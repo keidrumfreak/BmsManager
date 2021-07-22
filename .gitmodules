@@ -1,0 +1,3 @@
+[submodule "DotNetLibraries"]
+	path = DotNetLibraries
+	url = https://github.com/keidrumfreak/DotNetLibraries.git
