@@ -33,5 +33,15 @@ namespace BmsManager.Tests
             var arr = new[] { "test", "test1", "test2", "1test", "2test" };
             Assert.AreEqual("test", Utility.GetArtist(arr));
         }
+
+        [DataTestMethod]
+        [DataRow("test obj:aa", "test")]
+        [DataRow("test/obj:aa", "test")]
+        [DataRow("test / obj:aa", "test")]
+        [DataRow("test/Obj:aa", "test")]
+        public void RemoveObjerTest(string name, string result)
+        {
+            Assert.AreEqual(result, Utility.RemoveObjer(name));
+        }
     }
 }

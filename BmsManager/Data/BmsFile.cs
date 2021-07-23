@@ -12,13 +12,18 @@ namespace BmsManager.Data
     class BmsFile
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public int FolderID { get; set; }
 
         public string MD5 { get; set; }
 
-        public string FileName { get; set; }
+        public string Path { get; set; }
+
+        public string Artist { get; set; }
+
+        public string Title { get; set; }
 
         [ForeignKey(nameof(FolderID))]
         public virtual BmsFolder Folder { get; set; }

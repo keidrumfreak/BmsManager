@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using BmsManager.Data;
 
 namespace BmsManager
 {
@@ -22,6 +23,11 @@ namespace BmsManager
         public FolderRegister()
         {
             InitializeComponent();
+        }
+
+        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            ((FolderRegisterViewModel)DataContext).SelectedNode = (RootDirectory)e.NewValue;
         }
     }
 }

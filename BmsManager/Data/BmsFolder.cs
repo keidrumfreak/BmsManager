@@ -12,6 +12,7 @@ namespace BmsManager.Data
     class BmsFolder
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public int RootID { get; set; }
