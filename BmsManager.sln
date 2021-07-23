@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BmsManager.Tests", "BmsManager.Tests\BmsManager.Tests.csproj", "{FE0C1844-2390-4E64-9A85-5133690DFC40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BmsManager", "BmsManager\BmsManager.csproj", "{9119139A-3CF6-44B6-93B9-0D61F1E3A1F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BmsManager", "BmsManager\BmsManager.csproj", "{9119139A-3CF6-44B6-93B9-0D61F1E3A1F4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLib.Wpf", "DotNetLibraries\CommonLib\CommonLib.Wpf\CommonLib.Wpf.csproj", "{54DC128A-B203-4A03-B693-0F1F72334F41}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLib", "DotNetLibraries\CommonLib\CommonLib\CommonLib.csproj", "{8FD10FD5-66B6-4653-AEC9-D45BED485C59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{9119139A-3CF6-44B6-93B9-0D61F1E3A1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9119139A-3CF6-44B6-93B9-0D61F1E3A1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9119139A-3CF6-44B6-93B9-0D61F1E3A1F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54DC128A-B203-4A03-B693-0F1F72334F41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54DC128A-B203-4A03-B693-0F1F72334F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54DC128A-B203-4A03-B693-0F1F72334F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54DC128A-B203-4A03-B693-0F1F72334F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

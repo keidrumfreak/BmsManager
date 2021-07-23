@@ -13,5 +13,25 @@ namespace BmsManager.Tests
             var hash = Utility.GetMd5Hash(@"E:\_source\BmsManager\BmsManager.Tests\_ld2013_a.bms");
             Assert.AreEqual(md5, hash);
         }
+
+        [DataTestMethod]
+        [DataRow("main-sub-", "main")]
+        [DataRow("main`sub`", "main")]
+        [DataRow("main(sub)", "main")]
+        [DataRow("main[sub]", "main")]
+        [DataRow("main<sub>", "main")]
+        [DataRow("main  sub", "main")]
+        [DataRow(@"main""sub""", "main")]
+        public void GetTitleTest(string title, string main)
+        {
+            Assert.AreEqual(main, Utility.GetTitle(title));
+        }
+
+        [TestMethod]
+        public void GetArtistTest()
+        {
+            var arr = new[] { "test", "test1", "test2", "1test", "2test" };
+            Assert.AreEqual("test", Utility.GetArtist(arr));
+        }
     }
 }

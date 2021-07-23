@@ -8,19 +8,15 @@ using System.Threading.Tasks;
 
 namespace BmsManager.Data
 {
-    [Table("File")]
-    class BmsFile
+    [Table("Root")]
+    class RootDirectory
     {
         [Key]
         public int ID { get; set; }
 
-        public int FolderID { get; set; }
+        public string Path { get; set; }
 
-        public string MD5 { get; set; }
-
-        public string FileName { get; set; }
-
-        [ForeignKey(nameof(FolderID))]
-        public virtual BmsFolder Folder { get; set; }
+        [InverseProperty(nameof(BmsFolder.Root))]
+        public virtual ICollection<BmsFolder> Folders { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace BmsManager.Data
         public virtual DbSet<BmsExtension> Extensions { get; set; }
         public virtual DbSet<BmsFile> Files { get; set; }
         public virtual DbSet<BmsFolder> BmsFolders { get; set; }
+        public virtual DbSet<RootDirectory> RootDirectories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
