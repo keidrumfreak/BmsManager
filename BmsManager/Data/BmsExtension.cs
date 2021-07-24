@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BmsManager.Data
 {
-    [Table("Extension")]
+    [Table("BmsExtension")]
     class BmsExtension
     {
         [Key]

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BmsManager.Data
 {
-    [Table("File")]
+    [Table("BmsFile")]
     class BmsFile
     {
         [Key]

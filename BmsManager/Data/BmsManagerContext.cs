@@ -16,6 +16,10 @@ namespace BmsManager.Data
         public virtual DbSet<BmsFolder> BmsFolders { get; set; }
         public virtual DbSet<RootDirectory> RootDirectories { get; set; }
 
+        public virtual DbSet<BmsTable> Tables { get; set; }
+        public virtual DbSet<BmsTableDifficulty> Difficulties { get; set; }
+        public virtual DbSet<BmsTableData> TableDatas { get; set; }
+
         public static readonly LoggerFactory LoggerFactory = new LoggerFactory(new[] {
             new DebugLoggerProvider()
         });

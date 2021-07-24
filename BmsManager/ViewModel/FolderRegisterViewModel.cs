@@ -229,6 +229,10 @@ namespace BmsManager
                 {
                     var root = allRoots.FirstOrDefault(r => r.ID == folder.Key);
                     root.Folders = folder.ToList();
+                    foreach (var fol in folder)
+                    {
+                        fol.Root = root;
+                    }
                 }
 
                 foreach (var root in allRoots)
@@ -387,6 +391,21 @@ namespace BmsManager
                             // 一回だけリトライ (名称は適当につける)
                             rename = $"[{Utility.GetArtist(folder.Files.Select(f => f.Artist))}]{folder.Files.First().Title}";
                             dst = Path.Combine(Path.GetDirectoryName(folder.Path), rename);
+                            if (Directory.Exists(dst))
+                            {
+                                var i = 1;
+                                var ren = dst;
+                                while (true)
+                                {
+                                    i++;
+                                    ren = $"{dst} ({i})";
+                                    if (!Directory.Exists(ren))
+                                    {
+                                        dst = ren;
+                                        break;
+                                    }
+                                }
+                            }
                             retry = true;
                             continue;
                         }

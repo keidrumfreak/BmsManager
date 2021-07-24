@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BmsManager.Data
 {
-    [Table("Root")]
+    [Table("RootDirectory")]
     class RootDirectory
     {
         [Key]

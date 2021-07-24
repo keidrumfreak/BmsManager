@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DotNetLibraries\CommonLib\CommonLib.Wpf\CommonLib.Wpf.csproj" />
+    <ProjectReference Include="..\DotNetLibraries\CommonLib\CommonLib\CommonLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

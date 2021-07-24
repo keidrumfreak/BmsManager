@@ -16,6 +16,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <Button Content="ファイル管理" Command="{Binding ShowFileRegister}"/>
+        <StackPanel Orientation="Horizontal">
+            <Button Content="ファイル管理" Command="{Binding ShowFileRegister}"/>
+            <Button Content="難易度表管理" Command="{Binding ShowTableManager}"/>
+        </StackPanel>
     </Grid>
 </Window>

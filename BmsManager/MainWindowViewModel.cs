@@ -15,9 +15,12 @@ namespace BmsManager
     {
         public ICommand ShowFileRegister { get; set; }
 
+        public ICommand ShowTableManager { get; set; }
+
         public MainWindowViewModel()
         {
-            ShowFileRegister = CreateCommand(input => new FolderRegister().ShowDialog());
+            ShowFileRegister = CreateCommand(input => new FolderRegister().Show());
+            ShowTableManager = CreateCommand(input => new BmsTableManager().Show());
         }
     }
 }
