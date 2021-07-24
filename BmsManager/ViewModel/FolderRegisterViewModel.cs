@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -101,7 +102,7 @@ namespace BmsManager
 
             using (var con = new BmsManagerContext())
             {
-                Roots = con.RootDirectories.ToArray();
+                Roots = con.RootDirectories.AsNoTracking().ToArray();
             }
         }
 
@@ -217,31 +218,25 @@ namespace BmsManager
         {
             using (var con = new BmsManagerContext())
             {
-                var allRoots = con.RootDirectories
-                    .Include(d => d.Children)
-                    .Include(d => d.Folders)
-                    .ThenInclude(f => f.Files)
+                var folders = con.BmsFolders
+                    .Include(f => f.Files)
                     .AsNoTracking().ToArray();
 
-                var roots = allRoots.Where(r => r.ParentRootID == null).ToList();
+                var allRoots = con.RootDirectories
+                    .AsNoTracking().ToArray();
 
-                foreach (var root in roots)
+                foreach (var folder in folders.GroupBy(f => f.RootID))
                 {
-                    addChildren(root);
-
-                    void addChildren(RootDirectory dir)
-                    {
-                        if (dir.Children == null || !dir.Children.Any())
-                            return; // 末端
-                        
-                        // 既に関連エンティティを読み込み済のインスタンスに置き換える
-                        dir.Children = allRoots.Where(r => r.ParentRootID == dir.ID).ToList();
-                        foreach (var child in dir.Children)
-                        {
-                            addChildren(child);
-                        }
-                    }
+                    var root = allRoots.FirstOrDefault(r => r.ID == folder.Key);
+                    root.Folders = folder.ToList();
                 }
+
+                foreach (var root in allRoots)
+                {
+                    root.Children = allRoots.Where(r => r.ParentRootID == root.ID).ToList();
+                }
+
+                var roots = allRoots.Where(r => r.ParentRootID == null).ToList();
 
                 TreeRoot = roots;
             }
