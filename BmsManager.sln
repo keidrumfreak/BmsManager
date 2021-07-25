@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLib.Wpf", "DotNetLibr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLib", "DotNetLibraries\CommonLib\CommonLib\CommonLib.csproj", "{8FD10FD5-66B6-4653-AEC9-D45BED485C59}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8B70D3AF-6EE1-42BF-81C6-19920A328460}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FE0C1844-2390-4E64-9A85-5133690DFC40} = {8B70D3AF-6EE1-42BF-81C6-19920A328460}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A56D43EC-0AD5-4E22-9C20-C97AB85883F9}

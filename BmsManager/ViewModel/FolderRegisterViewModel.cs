@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -36,7 +37,7 @@ namespace BmsManager
         private IEnumerable<BmsFile> bmsFiles;
         public IEnumerable<BmsFile> BmsFiles { get; set; }
 
-        public IEnumerable<BmsFolder> BmsFolders { get; set; }
+        public ObservableCollection<BmsFolder> BmsFolders { get; set; }
 
         BmsFolder selectedBmsFolder;
         public BmsFolder SelectedBmsFolder
@@ -142,8 +143,8 @@ namespace BmsManager
             bmsFiles = bmses.Select(bms => new BmsFile { Path = bms.FullPath, Artist = bms.Artist, Title = bms.Title, MD5 = Utility.GetMd5Hash(bms.FullPath) }).ToList();
             BmsFiles = bmsFiles;
 
-            BmsFolders = BmsFiles.GroupBy(bms => Path.GetDirectoryName(bms.Path), (path, bms) => bms.Where(b => b.Path.StartsWith(path)))
-                .Select(g => new BmsFolder { Path = Path.GetDirectoryName(g.First().Path), Files = g.ToList() }).ToList();
+            BmsFolders = new ObservableCollection<BmsFolder>(BmsFiles.GroupBy(bms => Path.GetDirectoryName(bms.Path), (path, bms) => bms.Where(b => b.Path.StartsWith(path)))
+                .Select(g => new BmsFolder { Path = Path.GetDirectoryName(g.First().Path), Files = g.ToList() }).ToList());
 
             foreach (var folder in BmsFolders)
             {
@@ -280,7 +281,7 @@ namespace BmsManager
                 BmsFiles = null;
             }
 
-            BmsFolders = descendants(root);
+            BmsFolders = new ObservableCollection<BmsFolder>(descendants(root));
             BmsFiles = BmsFolders.SelectMany(f => f.Files);
 
             IEnumerable<BmsFolder> descendants(RootDirectory root)
@@ -352,59 +353,13 @@ namespace BmsManager
 
             foreach (var folder in BmsFolders)
             {
-                var artist = Utility.GetArtist(folder.Files.Select(f => f.Artist));
-                var title = Utility.GetTitle(folder.Files.First().Title);
-                if (artist.Length > 50)
-                    artist = artist.Substring(0, 50);
-                if (title.Length > 50)
-                    title = title.Substring(0, 50);
-                var rename = $"[{Utility.GetArtist(folder.Files.Select(f => f.Artist))}]{Utility.GetTitle(folder.Files.First().Title)}"
-                    .Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
-                    .Replace("\"", "”").Replace('?', '？').Replace('|', '｜');
-
-                var dst = Path.Combine(Path.GetDirectoryName(folder.Path), rename);
-                var tmp = Path.Combine(Path.GetDirectoryName(folder.Path), "tmp");
-
-                bool retry = false;
-                while (true)
+                try
                 {
-                    try
-                    {
-                        Directory.Move(folder.Path, tmp);
-                        Directory.Move(tmp, dst);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (Directory.Exists(tmp))
-                            Directory.Move(tmp, folder.Path);
-
-                        if (!retry)
-                        {
-                            // 一回だけリトライ (名称は適当につける)
-                            rename = $"[{Utility.GetArtist(folder.Files.Select(f => f.Artist))}]{folder.Files.First().Title}";
-                            dst = Path.Combine(Path.GetDirectoryName(folder.Path), rename);
-                            if (Directory.Exists(dst))
-                            {
-                                var i = 1;
-                                var ren = dst;
-                                while (true)
-                                {
-                                    i++;
-                                    ren = $"{dst} ({i})";
-                                    if (!Directory.Exists(ren))
-                                    {
-                                        dst = ren;
-                                        break;
-                                    }
-                                }
-                            }
-                            retry = true;
-                            continue;
-                        }
-
-                        MessageBox.Show($"FileName:{rename}\r\n{ex}");
-                    }
-                    break;
+                    folder.AutoRename();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
                 }
             }
 
@@ -416,24 +371,13 @@ namespace BmsManager
             if (string.IsNullOrEmpty(RenameText))
                 return;
 
-            var rename = RenameText
-                .Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
-                .Replace("\"", "”").Replace('?', '？').Replace('|', '｜'); ;
-
-            var dst = Path.Combine(Path.GetDirectoryName(SelectedBmsFolder.Path), rename);
-            var tmp = Path.Combine(Path.GetDirectoryName(SelectedBmsFolder.Path), "tmp");
-
             try
             {
-                Directory.Move(SelectedBmsFolder.Path, tmp);
-                Directory.Move(tmp, dst);
+                SelectedBmsFolder.Rename(RenameText);
             }
             catch (Exception ex)
             {
-                if (Directory.Exists(tmp))
-                    Directory.Move(tmp, SelectedBmsFolder.Path);
-
-                MessageBox.Show($"FileName:{RenameText}\r\n{ex}");
+                MessageBox.Show(ex.ToString());
             }
 
             load(input);
