@@ -64,7 +64,7 @@ namespace BmsManager
                 }
             }
 
-                var doc = new BmsTableDocument(Url);
+            var doc = new BmsTableDocument(Url);
             await doc.LoadAsync();
             await doc.LoadHeaderAsync();
             await doc.LoadDatasAsync();
@@ -93,7 +93,7 @@ namespace BmsManager
                         PackUrl = d.UrlPack,
                         PackName = d.NamePack,
                         Comment = d.Comment,
-                        OrgMD5 = d.OrgMD5                        
+                        OrgMD5 = d.OrgMD5
                     }).ToList()
                 }).ToList()
             };

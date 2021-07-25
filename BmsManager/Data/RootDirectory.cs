@@ -27,5 +27,10 @@ namespace BmsManager.Data
 
         [InverseProperty(nameof(Parent))]
         public virtual ICollection<RootDirectory> Children { get; set; }
+
+        public void Reload()
+        {
+
+        }
     }
 }

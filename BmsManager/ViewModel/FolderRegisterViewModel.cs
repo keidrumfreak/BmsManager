@@ -132,7 +132,7 @@ namespace BmsManager
             if (SelectedNode == null)
                 return;
 
-            var extensions = getExtensions();
+            var extensions = BmsExtension.GetExtensions();
 
             var files = Directory.EnumerateFiles(SelectedNode.Path, "*.*", SearchOption.AllDirectories)
                 .Where(f => extensions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant()));
@@ -311,7 +311,7 @@ namespace BmsManager
             if (SelectedRoot == null)
                 return;
 
-            var extensions = getExtensions();
+            var extensions = BmsExtension.GetExtensions();
 
             SelectedRoot.Children = searchRoot(SelectedRoot).ToArray();
 
@@ -329,14 +329,6 @@ namespace BmsManager
             };
 
             TreeRoot = new[] { SelectedRoot };
-        }
-
-        private IEnumerable<string> getExtensions()
-        {
-            using (var con = new BmsManagerContext())
-            {
-                return con.Extensions.Select(e => e.Extension).ToArray();
-            }
         }
 
         private void changeNarrowing(object input)

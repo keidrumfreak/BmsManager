@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BmsManager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="200" Width="300">
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
@@ -15,10 +15,9 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
-            <Button Content="ファイル管理" Command="{Binding ShowFileRegister}"/>
-            <Button Content="難易度表管理" Command="{Binding ShowTableManager}"/>
-        </StackPanel>
+        <Button Grid.Row="0" Margin="10" Content="ファイル管理" Command="{Binding ShowFileRegister}"/>
+        <Button Grid.Row="1" Margin="10" Content="難易度表管理" Command="{Binding ShowTableManager}"/>
     </Grid>
 </Window>

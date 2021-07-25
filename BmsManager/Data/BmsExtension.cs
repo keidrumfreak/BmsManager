@@ -16,5 +16,13 @@ namespace BmsManager.Data
         public int ID { get; set; }
 
         public string Extension { get; set; }
+
+        public static IEnumerable<string> GetExtensions()
+        {
+            using (var con = new BmsManagerContext())
+            {
+                return con.Extensions.Select(e => e.Extension).ToArray();
+            }
+        }
     }
 }
