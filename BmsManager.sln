@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLib", "DotNetLibrarie
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8B70D3AF-6EE1-42BF-81C6-19920A328460}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLib.TestHelper", "DotNetLibraries\CommonLib\CommonLib.TestHelper\CommonLib.TestHelper.csproj", "{ED727B8D-A8EC-4624-A0A8-60E6246AC031}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,12 +37,17 @@ Global
 		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FD10FD5-66B6-4653-AEC9-D45BED485C59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED727B8D-A8EC-4624-A0A8-60E6246AC031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED727B8D-A8EC-4624-A0A8-60E6246AC031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED727B8D-A8EC-4624-A0A8-60E6246AC031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED727B8D-A8EC-4624-A0A8-60E6246AC031}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FE0C1844-2390-4E64-9A85-5133690DFC40} = {8B70D3AF-6EE1-42BF-81C6-19920A328460}
+		{ED727B8D-A8EC-4624-A0A8-60E6246AC031} = {8B70D3AF-6EE1-42BF-81C6-19920A328460}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A56D43EC-0AD5-4E22-9C20-C97AB85883F9}

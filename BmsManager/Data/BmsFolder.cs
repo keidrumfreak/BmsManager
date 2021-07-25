@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -54,24 +55,25 @@ namespace BmsManager.Data
 
             try
             {
-                Directory.Move(Path, tmp);
+                SystemProvider.FileSystem.Directory.Move(Path, tmp);
 
                 var i = 1;
                 var ren = dst;
-                while (Directory.Exists(ren))
+                while (SystemProvider.FileSystem.Directory.Exists(ren))
                 {
                     i++;
                     ren = $"{dst} ({i})";
                 }
                 dst = ren;
 
-                Directory.Move(tmp, dst);
-                return;
+                SystemProvider.FileSystem.Directory.Move(tmp, dst);
+
+                Path = dst;
             }
             catch (IOException)
             {
-                if (Directory.Exists(tmp))
-                    Directory.Move(tmp, Path);
+                if (SystemProvider.FileSystem.Directory.Exists(tmp))
+                    SystemProvider.FileSystem.Directory.Move(tmp, Path);
                 throw;
             }
         }
