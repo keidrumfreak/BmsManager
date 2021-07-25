@@ -17,12 +17,17 @@ namespace BmsManager.Data
 
         public string Extension { get; set; }
 
-        public static IEnumerable<string> GetExtensions()
+        static IEnumerable<string> extensions;
+        public static IEnumerable<string> GetExtensions(bool reload = false)
         {
+            if (extensions != null && !reload)
+                return extensions;
+
             using (var con = new BmsManagerContext())
             {
-                return con.Extensions.Select(e => e.Extension).ToArray();
+                extensions = con.Extensions.Select(e => e.Extension).ToArray();
             }
+            return extensions;
         }
     }
 }

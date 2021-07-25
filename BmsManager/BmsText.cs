@@ -20,7 +20,7 @@ namespace BmsManager
         public BmsText(string path)
         {
             FullPath = path;
-            text = File.ReadAllLines(path, Encoding.GetEncoding("shift-jis"));
+            text = SystemProvider.FileSystem.File.ReadAllLines(path, Encoding.GetEncoding("shift-jis"));
             Title = text.FirstOrDefault(t => t.StartsWith("#TITLE"))?.Replace("#TITLE ", "");
             Artist = text.FirstOrDefault(t => t.StartsWith("#ARTIST"))?.Replace("#ARTIST ", "");
         }

@@ -133,86 +133,90 @@ namespace BmsManager
             if (SelectedNode == null)
                 return;
 
-            var extensions = BmsExtension.GetExtensions();
+            SelectedNode.LoadFromFileSystem();
 
-            var files = Directory.EnumerateFiles(SelectedNode.Path, "*.*", SearchOption.AllDirectories)
-                .Where(f => extensions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant()));
+            setNodeData(SelectedNode);
 
-            var bmses = files.Select(f => new BmsText(f));
+            //var extensions = BmsExtension.GetExtensions();
 
-            bmsFiles = bmses.Select(bms => new BmsFile { Path = bms.FullPath, Artist = bms.Artist, Title = bms.Title, MD5 = Utility.GetMd5Hash(bms.FullPath) }).ToList();
-            BmsFiles = bmsFiles;
+            //var files = Directory.EnumerateFiles(SelectedNode.Path, "*.*", SearchOption.AllDirectories)
+            //    .Where(f => extensions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant()));
 
-            BmsFolders = new ObservableCollection<BmsFolder>(BmsFiles.GroupBy(bms => Path.GetDirectoryName(bms.Path), (path, bms) => bms.Where(b => b.Path.StartsWith(path)))
-                .Select(g => new BmsFolder { Path = Path.GetDirectoryName(g.First().Path), Files = g.ToList() }).ToList());
+            //var bmses = files.Select(f => new BmsText(f));
 
-            foreach (var folder in BmsFolders)
-            {
-                folder.Root = getRoot(folder.Path);
-                var name = Path.GetFileName(folder.Path);
-                var index = name.IndexOf("]");
-                if (index != -1)
-                {
-                    folder.Artist = name.Substring(1, index - 1);
-                    folder.Title = name.Substring(index + 1);
-                }
-            }
+            //bmsFiles = bmses.Select(bms => new BmsFile { Path = bms.FullPath, Artist = bms.Artist, Title = bms.Title, MD5 = Utility.GetMd5Hash(bms.FullPath) }).ToList();
+            //BmsFiles = bmsFiles;
 
-            foreach (var grp in BmsFolders.GroupBy(f => f.Root))
-            {
-                var root = grp.Key;
-                var folders = grp.Select(g => g);
-                if (root.Folders == null)
-                {
-                    root.Folders = folders.ToList();
-                    continue;
-                }
+            //BmsFolders = new ObservableCollection<BmsFolder>(BmsFiles.GroupBy(bms => Path.GetDirectoryName(bms.Path), (path, bms) => bms.Where(b => b.Path.StartsWith(path)))
+            //    .Select(g => new BmsFolder { Path = Path.GetDirectoryName(g.First().Path), Files = g.ToList() }).ToList());
 
-                foreach (var folder in root.Folders.ToArray())
-                {
-                    if (folders.Any(f => f.Path == folder.Path))
-                        continue;
+            //foreach (var folder in BmsFolders)
+            //{
+            //    folder.Root = getRoot(folder.Path);
+            //    var name = Path.GetFileName(folder.Path);
+            //    var index = name.IndexOf("]");
+            //    if (index != -1)
+            //    {
+            //        folder.Artist = name.Substring(1, index - 1);
+            //        folder.Title = name.Substring(index + 1);
+            //    }
+            //}
 
-                    // 実体が存在しないフォルダを削除する
-                    foreach (var file in folder.Files.ToArray())
-                    {
-                        folder.Files.Remove(file);
-                    }
-                    root.Folders.Remove(folder);
-                }
+            //foreach (var grp in BmsFolders.GroupBy(f => f.Root))
+            //{
+            //    var root = grp.Key;
+            //    var folders = grp.Select(g => g);
+            //    if (root.Folders == null)
+            //    {
+            //        root.Folders = folders.ToList();
+            //        continue;
+            //    }
 
-                foreach (var folder in folders)
-                {
-                    var dbFolder = root.Folders?.FirstOrDefault(f => f.Path == folder.Path);
-                    if (dbFolder == default)
-                    {
-                        // フォルダ自体未登録なら追加するだけ
-                        root.Folders.Add(folder);
-                        continue;
-                    }
+            //    foreach (var folder in root.Folders.ToArray())
+            //    {
+            //        if (folders.Any(f => f.Path == folder.Path))
+            //            continue;
 
-                    dbFolder.Artist = folder.Artist;
-                    dbFolder.Title = folder.Title;
+            //        // 実体が存在しないフォルダを削除する
+            //        foreach (var file in folder.Files.ToArray())
+            //        {
+            //            folder.Files.Remove(file);
+            //        }
+            //        root.Folders.Remove(folder);
+            //    }
 
-                    foreach (var file in dbFolder.Files.ToArray())
-                    {
-                        if (folder.Files.Any(f => f.MD5 == file.MD5))
-                            continue;
+            //    foreach (var folder in folders)
+            //    {
+            //        var dbFolder = root.Folders?.FirstOrDefault(f => f.Path == folder.Path);
+            //        if (dbFolder == default)
+            //        {
+            //            // フォルダ自体未登録なら追加するだけ
+            //            root.Folders.Add(folder);
+            //            continue;
+            //        }
 
-                        // 実体が存在しないファイルを削除する
-                        folder.Files.Remove(file);
-                    }
+            //        dbFolder.Artist = folder.Artist;
+            //        dbFolder.Title = folder.Title;
 
-                    foreach (var file in folder.Files)
-                    {
-                        if (!dbFolder.Files.Any(f => f.MD5 == file.MD5))
-                            dbFolder.Files.Add(file); // 登録されていないファイルなら登録する
-                    }
-                }
-            }
+            //        foreach (var file in dbFolder.Files.ToArray())
+            //        {
+            //            if (folder.Files.Any(f => f.MD5 == file.MD5))
+            //                continue;
 
-            OnPropertyChanged(nameof(BmsFolders));
-            OnPropertyChanged(nameof(BmsFiles));
+            //            // 実体が存在しないファイルを削除する
+            //            folder.Files.Remove(file);
+            //        }
+
+            //        foreach (var file in folder.Files)
+            //        {
+            //            if (!dbFolder.Files.Any(f => f.MD5 == file.MD5))
+            //                dbFolder.Files.Add(file); // 登録されていないファイルなら登録する
+            //        }
+            //    }
+            //}
+
+            //OnPropertyChanged(nameof(BmsFolders));
+            //OnPropertyChanged(nameof(BmsFiles));
         }
 
         private void loadDB(object input)
@@ -282,7 +286,8 @@ namespace BmsManager
             }
 
             BmsFolders = new ObservableCollection<BmsFolder>(descendants(root));
-            BmsFiles = BmsFolders.SelectMany(f => f.Files);
+            bmsFiles = BmsFolders.SelectMany(f => f.Files);
+            BmsFiles = bmsFiles;
 
             IEnumerable<BmsFolder> descendants(RootDirectory root)
             {
@@ -385,90 +390,97 @@ namespace BmsManager
 
         private void register(object input)
         {
-            if (BmsFolders == null)
+            if (SelectedNode == null)
                 return;
 
             using (var con = new BmsManagerContext())
             {
-                foreach (var group in BmsFolders.GroupBy(f => f.Root))
+                registerRoot(SelectedNode);
+
+                void registerRoot(RootDirectory dir)
                 {
-                    var root = con.RootDirectories.AsNoTracking().FirstOrDefault(r => r.Path == group.Key.Path);
-                    var folders = group.Select(g => g);
+                    var root = con.RootDirectories
+                        .Include(d => d.Folders)
+                        .FirstOrDefault(d => d.Path == dir.Path);
+
                     if (root == null)
                     {
-                        // ルート未登録の場合ルートごと登録
-                        // 親が存在しない場合それも登録
-                        int registerParent(RootDirectory dir)
+                        // ルート未登録の場合そのまま登録
+                        con.RootDirectories.Add(dir);
+                        return;
+                    }
+
+                    if (dir.Children?.Any() ?? false)
+                    {
+                        // 子が存在する場合それぞれ登録
+                        foreach (var child in dir.Children)
                         {
-                            var parent = con.RootDirectories.AsNoTracking().FirstOrDefault(d => d.Path == dir.Parent.Path);
-                            if (parent == default)
+                            registerRoot(child);
+                        }
+                    }
+
+                    if (dir.Folders == null || !dir.Folders.Any())
+                        return;
+
+
+                    if (!root.Folders.Any())
+                    {
+                        // フォルダ未登録の場合そのまま登録
+                        root.Folders = dir.Folders.ToArray();
+                        return;
+                    }
+
+                    var registered = new List<BmsFolder>();
+                    foreach (var folder in root.Folders.ToArray())
+                    {
+                        var fsFolder = dir.Folders.FirstOrDefault(f => f.Path == folder.Path);
+                        if (fsFolder == default)
+                        {
+                            // 実体が存在しないフォルダを削除
+                            root.Folders.Remove(folder);
+                            continue;
+                        }
+
+                        con.Entry(folder).Collection(f => f.Files).Load();
+
+                        foreach (var file in folder.Files.ToArray())
+                        {
+                            var fsFile = fsFolder.Files.FirstOrDefault(f => f.Path == file.Path);
+                            if (fsFile == default)
                             {
-                                dir.ParentRootID = registerParent(dir.Parent);
+                                // 実体が存在しないファイルを削除
+                                folder.Files.Remove(file);
+                                continue;
+                            }
+                        }
+
+                        // ファイル情報更新・登録
+                        foreach (var file in fsFolder.Files)
+                        {
+                            var dbFile = folder.Files.FirstOrDefault(f => f.Path == file.Path);
+                            if (dbFile == default)
+                            {
+                                folder.Files.Add(file);
                             }
                             else
                             {
-                                dir.ParentRootID = parent.ID;
+                                dbFile.Title = file.Title;
+                                dbFile.Artist = file.Artist;
+                                dbFile.MD5 = file.MD5;
                             }
-                            // Childrenが参照されるとIDが明示的に入ってしまうため、インスタンスを新規作成
-                            var tmp = new RootDirectory { Path = dir.Path, ParentRootID = dir.ParentRootID };
-                            con.RootDirectories.Add(tmp);
-                            con.SaveChanges();
-                            return tmp.ID;
                         }
 
-                        root = con.RootDirectories.Find(registerParent(group.Key));
+                        // 登録済としてマーク
+                        registered.Add(fsFolder);
                     }
 
-                    if (root.Folders == null)
+                    // 未登録のフォルダを登録
+                    foreach (var folder in dir.Folders.Where(f => !registered.Contains(f)))
                     {
-                        // ルートにフォルダが未登録の場合そのまま追加
-                        root.Folders = folders.ToArray();
-                        continue;
-                    }
-
-                    foreach (var folder in root.Folders.ToArray())
-                    {
-                        if (folders.Any(f => f.Path == folder.Path))
-                            continue;
-
-                        // 実体が存在しないフォルダを削除する
-                        foreach (var file in folder.Files)
-                        {
-                            folder.Files.Remove(file);
-                        }
-                        root.Folders.Remove(folder);
-                    }
-
-                    foreach (var folder in folders)
-                    {
-                        var dbFolder = root.Folders?.FirstOrDefault(f => f.Path == folder.Path);
-                        if (dbFolder == default)
-                        {
-                            // フォルダ自体未登録なら追加するだけ
-                            root.Folders.Add(folder);
-                            continue;
-                        }
-
-                        dbFolder.Artist = folder.Artist;
-                        dbFolder.Title = folder.Title;
-
-                        foreach (var file in dbFolder.Files.ToArray())
-                        {
-                            if (folder.Files.Any(f => f.MD5 == file.MD5))
-                                continue;
-
-                            // 実体が存在しないファイルを削除する
-                            folder.Files.Remove(file);
-                        }
-
-                        foreach (var file in folder.Files)
-                        {
-                            if (!dbFolder.Files.Any(f => f.MD5 == file.MD5))
-                                dbFolder.Files.Add(file); // 登録されていないファイルなら登録する
-                        }
+                        root.Folders.Add(folder);
                     }
                 }
-                var roots = con.RootDirectories.ToArray();
+
                 con.SaveChanges();
             }
 

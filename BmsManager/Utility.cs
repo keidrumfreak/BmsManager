@@ -13,7 +13,7 @@ namespace BmsManager
     {
         public static string GetMd5Hash(string path)
         {
-            using (var file = File.OpenRead(path))
+            using (var file = SystemProvider.FileSystem.File.OpenRead(path))
             {
                 var md5 = MD5.Create();
                 var arr = md5.ComputeHash(file);

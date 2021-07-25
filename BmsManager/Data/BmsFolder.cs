@@ -77,5 +77,16 @@ namespace BmsManager.Data
                 throw;
             }
         }
+
+        public void SetMetaFromName()
+        {
+            var name = ClsPath.GetFileName(Path);
+            var index = name.IndexOf("]");
+            if (index != -1)
+            {
+                Artist = name.Substring(1, index - 1);
+                Title = name.Substring(index + 1);
+            }
+        }
     }
 }

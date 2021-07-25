@@ -27,5 +27,16 @@ namespace BmsManager.Data
 
         [ForeignKey(nameof(FolderID))]
         public virtual BmsFolder Folder { get; set; }
+
+        public BmsFile() { }
+
+        public BmsFile(string path)
+        {
+            Path = path;
+            var file = new BmsText(path);
+            Artist = file.Artist;
+            Title = file.Title;
+            MD5 = Utility.GetMd5Hash(path);
+        }
     }
 }
