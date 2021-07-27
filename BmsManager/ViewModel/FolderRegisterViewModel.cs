@@ -133,90 +133,11 @@ namespace BmsManager
             if (SelectedNode == null)
                 return;
 
-            SelectedNode.LoadFromFileSystem();
+            var node = TreeRoot.SelectMany(r => r.Descendants()).FirstOrDefault(f => f.Path == SelectedNode.Path);
 
-            setNodeData(SelectedNode);
+            node.LoadFromFileSystem();
 
-            //var extensions = BmsExtension.GetExtensions();
-
-            //var files = Directory.EnumerateFiles(SelectedNode.Path, "*.*", SearchOption.AllDirectories)
-            //    .Where(f => extensions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant()));
-
-            //var bmses = files.Select(f => new BmsText(f));
-
-            //bmsFiles = bmses.Select(bms => new BmsFile { Path = bms.FullPath, Artist = bms.Artist, Title = bms.Title, MD5 = Utility.GetMd5Hash(bms.FullPath) }).ToList();
-            //BmsFiles = bmsFiles;
-
-            //BmsFolders = new ObservableCollection<BmsFolder>(BmsFiles.GroupBy(bms => Path.GetDirectoryName(bms.Path), (path, bms) => bms.Where(b => b.Path.StartsWith(path)))
-            //    .Select(g => new BmsFolder { Path = Path.GetDirectoryName(g.First().Path), Files = g.ToList() }).ToList());
-
-            //foreach (var folder in BmsFolders)
-            //{
-            //    folder.Root = getRoot(folder.Path);
-            //    var name = Path.GetFileName(folder.Path);
-            //    var index = name.IndexOf("]");
-            //    if (index != -1)
-            //    {
-            //        folder.Artist = name.Substring(1, index - 1);
-            //        folder.Title = name.Substring(index + 1);
-            //    }
-            //}
-
-            //foreach (var grp in BmsFolders.GroupBy(f => f.Root))
-            //{
-            //    var root = grp.Key;
-            //    var folders = grp.Select(g => g);
-            //    if (root.Folders == null)
-            //    {
-            //        root.Folders = folders.ToList();
-            //        continue;
-            //    }
-
-            //    foreach (var folder in root.Folders.ToArray())
-            //    {
-            //        if (folders.Any(f => f.Path == folder.Path))
-            //            continue;
-
-            //        // 実体が存在しないフォルダを削除する
-            //        foreach (var file in folder.Files.ToArray())
-            //        {
-            //            folder.Files.Remove(file);
-            //        }
-            //        root.Folders.Remove(folder);
-            //    }
-
-            //    foreach (var folder in folders)
-            //    {
-            //        var dbFolder = root.Folders?.FirstOrDefault(f => f.Path == folder.Path);
-            //        if (dbFolder == default)
-            //        {
-            //            // フォルダ自体未登録なら追加するだけ
-            //            root.Folders.Add(folder);
-            //            continue;
-            //        }
-
-            //        dbFolder.Artist = folder.Artist;
-            //        dbFolder.Title = folder.Title;
-
-            //        foreach (var file in dbFolder.Files.ToArray())
-            //        {
-            //            if (folder.Files.Any(f => f.MD5 == file.MD5))
-            //                continue;
-
-            //            // 実体が存在しないファイルを削除する
-            //            folder.Files.Remove(file);
-            //        }
-
-            //        foreach (var file in folder.Files)
-            //        {
-            //            if (!dbFolder.Files.Any(f => f.MD5 == file.MD5))
-            //                dbFolder.Files.Add(file); // 登録されていないファイルなら登録する
-            //        }
-            //    }
-            //}
-
-            //OnPropertyChanged(nameof(BmsFolders));
-            //OnPropertyChanged(nameof(BmsFiles));
+            setNodeData(node);
         }
 
         private void loadDB(object input)
@@ -416,6 +337,9 @@ namespace BmsManager
                         foreach (var child in dir.Children)
                         {
                             registerRoot(child);
+                            if (root.Children == null)
+                                root.Children = new List<RootDirectory>();
+                            root.Children.Add(child);
                         }
                     }
 
