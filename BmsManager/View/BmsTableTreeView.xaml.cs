@@ -10,18 +10,24 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace BmsManager
 {
     /// <summary>
-    /// TableManager.xaml の相互作用ロジック
+    /// BmsTableTreeView.xaml の相互作用ロジック
     /// </summary>
-    public partial class BmsTableManager : Window
+    public partial class BmsTableTreeView : UserControl
     {
-        public BmsTableManager()
+        public BmsTableTreeView()
         {
             InitializeComponent();
+        }
+
+        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            ((BmsTableTreeViewModel)DataContext).SelectedTreeItem = (BmsTableViewModel)e.NewValue;
         }
     }
 }

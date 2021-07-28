@@ -13,22 +13,9 @@
     <Grid Margin="5">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <TextBox Grid.Row="0" Grid.Column="0" Margin="5" Text="{Binding Url, Mode=TwoWay}" />
-        <Button Grid.Row="0" Grid.Column="1" Margin="5" Content="新規読み込み" Command="{Binding LoadFromUrl}"/>
-        <TreeView Grid.Row="1" Grid.Column="0" Margin="5" ItemsSource="{Binding BmsTables}" SelectedItemChanged="TreeView_SelectedItemChanged">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="data:BmsTableTreeItem" ItemsSource="{Binding Difficulties}">
-                    <TextBlock Text="{Binding Name}"/>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+        <local:BmsTableTreeView DataContext="{Binding BmsTableTree}"/>
         <Grid Grid.Column="2" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
