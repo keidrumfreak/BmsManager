@@ -11,32 +11,13 @@
         <local:FolderRegisterViewModel/>
     </Window.DataContext>
     <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Row="0" Grid.Column="0" Margin="5" Text="{Binding TargetDirectory, Mode=TwoWay}"/>
-        <Button Grid.Row="0" Grid.Column ="1" Margin="5" Content="ルートフォルダ登録" Command="{Binding AddRoot}"/>
-        <Button Grid.Row="1" Grid.Column="1" Margin="5" Content="ルートフォルダ探索" Command="{Binding Search}"/>
-        <Button Grid.Row="2" Grid.Column="1" Margin="5" Content="楽曲読み込み" Command="{Binding Load}"/>
-        <Button Grid.Row="3" Grid.Column="1" Margin="5" Content="DB読み込み" Command="{Binding LoadDB}"/>
-        <ComboBox Grid.Row="1" Grid.Column="0" Margin="5" ItemsSource="{Binding Roots}" DisplayMemberPath="Path" SelectedValue="{Binding SelectedRoot, Mode=TwoWay}"/>
-        <TreeView Grid.Row="2" Grid.RowSpan="3" Grid.Column="0" Margin="5" ItemsSource="{Binding TreeRoot}" SelectedItemChanged="TreeView_SelectedItemChanged">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="data:RootDirectory" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Path}"/>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-        <Grid Grid.Column="2" Grid.RowSpan="5">
+        <local:RootTreeView Grid.Column="0" DataContext="{Binding RootTree}"/>
+        <local:BmsFileList Grid.Column="1" DataContext="{Binding FileList}"/>
+        <!--<Grid Grid.Column="2" Grid.RowSpan="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
@@ -70,6 +51,6 @@
                     <DataGridTextColumn Header="ファイルパス" Binding="{Binding Path}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-        </Grid>
+        </Grid>-->
     </Grid>
 </Window>

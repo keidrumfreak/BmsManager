@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ClsPath = System.IO.Path;
 
 namespace BmsManager.Data
@@ -55,6 +56,172 @@ namespace BmsManager.Data
                     if (child.Children.Any() || child.Folders.Any())
                         Children.Add(child);
                 }
+            }
+        }
+
+        public static IEnumerable<RootDirectory> LoadTopRoot()
+        {
+            using (var con = new BmsManagerContext())
+            {
+                // TODO: 検索処理の改善 (EntityFrameworkの改善待ち)
+                var folders = con.BmsFolders
+                    .Include(f => f.Files)
+                    .AsNoTracking().ToArray();
+
+                var allRoots = con.RootDirectories
+                    .AsNoTracking().ToArray();
+
+                foreach (var folder in folders.GroupBy(f => f.RootID))
+                {
+                    var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
+                    parent.Folders = folder.ToList();
+                    foreach (var fol in folder)
+                    {
+                        fol.Root = parent;
+                    }
+                }
+
+                foreach (var parent in allRoots)
+                {
+                    parent.Children = allRoots.Where(r => r.ParentRootID == parent.ID).ToList();
+                }
+
+                return allRoots.Where(r => r.ParentRootID == null).ToArray();
+            }
+        }
+
+        public void LoadFromDB()
+        {
+            using (var con = new BmsManagerContext())
+            {
+                // 親子構造の取得が難しいのでとりあえず全部引っ張る
+                // TODO: 検索処理の改善
+                var folders = con.BmsFolders
+                    .Include(f => f.Files)
+                    .AsNoTracking().ToArray();
+
+                var allRoots = con.RootDirectories
+                    .AsNoTracking().ToArray();
+
+                foreach (var folder in folders.GroupBy(f => f.RootID))
+                {
+                    var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
+                    parent.Folders = folder.ToList();
+                    foreach (var fol in folder)
+                    {
+                        fol.Root = parent;
+                    }
+                }
+
+                foreach (var parent in allRoots)
+                {
+                    parent.Children = allRoots.Where(r => r.ParentRootID == parent.ID).ToList();
+                }
+
+                var root = allRoots.FirstOrDefault(r => r.Path == Path);
+
+                if (root == default)
+                    throw new BmsManagerException("DB未登録のルートフォルダです。");
+
+                Children = root.Children;
+                Folders = root.Folders;
+            }
+        }
+
+        public void Register()
+        {
+            using (var con = new BmsManagerContext())
+            {
+                registerRoot(this);
+
+                void registerRoot(RootDirectory dir)
+                {
+                    var root = con.RootDirectories
+                        .Include(d => d.Folders)
+                        .FirstOrDefault(d => d.Path == dir.Path);
+
+                    if (root == null)
+                    {
+                        // ルート未登録の場合そのまま登録
+                        con.RootDirectories.Add(dir);
+                        return;
+                    }
+
+                    if (dir.Children?.Any() ?? false)
+                    {
+                        // 子が存在する場合それぞれ登録
+                        foreach (var child in dir.Children)
+                        {
+                            registerRoot(child);
+                            if (root.Children == null)
+                                root.Children = new List<RootDirectory>();
+                            root.Children.Add(child);
+                        }
+                    }
+
+                    if (dir.Folders == null || !dir.Folders.Any())
+                        return;
+
+
+                    if (!root.Folders.Any())
+                    {
+                        // フォルダ未登録の場合そのまま登録
+                        root.Folders = dir.Folders.ToArray();
+                        return;
+                    }
+
+                    var registered = new List<BmsFolder>();
+                    foreach (var folder in root.Folders.ToArray())
+                    {
+                        var fsFolder = dir.Folders.FirstOrDefault(f => f.Path == folder.Path);
+                        if (fsFolder == default)
+                        {
+                            // 実体が存在しないフォルダを削除
+                            root.Folders.Remove(folder);
+                            continue;
+                        }
+
+                        con.Entry(folder).Collection(f => f.Files).Load();
+
+                        foreach (var file in folder.Files.ToArray())
+                        {
+                            var fsFile = fsFolder.Files.FirstOrDefault(f => f.Path == file.Path);
+                            if (fsFile == default)
+                            {
+                                // 実体が存在しないファイルを削除
+                                folder.Files.Remove(file);
+                                continue;
+                            }
+                        }
+
+                        // ファイル情報更新・登録
+                        foreach (var file in fsFolder.Files)
+                        {
+                            var dbFile = folder.Files.FirstOrDefault(f => f.Path == file.Path);
+                            if (dbFile == default)
+                            {
+                                folder.Files.Add(file);
+                            }
+                            else
+                            {
+                                dbFile.Title = file.Title;
+                                dbFile.Artist = file.Artist;
+                                dbFile.MD5 = file.MD5;
+                            }
+                        }
+
+                        // 登録済としてマーク
+                        registered.Add(fsFolder);
+                    }
+
+                    // 未登録のフォルダを登録
+                    foreach (var folder in dir.Folders.Where(f => !registered.Contains(f)))
+                    {
+                        root.Folders.Add(folder);
+                    }
+                }
+
+                con.SaveChanges();
             }
         }
 

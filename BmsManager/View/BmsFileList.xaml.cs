@@ -10,17 +10,17 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
-using BmsManager.Data;
 
 namespace BmsManager
 {
     /// <summary>
-    /// FileRegister.xaml の相互作用ロジック
+    /// BmsFileList.xaml の相互作用ロジック
     /// </summary>
-    public partial class FolderRegister : Window
+    public partial class BmsFileList : UserControl
     {
-        public FolderRegister()
+        public BmsFileList()
         {
             InitializeComponent();
         }

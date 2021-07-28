@@ -10,19 +10,24 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
-using BmsManager.Data;
 
 namespace BmsManager
 {
     /// <summary>
-    /// FileRegister.xaml の相互作用ロジック
+    /// RootRegister.xaml の相互作用ロジック
     /// </summary>
-    public partial class FolderRegister : Window
+    public partial class RootTreeView : UserControl
     {
-        public FolderRegister()
+        public RootTreeView()
         {
             InitializeComponent();
+        }
+
+        private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            ((RootTreeViewModel)DataContext).SelectedRoot = (RootDirectoryViewModel)e.NewValue;
         }
     }
 }

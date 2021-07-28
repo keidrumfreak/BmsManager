@@ -92,4 +92,11 @@ namespace BmsManager
             return ret.Trim(' ', '/', '(');
         }
     }
+
+    class BmsManagerException : Exception
+    {
+        public BmsManagerException(string message) : base(message) { }
+
+        public BmsManagerException(string message, Exception innerException) : base(message, innerException) { }
+    }
 }
