@@ -15,21 +15,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        <local:BmsTableTreeView DataContext="{Binding BmsTableTree}"/>
-        <Grid Grid.Column="2" Grid.RowSpan="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <CheckBox Content="未入手譜面のみ表示" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
-            <DataGrid Grid.Row="1" Margin="5" ItemsSource="{Binding TableDatas}" AutoGenerateColumns="False">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Level" Binding="{Binding Difficulty.Difficulty}"/>
-                    <DataGridTextColumn Header="タイトル" Binding="{Binding Title}"/>
-                    <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}"/>
-                    <DataGridTextColumn Header="MD5" Binding="{Binding MD5}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
+        <local:BmsTableTreeView Grid.Column="0" DataContext="{Binding BmsTableTree}"/>
+        <local:BmsTableDataList Grid.Column="1" DataContext="{Binding TableDataList}"/>
     </Grid>
 </Window>
