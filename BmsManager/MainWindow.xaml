@@ -10,14 +10,10 @@
         <local:MainWindowViewModel/>
     </Window.DataContext>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>
-        <Button Grid.Row="0" Margin="10" Content="フォルダ管理" Command="{Binding ShowFileRegister}"/>
-        <Button Grid.Row="1" Margin="10" Content="難易度表管理" Command="{Binding ShowTableManager}"/>
+        <StackPanel Orientation="Vertical">
+            <Button Margin="10" Content="フォルダ管理" Command="{Binding ShowFileRegister}"/>
+            <Button Margin="10" Content="難易度表管理" Command="{Binding ShowTableManager}"/>
+            <Button Margin="10" Content="重複ファイルチェック" Command="{Binding ShowDuplicateChecker}"/>
+        </StackPanel>
     </Grid>
 </Window>

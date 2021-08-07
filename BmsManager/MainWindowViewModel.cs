@@ -17,10 +17,13 @@ namespace BmsManager
 
         public ICommand ShowTableManager { get; set; }
 
+        public ICommand ShowDuplicateChecker { get; set; }
+
         public MainWindowViewModel()
         {
             ShowFileRegister = CreateCommand(input => new FolderRegister().Show());
             ShowTableManager = CreateCommand(input => new BmsTableManager().Show());
+            ShowDuplicateChecker = CreateCommand(input => new DuplicateBmsChecker().Show());
         }
     }
 }
