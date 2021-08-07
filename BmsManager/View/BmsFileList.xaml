@@ -13,6 +13,7 @@
     <Grid Grid.Column="2" Grid.RowSpan="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -24,20 +25,31 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Margin="5" Content="自動リネーム" Command="{Binding AutoRename}"/>
-            <TextBox Grid.Column="1" Margin="5" Text="{Binding RenameText, Mode=TwoWay}"/>
-            <Button Grid.Column="2" Margin="5" Content="手動リネーム" Command="{Binding Rename}"/>
-            <Button Grid.Column="3" Margin="5" Content="DB登録" Command="{Binding Register}"/>
+            <Button Grid.Row="1" Grid.Column="0" Margin="5" Content="自動リネーム" Command="{Binding AutoRename}"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Text="{Binding RenameText, Mode=TwoWay}"/>
+            <Button Grid.Row="1" Grid.Column="2" Margin="5" Content="手動リネーム" Command="{Binding Rename}"/>
+            <Button Grid.Row="1" Grid.Column="3" Margin="5" Content="DB登録" Command="{Binding Register}"/>
         </Grid>
-        <DataGrid Margin="5" Grid.Row="1" ItemsSource="{Binding BmsFolders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False">
+        <DataGrid Margin="5" Grid.Row="2" ItemsSource="{Binding BmsFolders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="エクスプローラで開く" Command="{Binding OpenFolder}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}" Width="100"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}" Width="100"/>
                 <DataGridTextColumn Header="フォルダパス" Binding="{Binding Path}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
-        <CheckBox Margin="5" Grid.Row="2" Content="BMSファイルを絞り込み表示する" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
-        <DataGrid Margin="5" Grid.Row="3" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False">
+        <CheckBox Margin="5" Grid.Row="3" Content="BMSファイルを絞り込み表示する" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
+        <DataGrid Margin="5" Grid.Row="4" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}" Width="100"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}" Width="100"/>

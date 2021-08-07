@@ -19,7 +19,7 @@ namespace BmsManager
         public RootDirectoryViewModel RootDirectory
         {
             get { return root; }
-            set { root = value; OnPropertyChanged(nameof(BmsFolders)); updateBmsFiles(); }
+            set { root = value; BmsFolders = root.Folders.Select(f => new BmsFolderViewModel(f)).ToArray(); updateBmsFiles(); }
         }
 
         public ICommand AutoRename { get; set; }
@@ -32,10 +32,15 @@ namespace BmsManager
 
         public IEnumerable<BmsFile> BmsFiles { get; set; }
 
-        public IEnumerable<BmsFolder> BmsFolders => RootDirectory?.Folders;
+        IEnumerable<BmsFolderViewModel> bmsFolders;
+        public IEnumerable<BmsFolderViewModel> BmsFolders
+        {
+            get { return bmsFolders; }
+            set { SetProperty(ref bmsFolders, value); }
+        }
 
-        BmsFolder selectedBmsFolder;
-        public BmsFolder SelectedBmsFolder
+        BmsFolderViewModel selectedBmsFolder;
+        public BmsFolderViewModel SelectedBmsFolder
         {
             get { return selectedBmsFolder; }
             set { selectedBmsFolder = value; updateBmsFiles(); if (selectedBmsFolder != null) { RenameText = Path.GetFileName(selectedBmsFolder.Path); } }
