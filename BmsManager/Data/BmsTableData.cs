@@ -24,8 +24,14 @@ namespace BmsManager.Data
 
         public string Artist { get; set; }
 
+        /// <summary>
+        /// 本体URL
+        /// </summary>
         public string Url { get; set; }
 
+        /// <summary>
+        /// 差分URL
+        /// </summary>
         public string DiffUrl { get; set; }
 
         public string DiffName { get; set; }

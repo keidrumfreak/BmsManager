@@ -23,8 +23,8 @@ namespace BmsManager
             set { SetProperty(ref table, value); loadTableData(); }
         }
 
-        IEnumerable<BmsTableData> tableDatas;
-        public IEnumerable<BmsTableData> TableDatas
+        IEnumerable<BmsTableDataViewModel> tableDatas;
+        public IEnumerable<BmsTableDataViewModel> TableDatas
         {
             get { return tableDatas; }
             set { SetProperty(ref tableDatas, value); }
@@ -37,7 +37,7 @@ namespace BmsManager
 
         private void loadTableData()
         {
-            TableDatas =Table?.TableDatas.ToArray();
+            TableDatas = Table?.TableDatas.Select(d => new BmsTableDataViewModel(d)).ToArray();
 
             if (Table == null)
                 return;

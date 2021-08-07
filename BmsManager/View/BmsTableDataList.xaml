@@ -17,8 +17,21 @@
         </Grid.RowDefinitions>
         <CheckBox Content="未入手譜面のみ表示" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
         <DataGrid Grid.Row="1" Margin="5" ItemsSource="{Binding TableDatas}" AutoGenerateColumns="False">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="本体URL" Command="{Binding OpenUrl}"/>
+                                <MenuItem Header="差分URL" Command="{Binding OpenDiffUrl}"/>
+                                <MenuItem Header="パッケージURL" Command="{Binding OpenPackUrl}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Level" Binding="{Binding Difficulty.Difficulty}"/>
+                <DataGridTextColumn Header="Level" Binding="{Binding Difficulty}"/>
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}"/>
                 <DataGridTextColumn Header="MD5" Binding="{Binding MD5}"/>
