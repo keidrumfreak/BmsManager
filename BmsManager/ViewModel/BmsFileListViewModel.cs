@@ -19,8 +19,10 @@ namespace BmsManager
         public RootDirectoryViewModel RootDirectory
         {
             get { return root; }
-            set { root = value; BmsFolders = root.Folders.Select(f => new BmsFolderViewModel(f)).ToArray(); updateBmsFiles(); }
+            set { root = value; searchFolder(); }
         }
+
+        public ICommand Search { get; set; }
 
         public ICommand AutoRename { get; set; }
 
@@ -30,7 +32,19 @@ namespace BmsManager
 
         public ICommand ChangeNarrowing { get; set; }
 
-        public IEnumerable<BmsFile> BmsFiles { get; set; }
+        IEnumerable<BmsFile> bmsFiles;
+        public IEnumerable<BmsFile> BmsFiles
+        {
+            get { return bmsFiles; }
+            set { SetProperty(ref bmsFiles, value); }
+        }
+
+        string seachText;
+        public string SearchText
+        {
+            get { return seachText; }
+            set { SetProperty(ref seachText, value); }
+        }
 
         IEnumerable<BmsFolderViewModel> bmsFolders;
         public IEnumerable<BmsFolderViewModel> BmsFolders
@@ -43,7 +57,7 @@ namespace BmsManager
         public BmsFolderViewModel SelectedBmsFolder
         {
             get { return selectedBmsFolder; }
-            set { selectedBmsFolder = value; updateBmsFiles(); if (selectedBmsFolder != null) { RenameText = Path.GetFileName(selectedBmsFolder.Path); } }
+            set { selectedBmsFolder = value; searchFile(); if (selectedBmsFolder != null) { RenameText = Path.GetFileName(selectedBmsFolder.Path); } }
         }
 
         BmsFile selectedBmsFile;
@@ -64,23 +78,54 @@ namespace BmsManager
 
         public BmsFileListViewModel()
         {
-            ChangeNarrowing = CreateCommand(input => updateBmsFiles());
+            ChangeNarrowing = CreateCommand(input => searchFile());
             AutoRename = CreateCommand(autoRename);
             Rename = CreateCommand(rename);
             Register = CreateCommand(register);
+            Search = CreateCommand(input => searchFolder());
         }
 
-        private void updateBmsFiles()
+        private void searchFolder()
         {
-            if (Narrowed && SelectedBmsFolder != null)
+            if (string.IsNullOrEmpty(SearchText))
             {
-                BmsFiles = SelectedBmsFolder?.Files;
+                BmsFolders = root.Folders.Select(f => new BmsFolderViewModel(f)).ToArray();
             }
             else
             {
-                BmsFiles = RootDirectory?.Folders.SelectMany(f => f.Files).ToArray();
+                var files = root.Folders.SelectMany(f => f.Files)
+                    .Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false)).ToArray();
+                var folders = files.Select(f => f.Folder).Distinct();
+
+                BmsFolders = folders.Select(f => new BmsFolderViewModel(f)).ToArray();
             }
-            OnPropertyChanged(nameof(BmsFiles));
+            searchFile();
+        }
+
+        private void searchFile()
+        {
+            if (Narrowed && SelectedBmsFolder != null)
+            {
+                if (string.IsNullOrEmpty(SearchText))
+                {
+                    BmsFiles = SelectedBmsFolder?.Files;
+                }
+                else
+                {
+                    BmsFiles = SelectedBmsFolder?.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false)).ToArray();
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(SearchText))
+                {
+                    BmsFiles = RootDirectory?.Folders.SelectMany(f => f.Files).ToArray();
+                }
+                else
+                {
+                    BmsFiles = RootDirectory?.Folders.SelectMany(f => f.Files).Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false)).ToArray();
+                }
+            }
         }
 
         private void autoRename(object input)
