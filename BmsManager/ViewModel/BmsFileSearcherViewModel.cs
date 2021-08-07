@@ -1,0 +1,148 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Input;
+using BmsManager.Data;
+using CommonLib.Wpf;
+
+namespace BmsManager
+{
+    class BmsFileSearcherViewModel : ViewModelBase
+    {
+        RootDirectoryViewModel root;
+        public RootDirectoryViewModel RootDirectory
+        {
+            get { return root; }
+            set { root = value; search(); }
+        }
+
+        public BmsFileListViewModel FileList { get; set; }
+
+        public ICommand Search { get; set; }
+
+        public ICommand Clear { get; set; }
+
+        public ICommand AutoRename { get; set; }
+
+        public ICommand Rename { get; set; }
+
+        public ICommand Register { get; set; }
+
+        string seachText;
+        public string SearchText
+        {
+            get { return seachText; }
+            set { SetProperty(ref seachText, value); }
+        }
+
+        string renameText;
+        public string RenameText
+        {
+            get { return renameText; }
+            set { SetProperty(ref renameText, value); }
+        }
+
+        public BmsFileSearcherViewModel()
+        {
+            FileList = new BmsFileListViewModel();
+            FileList.PropertyChanged += FileList_PropertyChanged;
+
+            AutoRename = CreateCommand(autoRename);
+            Rename = CreateCommand(rename);
+            Register = CreateCommand(register);
+            Search = CreateCommand(input => search());
+            Clear = CreateCommand(input => { SearchText = null; search(); });
+        }
+
+        private void search()
+        {
+            if (string.IsNullOrEmpty(SearchText))
+            {
+                FileList.BmsFolders = root.Folders.Select(f => new BmsFolderViewModel(f)).ToArray();
+                return;
+            }
+
+            FileList.BmsFolders = inner(root).ToArray();
+
+            IEnumerable<BmsFolderViewModel> inner(RootDirectoryViewModel root)
+            {
+                foreach (var folder in root.Folders)
+                {
+                    var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
+                    if (!files.Any()) continue;
+                    var vm = new BmsFolderViewModel(folder);
+                    vm.Files = files.Select(f => new BmsFileViewModel(f));
+                    yield return vm;
+                }
+            }
+        }
+
+        private void FileList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(BmsFileListViewModel.SelectedBmsFolder))
+            {
+                if (FileList.SelectedBmsFolder != null)
+                {
+                    RenameText = Path.GetFileName(FileList.SelectedBmsFolder.Path);
+                }
+            }
+            else if (e.PropertyName == nameof(BmsFileListViewModel.SelectedBmsFile))
+            {
+                if (FileList.SelectedBmsFile != null)
+                {
+                    RenameText = $"[{FileList.SelectedBmsFile.Artist}]{Utility.GetTitle(FileList.SelectedBmsFile.Title)}";
+                }
+            }
+        }
+
+        private void autoRename(object input)
+        {
+            if (FileList.BmsFolders == null)
+                return;
+
+            foreach (var folder in FileList.BmsFolders)
+            {
+                try
+                {
+                    folder.AutoRename();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+
+            RootDirectory.LoadFromFileSystem.Execute(null);
+
+            search();
+        }
+
+        private void rename(object input)
+        {
+            if (string.IsNullOrEmpty(RenameText))
+                return;
+
+            try
+            {
+                FileList.SelectedBmsFolder.Rename(RenameText);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            RootDirectory.LoadFromFileSystem.Execute(null);
+
+            search();
+        }
+
+        private void register(object input)
+        {
+            RootDirectory?.Register();
+
+            MessageBox.Show("登録完了しました");
+        }
+    }
+}

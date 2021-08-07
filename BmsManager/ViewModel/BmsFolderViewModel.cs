@@ -20,13 +20,14 @@ namespace BmsManager
 
         public ICommand OpenFolder { get; set; }
 
-        public IEnumerable<BmsFile> Files => folder.Files;
+        public IEnumerable<BmsFileViewModel> Files { get; set; }
 
         BmsFolder folder;
 
         public BmsFolderViewModel(BmsFolder folder)
         {
             this.folder = folder;
+            Files = folder.Files.Select(f => new BmsFileViewModel(f)).ToArray();
             OpenFolder = CreateCommand(input => openFolder());
         }
 

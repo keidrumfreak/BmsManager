@@ -16,7 +16,7 @@
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <local:RootTreeView Grid.Column="0" DataContext="{Binding RootTree}"/>
-        <local:BmsFileList Grid.Column="1" DataContext="{Binding FileList}"/>
+        <local:BmsFileSearcher Grid.Column="1" DataContext="{Binding FileList}"/>
         <!--<Grid Grid.Column="2" Grid.RowSpan="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>

@@ -19,12 +19,12 @@ namespace BmsManager
     {
         public RootTreeViewModel RootTree { get; set; }
 
-        public BmsFileListViewModel FileList { get; set; }
+        public BmsFileSearcherViewModel FileList { get; set; }
 
         public FolderRegisterViewModel()
         {
             RootTree = new RootTreeViewModel();
-            FileList = new BmsFileListViewModel();
+            FileList = new BmsFileSearcherViewModel();
 
             RootTree.PropertyChanged += RootTree_PropertyChanged;
         }
