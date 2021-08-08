@@ -73,7 +73,7 @@ namespace BmsManager
                     foreach (var folder in folders)
                     {
                         var vm = new BmsFolderViewModel(folder, FileList);
-                        vm.Duplicates = folders.Where(f => f.ID != folder.ID && f.Files.Any(f1 => folder.Files.Any(f2 => f1.Title == f2.Title && f1.Artist == f2.Artist))).ToArray();
+                        vm.Duplicates = folders.Where(f => f.ID != folder.ID && f.Title == folder.Title && f.Artist == folder.Artist).ToArray();
                         yield return vm;
                     }
                 }

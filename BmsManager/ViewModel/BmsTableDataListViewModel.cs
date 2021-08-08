@@ -7,6 +7,7 @@ using System.Windows.Input;
 using BmsManager.Data;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace BmsManager
 {
@@ -30,9 +31,12 @@ namespace BmsManager
             set { SetProperty(ref tableDatas, value); }
         }
 
+        public ICommand DownloadAll { get; set; }
+
         public BmsTableDataListViewModel()
         {
             ChangeNarrowing = CreateCommand(input => loadTableData());
+            DownloadAll = CreateCommand(async input => await downloadAllAsync());
         }
 
         private void loadTableData()
@@ -59,6 +63,23 @@ namespace BmsManager
                     var existFile = query.AsNoTracking().ToArray();
                     TableDatas = TableDatas.Where(d => !existFile.Any(f => f.MD5 == d.MD5)).ToArray();
                 }
+            }
+        }
+
+        private async Task downloadAllAsync()
+        {
+            string targetDir;
+            using (var diag = new CommonOpenFileDialog())
+            {
+                diag.IsFolderPicker = true;
+                if (diag.ShowDialog() != CommonFileDialogResult.Ok)
+                    return;
+                targetDir = diag.FileName;
+            }
+
+            foreach (var data in TableDatas)
+            {
+                await data.DownloadAsync(targetDir);
             }
         }
     }

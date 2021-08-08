@@ -10,13 +10,18 @@
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type local:BmsTableDataListViewModel}"/>
     </UserControl.Resources>
-    <Grid Grid.Column="2" Grid.RowSpan="2">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <CheckBox Content="未入手譜面のみ表示" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
-        <DataGrid Grid.Row="1" Margin="5" ItemsSource="{Binding TableDatas}" AutoGenerateColumns="False">
+        <CheckBox Grid.Row="0" Grid.Column="0" Content="未入手譜面のみ表示" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
+        <Button Grid.Row="0" Grid.Column="1" Margin="5" Content="差分一括DL" Command="{Binding DownloadAll}"/>
+        <DataGrid Grid.Row="1" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding TableDatas}" AutoGenerateColumns="False">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Setter Property="ContextMenu">
@@ -35,6 +40,7 @@
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}"/>
                 <DataGridTextColumn Header="MD5" Binding="{Binding MD5}"/>
+                <DataGridTextColumn Header="コメント" Width="*" Binding="{Binding Comment}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
