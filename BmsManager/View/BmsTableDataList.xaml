@@ -30,6 +30,7 @@
                                 <MenuItem Header="本体URL" Command="{Binding OpenUrl}"/>
                                 <MenuItem Header="差分URL" Command="{Binding OpenDiffUrl}"/>
                                 <MenuItem Header="パッケージURL" Command="{Binding OpenPackUrl}"/>
+                                <MenuItem Header="LR2IRを開く" Command="{Binding OpenLR2IR}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
