@@ -39,7 +39,7 @@ namespace BmsManager
             this.folder = folder;
             Files = folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray();
             OpenFolder = CreateCommand(input => openFolder());
-            Merge = CreateCommand(input => merge(), input => Duplicates?.Any() ?? false);
+            Merge = CreateCommand(input => Task.Run(() => merge()), input => Duplicates?.Any() ?? false);
         }
 
         public void AutoRename()
@@ -79,7 +79,8 @@ namespace BmsManager
                         try
                         {
                             var toPath = PathUtil.Combine(Path, SysPath.GetFileName(file));
-                            if (ext.Contains(SysPath.GetExtension(file).Substring(1)))
+                            var fileExt = SysPath.GetExtension(file); // 拡張子が存在しない場合もある
+                            if (fileExt.Length > 1 && ext.Contains(fileExt.Substring(1)))
                             {
                                 var i = 1;
                                 var dst = toPath;
@@ -97,11 +98,12 @@ namespace BmsManager
                         catch (Exception ex)
                         {
                             MessageBox.Show(ex.ToString());
+                            return;
                         }
                     }
                 }
 
-                parent.BmsFolders.Remove(parent.BmsFolders.FirstOrDefault(f => f.Path == fol.Path));
+                Application.Current.Dispatcher.Invoke(() => parent.BmsFolders.Remove(parent.BmsFolders.FirstOrDefault(f => f.Path == fol.Path)));
 
                 try
                 {
@@ -110,6 +112,7 @@ namespace BmsManager
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.ToString());
+                    return;
                 }
             }
 
@@ -121,7 +124,7 @@ namespace BmsManager
             folder.Root.LoadFromFileSystem();
             folder.Root.Register();
 
-            parent.BmsFolders.Remove(this);
+            Application.Current.Dispatcher.Invoke(() => parent.BmsFolders.Remove(this));
         }
     }
 }
