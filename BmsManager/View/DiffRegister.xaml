@@ -1,0 +1,43 @@
+﻿<Window x:Class="BmsManager.DiffRegister"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BmsManager"
+        mc:Ignorable="d"
+        Title="DiffRegister" Height="450" Width="800">
+    <Window.DataContext>
+        <local:DiffRegisterViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <Button Margin="5" Content="フォルダ読込" Command="{Binding SearchDiff}"/>
+        <TextBox Grid.Column="1" Margin="5" Text="{Binding TargetPath, Mode=TwoWay}"/>
+        <DataGrid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="5" ItemsSource="{Binding DiffFiles}" SelectedItem="{Binding SelectedDiffFile}" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="インストール先推定" Command="{Binding EstimateDestination}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.RowStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Title" Binding="{Binding Title}"/>
+                <DataGridTextColumn Header="Artist" Binding="{Binding Artist}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <local:BmsFileList Grid.Column="2" Grid.RowSpan="2" Margin="5" DataContext="{Binding FileList}"/>
+    </Grid>
+</Window>

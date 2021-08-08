@@ -11,6 +11,7 @@ using System.Windows.Input;
 using BmsManager.Data;
 using CommonLib.IO;
 using CommonLib.Wpf;
+using Microsoft.EntityFrameworkCore;
 using SysPath = System.IO.Path;
 
 namespace BmsManager
@@ -27,6 +28,8 @@ namespace BmsManager
 
         public ICommand Merge { get; set; }
 
+        public ICommand Install { get; set; }
+
         ObservableCollection<BmsFileViewModel> files;
         public ObservableCollection<BmsFileViewModel> Files
         {
@@ -38,14 +41,17 @@ namespace BmsManager
 
         BmsFolder folder;
         BmsFileListViewModel parent;
+        DiffFileViewModel diffFile;
 
-        public BmsFolderViewModel(BmsFolder folder, BmsFileListViewModel parent)
+        public BmsFolderViewModel(BmsFolder folder, BmsFileListViewModel parent, DiffFileViewModel diffFile = null)
         {
             this.parent = parent;
             this.folder = folder;
+            this.diffFile = diffFile;
             Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray());
             OpenFolder = CreateCommand(input => openFolder());
             Merge = CreateCommand(input => Task.Run(() => merge()), input => Duplicates?.Any() ?? false);
+            Install = CreateCommand(input => install(), input => diffFile != null);
         }
 
         public void AutoRename()
@@ -137,6 +143,37 @@ namespace BmsManager
             folder.Root.Register();
 
             Application.Current.Dispatcher.Invoke(() => parent.BmsFolders.Remove(this));
+        }
+
+        private void install()
+        {
+            try
+            {
+                var toPath = PathUtil.Combine(folder.Path, SysPath.GetFileName(diffFile.Path));
+                var i = 1;
+                var dst = toPath;
+                while (SystemProvider.FileSystem.File.Exists(toPath))
+                {
+                    i++;
+                    toPath = $"{SysPath.GetFileNameWithoutExtension(dst)} ({i}){SysPath.GetExtension(dst)}";
+                }
+
+                SystemProvider.FileSystem.File.Move(diffFile.Path, toPath);
+
+                using (var con = new BmsManagerContext())
+                {
+                    var fol = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == folder.Path);
+                    var file = new BmsFile(toPath);
+                    fol.Files.Add(file);
+                    con.SaveChanges();
+                }
+
+                diffFile.Remove();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }

@@ -14,6 +14,7 @@
             <Button Margin="10" Content="フォルダ管理" Command="{Binding ShowFileRegister}"/>
             <Button Margin="10" Content="難易度表管理" Command="{Binding ShowTableManager}"/>
             <Button Margin="10" Content="重複ファイルチェック" Command="{Binding ShowDuplicateChecker}"/>
+            <Button Margin="10" Content="差分登録" Command="{Binding ShowDiffRegister}"/>
         </StackPanel>
     </Grid>
 </Window>

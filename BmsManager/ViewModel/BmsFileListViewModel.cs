@@ -51,7 +51,11 @@ namespace BmsManager
 
         private void searchFile()
         {
-            if (Narrowed && SelectedBmsFolder != null)
+            if (BmsFolders == null)
+            {
+                BmsFiles = null;
+            }
+            else if (Narrowed && SelectedBmsFolder != null)
             {
                 BmsFiles = new ObservableCollection<BmsFileViewModel>(SelectedBmsFolder.Files);
             }

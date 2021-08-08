@@ -24,6 +24,7 @@
                             <ContextMenu>
                                 <MenuItem Header="エクスプローラで開く" Command="{Binding OpenFolder}"/>
                                 <MenuItem Header="このフォルダに統合する" Command="{Binding Merge}"/>
+                                <MenuItem Header="このフォルダにインストール" Command="{Binding Install}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
