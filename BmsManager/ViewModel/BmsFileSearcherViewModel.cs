@@ -96,7 +96,7 @@ namespace BmsManager
             }
         }
 
-        private void FileList_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void FileList_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(BmsFileListViewModel.SelectedBmsFolder))
             {

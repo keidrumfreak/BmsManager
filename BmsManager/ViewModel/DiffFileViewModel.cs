@@ -14,6 +14,7 @@ namespace BmsManager
     {
         public string Title => text.Title;
         public string Artist => text.Artist;
+        public string MD5 { get; set; }
         public string Path { get; set; }
 
         IEnumerable<BmsFolder> folders;
@@ -33,6 +34,8 @@ namespace BmsManager
             this.vm = vm;
             text = new BmsText(path);
             Path = path;
+
+            MD5 = Utility.GetMd5Hash(path);
 
             EstimateDestination = CreateCommand(input => GetEstimatedDestination());
         }

@@ -17,11 +17,15 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Button Margin="5" Content="フォルダ読込" Command="{Binding SearchDiff}"/>
         <TextBox Grid.Column="1" Margin="5" Text="{Binding TargetPath, Mode=TwoWay}"/>
-        <DataGrid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Margin="5" ItemsSource="{Binding DiffFiles}" SelectedItem="{Binding SelectedDiffFile}" IsReadOnly="True" AutoGenerateColumns="False">
+        <Button Grid.Column="2" Margin="5" Content="難易度表からインストール" Command="{Binding InstallByTable}"/>
+        <Button Grid.Column="3" Margin="5" Content="全部推定" Command="{Binding EstimateAll}"/>
+        <DataGrid Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="1" Margin="5" ItemsSource="{Binding DiffFiles}" SelectedItem="{Binding SelectedDiffFile}" IsReadOnly="True" AutoGenerateColumns="False">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Setter Property="ContextMenu">
@@ -38,6 +42,6 @@
                 <DataGridTextColumn Header="Artist" Binding="{Binding Artist}"/>
             </DataGrid.Columns>
         </DataGrid>
-        <local:BmsFileList Grid.Column="2" Grid.RowSpan="2" Margin="5" DataContext="{Binding FileList}"/>
+        <local:BmsFileList Grid.Column="4" Grid.RowSpan="2" Margin="5" DataContext="{Binding FileList}"/>
     </Grid>
 </Window>

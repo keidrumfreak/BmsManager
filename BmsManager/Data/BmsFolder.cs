@@ -77,16 +77,19 @@ namespace BmsManager.Data
                 using (var con = new BmsManagerContext())
                 {
                     var folder = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
-                    folder.Path = dst;
-                    Path = dst;
-                    SetMetaFromName();
-                    folder.Title = Title;
-                    folder.Artist = Artist;
-                    foreach (var file in folder.Files)
+                    if (folder != default)
                     {
-                        file.Path = PathUtil.Combine(dst, SysPath.GetFileName(file.Path));
+                        folder.Path = dst;
+                        Path = dst;
+                        SetMetaFromName();
+                        folder.Title = Title;
+                        folder.Artist = Artist;
+                        foreach (var file in folder.Files)
+                        {
+                            file.Path = PathUtil.Combine(dst, SysPath.GetFileName(file.Path));
+                        }
+                        con.SaveChanges();
                     }
-                    con.SaveChanges();
                 }
             }
             catch (IOException)

@@ -8,7 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using BmsManager.Data;
+using CommonLib.IO;
 using CommonLib.Wpf;
+using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager
 {
@@ -41,7 +43,7 @@ namespace BmsManager
                 else
                 {
                     if (selectedDiffFile.Folders != null)
-                        FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders.Select(f => new BmsFolderViewModel(f, FileList)));
+                        FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders.Select(f => new BmsFolderViewModel(f, FileList, selectedDiffFile)));
                     selectedDiffFile.PropertyChanged += DiffFile_PropertyChanged;
                 }
             }
@@ -49,10 +51,16 @@ namespace BmsManager
 
         public ICommand SearchDiff { get; set; }
 
+        public ICommand EstimateAll { get; set; }
+
+        public ICommand InstallByTable { get; set; }
+
         public DiffRegisterViewModel()
         {
             FileList = new BmsFileListViewModel();
             SearchDiff = CreateCommand(input => searchDiff());
+            EstimateAll = CreateCommand(input => estimateAll());
+            InstallByTable = CreateCommand(input => installByTable());
         }
 
         private void searchDiff()
@@ -66,11 +74,50 @@ namespace BmsManager
             DiffFiles = new ObservableCollection<DiffFileViewModel>(files.Select(f => new DiffFileViewModel(f, this)));
         }
 
+        private void estimateAll()
+        {
+            foreach (var file in DiffFiles)
+            {
+                file.GetEstimatedDestination();
+            }
+        }
+
         private void DiffFile_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(DiffFileViewModel.Folders))
             {
                 FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders.Select(f => new BmsFolderViewModel(f, FileList, SelectedDiffFile)));
+            }
+        }
+
+        private void installByTable()
+        {
+            using (var con = new BmsManagerContext())
+            {
+                foreach (var file in DiffFiles)
+                {
+                    var table = con.TableDatas.FirstOrDefault(d => d.MD5 == file.MD5);
+                    if (table == default)
+                        continue;
+                    var folder = con.Files.Include(f => f.Folder).FirstOrDefault(f => f.MD5 == table.OrgMD5)?.Folder;
+                    if (folder == default)
+                        continue;
+
+                    var toPath = PathUtil.Combine(folder.Path, Path.GetFileName(file.Path));
+                    var i = 1;
+                    var dst = toPath;
+                    while (SystemProvider.FileSystem.File.Exists(toPath))
+                    {
+                        i++;
+                        toPath = $"{Path.GetFileNameWithoutExtension(dst)} ({i}){Path.GetExtension(dst)}";
+                    }
+
+                    SystemProvider.FileSystem.File.Move(file.Path, toPath);
+
+                    folder.Files.Add(new BmsFile(toPath));
+                    file.Remove();
+                }
+                con.SaveChanges();
             }
         }
     }
