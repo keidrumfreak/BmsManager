@@ -8,7 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLib.IO;
-using ClsPath = System.IO.Path;
+using Microsoft.EntityFrameworkCore;
+using SysPath = System.IO.Path;
 
 namespace BmsManager.Data
 {
@@ -50,8 +51,8 @@ namespace BmsManager.Data
             var rename = name.Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
                 .Replace("\"", "”").Replace('?', '？').Replace('|', '｜');
 
-            var dst = PathUtil.Combine(ClsPath.GetDirectoryName(Path), rename);
-            var tmp = PathUtil.Combine(ClsPath.GetDirectoryName(Path), "tmp");
+            var dst = PathUtil.Combine(SysPath.GetDirectoryName(Path), rename);
+            var tmp = PathUtil.Combine(SysPath.GetDirectoryName(Path), "tmp");
 
             try
             {
@@ -68,7 +69,23 @@ namespace BmsManager.Data
 
                 SystemProvider.FileSystem.Directory.Move(tmp, dst);
 
-                Path = dst;
+                //Path = dst;
+                SetMetaFromName();
+
+                using (var con = new BmsManagerContext())
+                {
+                    var folder = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
+                    folder.Path = dst;
+                    Path = dst;
+                    SetMetaFromName();
+                    folder.Title = Title;
+                    folder.Artist = Artist;
+                    foreach (var file in folder.Files)
+                    {
+                        file.Path = PathUtil.Combine(dst, SysPath.GetFileName(file.Path));
+                    }
+                    con.SaveChanges();
+                }
             }
             catch (IOException)
             {
@@ -80,7 +97,7 @@ namespace BmsManager.Data
 
         public void SetMetaFromName()
         {
-            var name = ClsPath.GetFileName(Path);
+            var name = SysPath.GetFileName(Path);
             var index = name.IndexOf("]");
             if (index != -1)
             {

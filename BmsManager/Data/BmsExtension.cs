@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager.Data
 {
@@ -25,7 +26,7 @@ namespace BmsManager.Data
 
             using (var con = new BmsManagerContext())
             {
-                extensions = con.Extensions.Select(e => e.Extension).ToArray();
+                extensions = con.Extensions.AsNoTracking().Select(e => e.Extension).ToArray();
             }
             return extensions;
         }

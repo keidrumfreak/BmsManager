@@ -31,7 +31,8 @@ namespace BmsManager
         {
             var headerContent = Content.Descendants(Namespace + "meta")?
                 .FirstOrDefault(e => e.Attribute("name")?.Value == "bmstable")?
-                .Attribute("content").Value;
+                .Attribute("content").Value
+                .TrimStart('.', '/'); // "./"から始まっている場合がある
 
             var headerUri = $"{Home}/{headerContent}";
 
@@ -41,7 +42,7 @@ namespace BmsManager
 
         public async Task LoadDatasAsync()
         {
-            var dataUri = $"{Home}/{Header.DataUrl}";
+            var dataUri = $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
             var json = await HttpClientProvider.GetClient().GetStringAsync(dataUri);
             Datas = JsonSerializer.Deserialize<BmsTableData[]>(json);
         }

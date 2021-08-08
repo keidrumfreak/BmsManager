@@ -22,7 +22,12 @@ namespace BmsManager
 
         public string FolderPath => root.Path;
 
-        public IEnumerable<BmsFolder> Folders => root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
+        IEnumerable<BmsFolder> folders;
+        public IEnumerable<BmsFolder> Folders
+        {
+            get { return folders; }
+            set { SetProperty(ref folders, value); }
+        }
 
         public ICommand LoadFromFileSystem { get; set; }
 
@@ -45,18 +50,21 @@ namespace BmsManager
             Remove = CreateCommand(input => remove());
 
             Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
+            Folders = root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
         }
 
         private void loadFromFileSystem(object input)
         {
             root.LoadFromFileSystem();
             Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
+            Folders = root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
         }
 
         private void loadFromDB(object input)
         {
             root.LoadFromDB();
             Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
+            Folders = root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
         }
 
         public void Register()

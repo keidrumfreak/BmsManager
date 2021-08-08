@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -16,7 +17,21 @@ namespace BmsManager
         public RootDirectoryViewModel RootDirectory
         {
             get { return root; }
-            set { root = value; search(); }
+            set
+            {
+                if (root != null)
+                    root.PropertyChanged -= Root_PropertyChanged;
+
+                root = value;
+                root.PropertyChanged += Root_PropertyChanged;
+                search();
+            }
+        }
+
+        private void Root_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(RootDirectoryViewModel.Folders))
+                search();
         }
 
         public BmsFileListViewModel FileList { get; set; }
@@ -74,7 +89,7 @@ namespace BmsManager
                     var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
                     if (!files.Any()) continue;
                     var vm = new BmsFolderViewModel(folder, FileList);
-                    vm.Files = files.Select(f => new BmsFileViewModel(f, FileList));
+                    vm.Files = new ObservableCollection<BmsFileViewModel>(files.Select(f => new BmsFileViewModel(f, FileList)).ToArray());
                     yield return vm;
                 }
             }
@@ -134,7 +149,7 @@ namespace BmsManager
                 MessageBox.Show(ex.ToString());
             }
 
-            RootDirectory.LoadFromFileSystem.Execute(null);
+            //RootDirectory.LoadFromFileSystem.Execute(null);
 
             search();
         }

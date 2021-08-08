@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,12 @@ namespace BmsManager
 
         public ICommand Merge { get; set; }
 
-        public IEnumerable<BmsFileViewModel> Files { get; set; }
+        ObservableCollection<BmsFileViewModel> files;
+        public ObservableCollection<BmsFileViewModel> Files
+        {
+            get { return files; }
+            set { SetProperty(ref files, value); }
+        }
 
         public IEnumerable<BmsFolder> Duplicates { get; set; }
 
@@ -37,7 +43,7 @@ namespace BmsManager
         {
             this.parent = parent;
             this.folder = folder;
-            Files = folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray();
+            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray());
             OpenFolder = CreateCommand(input => openFolder());
             Merge = CreateCommand(input => Task.Run(() => merge()), input => Duplicates?.Any() ?? false);
         }
@@ -50,6 +56,10 @@ namespace BmsManager
         public void Rename(string name)
         {
             folder.Rename(name);
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Artist));
+            OnPropertyChanged(nameof(Path));
+            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray());
         }
 
         private void openFolder()
@@ -67,9 +77,11 @@ namespace BmsManager
                 foreach (var file in fol.Files)
                 {
                     // 重複BMSファイルは先に削除しておく
-                    folder.Files.Any(f => f.MD5 == file.MD5);
-                    if (SystemProvider.FileSystem.File.Exists(file.Path))
-                        SystemProvider.FileSystem.File.Delete(file.Path);
+                    if (folder.Files.Any(f => f.MD5 == file.MD5))
+                    {
+                        if (SystemProvider.FileSystem.File.Exists(file.Path))
+                            SystemProvider.FileSystem.File.Delete(file.Path);
+                    }
                 }
 
                 if (SystemProvider.FileSystem.Directory.Exists(fol.Path))
