@@ -48,7 +48,7 @@ namespace BmsManager
                 ? Header.DataUrl
                 : $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
             var json = await HttpClientProvider.GetClient().GetStringAsync(dataUri);
-            Datas = JsonSerializer.Deserialize<BmsTableData[]>(json, new JsonSerializerOptions { IgnoreNullValues = true });
+            Datas = JsonSerializer.Deserialize<BmsTableData[]>(json);
         }
 
         public class BmsTalbeHeader

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
@@ -65,7 +66,7 @@ namespace BmsManager
             FileList = new BmsFileListViewModel();
             FileList.PropertyChanged += FileList_PropertyChanged;
 
-            AutoRename = CreateCommand(autoRename);
+            AutoRename = CreateCommand(input => Task.Run(() => autoRename()));
             Rename = CreateCommand(rename);
             Register = CreateCommand(register);
             Search = CreateCommand(input => search());
@@ -113,7 +114,7 @@ namespace BmsManager
             }
         }
 
-        private void autoRename(object input)
+        private void autoRename()
         {
             if (FileList.BmsFolders == null)
                 return;
@@ -130,7 +131,7 @@ namespace BmsManager
                 }
             }
 
-            RootDirectory.LoadFromFileSystem.Execute(null);
+            //RootDirectory.LoadFromFileSystem.Execute(null);
 
             search();
         }

@@ -37,12 +37,12 @@ namespace BmsManager.Data
         public void AutoRename()
         {
             var artist = Utility.GetArtist(Files.Select(f => f.Artist));
-            var title = Utility.GetTitle(Files.First().Title);
+            var title = Utility.GetTitle(Files.Where(f => !string.IsNullOrWhiteSpace(f.Title)).FirstOrDefault()?.Title);
             if (artist.Length > 50)
                 artist = artist.Substring(0, 50);
             if (title.Length > 50)
                 title = title.Substring(0, 50);
-            var rename = $"[{Utility.GetArtist(Files.Select(f => f.Artist))}]{Utility.GetTitle(Files.First().Title)}";
+            var rename = $"[{Utility.GetArtist(Files.Select(f => f.Artist))}]{Utility.GetTitle(Files.First().Title)}".Trim();
             Rename(rename);
         }
 
@@ -53,6 +53,9 @@ namespace BmsManager.Data
 
             var dst = PathUtil.Combine(SysPath.GetDirectoryName(Path), rename);
             var tmp = PathUtil.Combine(SysPath.GetDirectoryName(Path), "tmp");
+
+            if (SysPath.GetFileName(Path) == rename)
+                return;
 
             try
             {
@@ -69,7 +72,6 @@ namespace BmsManager.Data
 
                 SystemProvider.FileSystem.Directory.Move(tmp, dst);
 
-                //Path = dst;
                 SetMetaFromName();
 
                 using (var con = new BmsManagerContext())
