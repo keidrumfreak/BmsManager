@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -60,11 +61,11 @@ namespace BmsManager
         {
             if (string.IsNullOrEmpty(SearchText))
             {
-                FileList.BmsFolders = root.Folders.Select(f => new BmsFolderViewModel(f)).ToArray();
+                FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(root.Folders.Select(f => new BmsFolderViewModel(f, FileList)).ToArray());
                 return;
             }
 
-            FileList.BmsFolders = inner(root).ToArray();
+            FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(inner(root).ToArray());
 
             IEnumerable<BmsFolderViewModel> inner(RootDirectoryViewModel root)
             {
@@ -72,8 +73,8 @@ namespace BmsManager
                 {
                     var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
                     if (!files.Any()) continue;
-                    var vm = new BmsFolderViewModel(folder);
-                    vm.Files = files.Select(f => new BmsFileViewModel(f));
+                    var vm = new BmsFolderViewModel(folder, FileList);
+                    vm.Files = files.Select(f => new BmsFileViewModel(f, FileList));
                     yield return vm;
                 }
             }

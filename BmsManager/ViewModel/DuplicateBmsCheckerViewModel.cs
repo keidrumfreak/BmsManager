@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +40,17 @@ namespace BmsManager
                     .Include(f => f.Files).Include(f => f.Root)
                     .AsNoTracking().ToArray();
 
-                FileList.BmsFolders = fol.Select(f => new BmsFolderViewModel(f)).ToArray();
+                IEnumerable<BmsFolderViewModel> inner(IEnumerable<BmsFolder> folders)
+                {
+                    foreach (var folder in folders)
+                    {
+                        var vm = new BmsFolderViewModel(folder, FileList);
+                        vm.Duplicates = folders.Where(f => f.ID != folder.ID && f.Files.Any(f1 => folder.Files.Any(f2 => f1.MD5 == f2.MD5))).ToArray();
+                        yield return vm;
+                    }
+                }
+
+                FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(inner(fol).ToArray());
             }
         }
     }

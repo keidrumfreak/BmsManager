@@ -23,6 +23,7 @@
                         <Setter.Value>
                             <ContextMenu>
                                 <MenuItem Header="エクスプローラで開く" Command="{Binding OpenFolder}"/>
+                                <MenuItem Header="このフォルダに統合する" Command="{Binding Merge}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
@@ -36,9 +37,21 @@
         </DataGrid>
         <CheckBox Margin="5" Grid.Row="1" Content="BMSファイルを絞り込み表示する" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
         <DataGrid Margin="5" Grid.Row="2" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False">
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="削除する" Command="{Binding Remove}"/>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.RowStyle>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}" Width="100"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}" Width="100"/>
+                <DataGridTextColumn Header="MD5" Binding="{Binding MD5}" Width="300"/>
                 <DataGridTextColumn Header="ファイルパス" Binding="{Binding Path}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>

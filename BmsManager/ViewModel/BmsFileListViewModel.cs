@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,15 +12,15 @@ namespace BmsManager
 {
     class BmsFileListViewModel : ViewModelBase
     {
-        IEnumerable<BmsFileViewModel> bmsFiles;
-        public IEnumerable<BmsFileViewModel> BmsFiles
+        ObservableCollection<BmsFileViewModel> bmsFiles;
+        public ObservableCollection<BmsFileViewModel> BmsFiles
         {
             get { return bmsFiles; }
             set { SetProperty(ref bmsFiles, value); }
         }
 
-        IEnumerable<BmsFolderViewModel> bmsFolders;
-        public IEnumerable<BmsFolderViewModel> BmsFolders
+        ObservableCollection<BmsFolderViewModel> bmsFolders;
+        public ObservableCollection<BmsFolderViewModel> BmsFolders
         {
             get { return bmsFolders; }
             set { SetProperty(ref bmsFolders, value); searchFile(); }
@@ -52,11 +53,11 @@ namespace BmsManager
         {
             if (Narrowed && SelectedBmsFolder != null)
             {
-                BmsFiles = SelectedBmsFolder.Files;
+                BmsFiles = new ObservableCollection<BmsFileViewModel>(SelectedBmsFolder.Files);
             }
             else
             {
-                BmsFiles = BmsFolders.SelectMany(f => f.Files).ToArray();
+                BmsFiles = new ObservableCollection<BmsFileViewModel>(BmsFolders.SelectMany(f => f.Files).ToArray());
             }
         }
     }

@@ -176,7 +176,12 @@ namespace BmsManager.Data
                         var fsFolder = dir.Folders.FirstOrDefault(f => f.Path == folder.Path);
                         if (fsFolder == default)
                         {
+                            con.Entry(folder).Collection(f => f.Files).Load();
                             // 実体が存在しないフォルダを削除
+                            foreach (var file in folder.Files)
+                            {
+                                con.Files.Remove(file);
+                            }
                             root.Folders.Remove(folder);
                             continue;
                         }
