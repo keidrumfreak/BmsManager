@@ -34,7 +34,9 @@ namespace BmsManager
                 .Attribute("content").Value
                 .TrimStart('.', '/'); // "./"から始まっている場合がある
 
-            var headerUri = $"{Home}/{headerContent}";
+            var headerUri = headerContent.StartsWith("http:")
+                ? headerContent
+                : $"{Home}/{headerContent}";
 
             var json = await HttpClientProvider.GetClient().GetStringAsync(headerUri);
             Header = JsonSerializer.Deserialize<BmsTalbeHeader>(json);
@@ -42,9 +44,11 @@ namespace BmsManager
 
         public async Task LoadDatasAsync()
         {
-            var dataUri = $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
+            var dataUri = Header.DataUrl.StartsWith("http:")
+                ? Header.DataUrl
+                : $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
             var json = await HttpClientProvider.GetClient().GetStringAsync(dataUri);
-            Datas = JsonSerializer.Deserialize<BmsTableData[]>(json);
+            Datas = JsonSerializer.Deserialize<BmsTableData[]>(json, new JsonSerializerOptions { IgnoreNullValues = true });
         }
 
         public class BmsTalbeHeader
@@ -71,10 +75,33 @@ namespace BmsManager
             public string MD5 { get; set; }
 
             [JsonPropertyName("level")]
-            public string Level { get; set; }
+            public JsonElement LevelValue { get; set; }
+
+            string level;
+            [JsonIgnore]
+            public string Level
+            {
+                get
+                {
+                    return level != null ? level
+                        : (level = LevelValue.ValueKind == JsonValueKind.String ? LevelValue.GetString() : LevelValue.GetInt32().ToString());
+                }
+            }
 
             [JsonPropertyName("lr2_bmsid")]
-            public string LR2BmsID { get; set; }
+            public JsonElement? LR2BmsIDValue { get; set; }
+
+            string lr2BmsID;
+            [JsonIgnore]
+            public string LR2BmsID
+            {
+                get
+                {
+                    if (lr2BmsID != null) return lr2BmsID;
+                    if (!LR2BmsIDValue.HasValue) return null;
+                    return lr2BmsID = LR2BmsIDValue.Value.ValueKind == JsonValueKind.String ? LR2BmsIDValue.Value.GetString() : LR2BmsIDValue.Value.GetInt32().ToString();
+                }
+            }
 
             [JsonPropertyName("title")]
             public string Title { get; set; }
