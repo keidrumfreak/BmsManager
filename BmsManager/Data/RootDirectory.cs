@@ -138,6 +138,7 @@ namespace BmsManager.Data
                 {
                     var root = con.RootDirectories
                         .Include(d => d.Folders)
+                        .Include(d => d.Children)
                         .FirstOrDefault(d => d.Path == dir.Path);
 
                     if (root == null)
@@ -147,7 +148,8 @@ namespace BmsManager.Data
                         return;
                     }
 
-                    if (dir.Children?.Any() ?? false)
+                    var hasChild = dir.Children?.Any() ?? false;
+                    if (hasChild)
                     {
                         // 子が存在する場合それぞれ登録
                         foreach (var child in dir.Children)
@@ -155,12 +157,32 @@ namespace BmsManager.Data
                             registerRoot(child);
                             if (root.Children == null)
                                 root.Children = new List<RootDirectory>();
-                            root.Children.Add(child);
+                            if (!root.Children.Any(c => c.Path == child.Path))
+                                root.Children.Add(child);
                         }
                     }
 
                     if (dir.Folders == null || !dir.Folders.Any())
+                    {
+                        // フォルダも子も存在しない場合削除する
+                        if (!hasChild)
+                        {
+                            if (root.Folders.Any())
+                            {
+                                foreach (var folder in root.Folders)
+                                {
+                                    con.Entry(folder).Collection(f => f.Files);
+                                    foreach (var file in folder.Files)
+                                    {
+                                        con.Files.Remove(file);
+                                    }
+                                    con.BmsFolders.Remove(folder);
+                                }
+                            }
+                            con.RootDirectories.Remove(root);
+                        }
                         return;
+                    }
 
 
                     if (!root.Folders.Any())

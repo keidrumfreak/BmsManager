@@ -29,6 +29,7 @@
                             <ContextMenu>
                                 <MenuItem Header="フォルダ読み込み" Command="{Binding LoadFromFileSystem}"/>
                                 <MenuItem Header="DB読み込み" Command="{Binding LoadFromDB}"/>
+                                <MenuItem Header="登録解除" Command="{Binding Remove}"/>
                             </ContextMenu>
                         </TextBlock.ContextMenu>
                     </TextBlock>

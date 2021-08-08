@@ -30,7 +30,7 @@ namespace BmsManager
         {
             AddRoot = CreateCommand(addRoot);
 
-            RootTree = new ObservableCollection<RootDirectoryViewModel>(RootDirectory.LoadTopRoot().Select(r => new RootDirectoryViewModel(r)));
+            RootTree = new ObservableCollection<RootDirectoryViewModel>(RootDirectory.LoadTopRoot().Select(r => new RootDirectoryViewModel(r, this, null)));
         }
 
         private void addRoot(object input)
@@ -50,7 +50,7 @@ namespace BmsManager
                 con.RootDirectories.Add(root);
                 con.SaveChanges();
 
-                RootTree.Add(new RootDirectoryViewModel(root));
+                RootTree.Add(new RootDirectoryViewModel(root, this, null));
             }
         }
     }
