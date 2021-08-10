@@ -102,13 +102,17 @@ namespace BmsManager
         private string getTargetPath(string targetDir, string url)
         {
             var exts = BmsExtension.GetExtensions();
-            if (exts.Any(e => data.DiffUrl.EndsWith(e)) || data.DiffUrl.EndsWith("zip") || data.DiffUrl.EndsWith("rar"))
+            if (exts.Any(e => url.EndsWith(e)) || url.EndsWith("zip") || url.EndsWith("rar"))
             {
-                return PathUtil.Combine(targetDir, Path.GetFileName(data.DiffUrl));
+                return PathUtil.Combine(targetDir, Path.GetFileName(url));
             }
-            else if (data.DiffUrl.Contains("get="))
+            else if (url.Contains("get="))
             {
-                return PathUtil.Combine(targetDir, data.DiffUrl.Substring(data.DiffUrl.IndexOf("get=")).Replace("get=", "") + ".zip");
+                return PathUtil.Combine(targetDir, url.Substring(data.DiffUrl.IndexOf("get=")).Replace("get=", "") + ".zip");
+            }
+            else if(url.EndsWith("dl=0") || url.EndsWith("dl=1"))
+            {
+                return PathUtil.Combine(targetDir, Path.GetFileName(url.Replace("?dl=0", "").Replace("?dl=1", "")).Replace("%", ""));
             }
             return null;
         }
