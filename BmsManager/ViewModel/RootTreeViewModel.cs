@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,6 +48,9 @@ namespace BmsManager
                 }
 
                 var root = new RootDirectory { Path = TargetDirectory };
+                var parent = con.RootDirectories.FirstOrDefault(r => r.Path == Path.GetDirectoryName(TargetDirectory));
+                if (parent != default)
+                    root.ParentRootID = parent.ID;
                 con.RootDirectories.Add(root);
                 con.SaveChanges();
 

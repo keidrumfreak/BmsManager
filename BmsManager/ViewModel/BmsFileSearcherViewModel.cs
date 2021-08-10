@@ -131,7 +131,7 @@ namespace BmsManager
                 }
             }
 
-            //RootDirectory.LoadFromFileSystem.Execute(null);
+            RootDirectory.LoadFromFileSystem.Execute(null);
 
             search();
         }
@@ -149,8 +149,6 @@ namespace BmsManager
             {
                 MessageBox.Show(ex.ToString());
             }
-
-            //RootDirectory.LoadFromFileSystem.Execute(null);
 
             search();
         }

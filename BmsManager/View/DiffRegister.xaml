@@ -40,6 +40,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" Binding="{Binding Title}"/>
                 <DataGridTextColumn Header="Artist" Binding="{Binding Artist}"/>
+                <DataGridTextColumn Header="MD5" Binding="{Binding MD5}"/>
             </DataGrid.Columns>
         </DataGrid>
         <local:BmsFileList Grid.Column="4" Grid.RowSpan="2" Margin="5" DataContext="{Binding FileList}"/>

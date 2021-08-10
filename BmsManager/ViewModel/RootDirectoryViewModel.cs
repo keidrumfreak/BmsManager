@@ -85,17 +85,26 @@ namespace BmsManager
         {
             using (var con = new BmsManagerContext())
             {
-                foreach (var root in con.RootDirectories.Include(r => r.Folders).ThenInclude(f => f.Files).Where(r => r.Path == FolderPath).ToArray())
+                inner(FolderPath);
+                void inner(string path)
                 {
-                    foreach (var folder in root.Folders)
+                    foreach (var root in con.RootDirectories.Include(r => r.Children).Include(r => r.Folders).ThenInclude(f => f.Files).Where(r => r.Path == path).ToArray())
                     {
-                        foreach (var file in folder.Files)
+                        foreach (var child in children)
                         {
-                            con.Files.Remove(file);
+                            inner(child.FolderPath);
                         }
-                        con.BmsFolders.Remove(folder);
+
+                        foreach (var folder in root.Folders)
+                        {
+                            foreach (var file in folder.Files)
+                            {
+                                con.Files.Remove(file);
+                            }
+                            con.BmsFolders.Remove(folder);
+                        }
+                        con.RootDirectories.Remove(root);
                     }
-                    con.RootDirectories.Remove(root);
                 }
                 con.SaveChanges();
             }

@@ -155,7 +155,7 @@ namespace BmsManager
                 while (SystemProvider.FileSystem.File.Exists(toPath))
                 {
                     i++;
-                    toPath = $"{SysPath.GetFileNameWithoutExtension(dst)} ({i}){SysPath.GetExtension(dst)}";
+                    toPath = PathUtil.Combine(folder.Path, $"{SysPath.GetFileNameWithoutExtension(dst)} ({i}){SysPath.GetExtension(dst)}");
                 }
 
                 SystemProvider.FileSystem.File.Move(diffFile.Path, toPath);

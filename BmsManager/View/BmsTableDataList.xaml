@@ -21,7 +21,7 @@
         </Grid.RowDefinitions>
         <CheckBox Grid.Row="0" Grid.Column="0" Content="未入手譜面のみ表示" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
         <Button Grid.Row="0" Grid.Column="1" Margin="5" Content="差分一括DL" Command="{Binding DownloadAll}"/>
-        <DataGrid Grid.Row="1" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding TableDatas}" AutoGenerateColumns="False">
+        <DataGrid Grid.Row="1" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding TableDatas}" AutoGenerateColumns="False" IsReadOnly="True">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Setter Property="ContextMenu">
