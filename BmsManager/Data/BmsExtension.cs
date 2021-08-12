@@ -26,6 +26,17 @@ namespace BmsManager.Data
 
             using (var con = new BmsManagerContext())
             {
+                if (!con.Extensions.Any())
+                {
+                    con.Extensions.AddRange(new[]
+                    {
+                        new BmsExtension { Extension = "bms" },
+                        new BmsExtension { Extension = "bme" },
+                        new BmsExtension { Extension = "bml" },
+                        new BmsExtension { Extension = "pms" },
+                    });
+                }
+
                 extensions = con.Extensions.AsNoTracking().Select(e => e.Extension).ToArray();
             }
             return extensions;
