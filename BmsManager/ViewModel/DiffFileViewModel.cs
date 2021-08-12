@@ -62,9 +62,10 @@ namespace BmsManager
 
         public void Remove()
         {
-            // ディレクトリが空になるなら消す
+            // ディレクトリが空になるなら消す (txtは無視する)
             var dir = SysPath.GetDirectoryName(Path);
-            if (!SystemProvider.FileSystem.Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories).Any())
+            if (!SystemProvider.FileSystem.Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories)
+                .Where(f => !f.EndsWith("txt")).Any())
                 SystemProvider.FileSystem.Directory.Delete(dir, true);
 
             vm.DiffFiles.Remove(this);
