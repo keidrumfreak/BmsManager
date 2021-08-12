@@ -2,7 +2,7 @@
 
 ## BMSファイルの管理支援ツール
 
-* 動作環境 : .NET5 ( https://dotnet.microsoft.com/download/dotnet/5.0 )
+* 動作環境 : .NET5.0 ( https://dotnet.microsoft.com/download/dotnet/5.0 )
 * 推奨環境 : SQLServer2019導入
   * SQLiteを使用したモードもあるので、SQLServer導入しなくても動きます。その場合接続文字列は無視して、exeと同階層に ```bms.db``` を作成します
   * ```appsettings.json``` の ```databaseKind``` の値を ```SQLite``` に変更してください
