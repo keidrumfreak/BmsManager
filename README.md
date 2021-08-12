@@ -15,6 +15,11 @@
 * 現在対応しているBMS拡張子はbms,bme,bml,pmsです
 * 不具合、要望等はissue、または twitter ( https://twitter.com/keidrumfreak )までお願いします
 
+## 導入方法
+
+* zipを解凍してください (レジストリの編集等は行っていません)
+* SQLServerを使用する場合、かつ新規導入の場合はDDL_SQLServer.sqlを実行してください
+
 ## 使い方
 
 * BMSManager.exeをダブルクリックして起動してください
