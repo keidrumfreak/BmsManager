@@ -77,11 +77,11 @@ namespace BmsManager
         {
             if (string.IsNullOrEmpty(SearchText))
             {
-                FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(root.Folders.Select(f => new BmsFolderViewModel(f, FileList)).ToArray());
+                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(root.Folders.ToArray());
                 return;
             }
 
-            FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(inner(root).ToArray());
+            FileList.Folders = new ObservableCollection<BmsFolderViewModel>(inner(root).ToArray());
 
             IEnumerable<BmsFolderViewModel> inner(RootDirectoryViewModel root)
             {
@@ -89,9 +89,9 @@ namespace BmsManager
                 {
                     var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
                     if (!files.Any()) continue;
-                    var vm = new BmsFolderViewModel(folder, FileList);
-                    vm.Files = new ObservableCollection<BmsFileViewModel>(files.Select(f => new BmsFileViewModel(f, FileList)).ToArray());
-                    yield return vm;
+                    //var vm = new BmsFolderViewModel(folder, FileList);
+                    folder.Files = new ObservableCollection<BmsFileViewModel>(files.ToArray());
+                    yield return folder;
                 }
             }
         }
@@ -116,10 +116,10 @@ namespace BmsManager
 
         private void autoRename()
         {
-            if (FileList.BmsFolders == null)
+            if (FileList.Folders == null)
                 return;
 
-            foreach (var folder in FileList.BmsFolders)
+            foreach (var folder in FileList.Folders)
             {
                 try
                 {

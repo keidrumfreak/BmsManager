@@ -16,7 +16,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DataGrid Margin="5" Grid.Row="0" ItemsSource="{Binding BmsFolders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False">
+        <DataGrid Margin="5" Grid.Row="0" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Setter Property="ContextMenu">

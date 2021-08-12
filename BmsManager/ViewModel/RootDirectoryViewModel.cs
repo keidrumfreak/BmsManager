@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager
 {
-    class RootDirectoryViewModel : ViewModelBase
+    class RootDirectoryViewModel : ViewModelBase, IBmsFolderParentViewModel
     {
         ObservableCollection<RootDirectoryViewModel> children;
         public ObservableCollection<RootDirectoryViewModel> Children
@@ -22,8 +22,8 @@ namespace BmsManager
 
         public string FolderPath => root.Path;
 
-        IEnumerable<BmsFolder> folders;
-        public IEnumerable<BmsFolder> Folders
+        ObservableCollection<BmsFolderViewModel> folders;
+        public ObservableCollection<BmsFolderViewModel> Folders
         {
             get { return folders; }
             set { SetProperty(ref folders, value); }
@@ -53,7 +53,7 @@ namespace BmsManager
                 Children = null;
             else
                 Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
-            Folders = root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
+            Folders = new ObservableCollection<BmsFolderViewModel>(root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).Select(f => new BmsFolderViewModel(f, this)).ToArray());
         }
 
         private void loadFromFileSystem(object input)
@@ -63,7 +63,7 @@ namespace BmsManager
                 Children = null;
             else
                 Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
-            Folders = root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
+            Folders = new ObservableCollection<BmsFolderViewModel>(root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).Select(f => new BmsFolderViewModel(f, this)).ToArray());
         }
 
         private void loadFromDB(object input)
@@ -73,7 +73,7 @@ namespace BmsManager
                 Children = null;
             else
                 Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
-            Folders = root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
+            Folders = new ObservableCollection<BmsFolderViewModel>(root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).Select(f => new BmsFolderViewModel(f, this)).ToArray());
         }
 
         public void Register()

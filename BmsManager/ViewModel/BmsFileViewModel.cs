@@ -24,9 +24,9 @@ namespace BmsManager
 
         BmsFile file;
 
-        BmsFileListViewModel parent;
+        BmsFolderViewModel parent;
 
-        public BmsFileViewModel(BmsFile file, BmsFileListViewModel parent)
+        public BmsFileViewModel(BmsFile file, BmsFolderViewModel parent)
         {
             this.parent = parent;
             this.file = file;
@@ -48,7 +48,7 @@ namespace BmsManager
                         con.SaveChanges();
                     }
                 }
-                parent.BmsFiles.Remove(this);
+                parent.Files.Remove(this);
             }
             catch (Exception ex)
             {

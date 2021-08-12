@@ -10,7 +10,7 @@ using CommonLib.Wpf;
 
 namespace BmsManager
 {
-    class BmsFileListViewModel : ViewModelBase
+    class BmsFileListViewModel : ViewModelBase, IBmsFolderParentViewModel
     {
         ObservableCollection<BmsFileViewModel> bmsFiles;
         public ObservableCollection<BmsFileViewModel> BmsFiles
@@ -19,11 +19,11 @@ namespace BmsManager
             set { SetProperty(ref bmsFiles, value); }
         }
 
-        ObservableCollection<BmsFolderViewModel> bmsFolders;
-        public ObservableCollection<BmsFolderViewModel> BmsFolders
+        ObservableCollection<BmsFolderViewModel> folders;
+        public ObservableCollection<BmsFolderViewModel> Folders
         {
-            get { return bmsFolders; }
-            set { SetProperty(ref bmsFolders, value); searchFile(); }
+            get { return folders; }
+            set { SetProperty(ref folders, value); searchFile(); }
         }
 
         BmsFolderViewModel selectedBmsFolder;
@@ -51,7 +51,7 @@ namespace BmsManager
 
         private void searchFile()
         {
-            if (BmsFolders == null)
+            if (Folders == null)
             {
                 BmsFiles = null;
             }
@@ -61,7 +61,7 @@ namespace BmsManager
             }
             else
             {
-                BmsFiles = new ObservableCollection<BmsFileViewModel>(BmsFolders.SelectMany(f => f.Files).ToArray());
+                BmsFiles = new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files).ToArray());
             }
         }
     }

@@ -51,7 +51,7 @@ namespace BmsManager
                     }
                 }
 
-                FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(inner(fol).ToArray());
+                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(inner(fol).ToArray());
             }
         }
 
@@ -78,7 +78,7 @@ namespace BmsManager
                     }
                 }
 
-                FileList.BmsFolders = new ObservableCollection<BmsFolderViewModel>(inner(fol).ToArray());
+                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(inner(fol).ToArray());
             }
         }
     }

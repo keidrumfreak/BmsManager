@@ -16,6 +16,11 @@ using SysPath = System.IO.Path;
 
 namespace BmsManager
 {
+    interface IBmsFolderParentViewModel
+    {
+        ObservableCollection<BmsFolderViewModel> Folders { get; set; }
+    }
+
     class BmsFolderViewModel : ViewModelBase
     {
         public string Title => folder.Title;
@@ -40,15 +45,15 @@ namespace BmsManager
         public IEnumerable<BmsFolder> Duplicates { get; set; }
 
         BmsFolder folder;
-        BmsFileListViewModel parent;
+        IBmsFolderParentViewModel parent;
         DiffFileViewModel diffFile;
 
-        public BmsFolderViewModel(BmsFolder folder, BmsFileListViewModel parent, DiffFileViewModel diffFile = null)
+        public BmsFolderViewModel(BmsFolder folder, IBmsFolderParentViewModel parent, DiffFileViewModel diffFile = null)
         {
             this.parent = parent;
             this.folder = folder;
             this.diffFile = diffFile;
-            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray());
+            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, this)).ToArray());
             OpenFolder = CreateCommand(input => openFolder());
             Merge = CreateCommand(input => Task.Run(() => merge()), input => Duplicates?.Any() ?? false);
             Install = CreateCommand(input => install(), input => diffFile != null);
@@ -65,7 +70,7 @@ namespace BmsManager
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Artist));
             OnPropertyChanged(nameof(Path));
-            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, parent)).ToArray());
+            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, this)).ToArray());
         }
 
         private void openFolder()
@@ -121,7 +126,7 @@ namespace BmsManager
                     }
                 }
 
-                Application.Current.Dispatcher.Invoke(() => parent.BmsFolders.Remove(parent.BmsFolders.FirstOrDefault(f => f.Path == fol.Path)));
+                Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(parent.Folders.FirstOrDefault(f => f.Path == fol.Path)));
 
                 try
                 {
@@ -142,7 +147,7 @@ namespace BmsManager
             folder.Root.LoadFromFileSystem();
             folder.Root.Register();
 
-            Application.Current.Dispatcher.Invoke(() => parent.BmsFolders.Remove(this));
+            Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(this));
         }
 
         private void install()
