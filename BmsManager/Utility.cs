@@ -91,6 +91,12 @@ namespace BmsManager
 
             return ret.Trim(' ', '/', '(');
         }
+
+        public static string ToFileNameString(string name)
+        {
+            return name.Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
+                .Replace("\"", "”").Replace('?', '？').Replace('|', '｜');
+        }
     }
 
     class BmsManagerException : Exception

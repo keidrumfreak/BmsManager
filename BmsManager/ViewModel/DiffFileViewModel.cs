@@ -44,11 +44,17 @@ namespace BmsManager
         {
             using (var con = new BmsManagerContext())
             {
-                Folders = con.BmsFolders
+                var title = Utility.ToFileNameString(text.Title);
+                var artist = Utility.ToFileNameString(text.Artist);
+                var query = con.BmsFolders
                     .Include(f => f.Files)
-                    .AsNoTracking()
-                    .Where(f => text.Title.Contains(f.Title) && text.Artist.Contains(f.Artist))
-                    .ToArray();
+                    .AsNoTracking();
+                if (!string.IsNullOrEmpty(title) && title.Length > 2)
+                    query = query.Where(f => f.Title.Length > 1);
+                if (!string.IsNullOrEmpty(artist) && artist.Length > 2)
+                    query = query.Where(f => f.Artist.Length > 1);
+                query = query.Where(f => title.Contains(f.Title) && artist.Contains(f.Artist));
+                Folders = query.ToArray();
             }
         }
 

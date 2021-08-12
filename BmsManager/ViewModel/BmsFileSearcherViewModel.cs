@@ -85,13 +85,16 @@ namespace BmsManager
 
             IEnumerable<BmsFolderViewModel> inner(RootDirectoryViewModel root)
             {
-                foreach (var folder in root.Folders)
+                if (root.Folders != null)
                 {
-                    var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
-                    if (!files.Any()) continue;
-                    //var vm = new BmsFolderViewModel(folder, FileList);
-                    folder.Files = new ObservableCollection<BmsFileViewModel>(files.ToArray());
-                    yield return folder;
+                    foreach (var folder in root.Folders)
+                    {
+                        var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
+                        if (!files.Any()) continue;
+                        //var vm = new BmsFolderViewModel(folder, FileList);
+                        folder.Files = new ObservableCollection<BmsFileViewModel>(files.ToArray());
+                        yield return folder;
+                    }
                 }
             }
         }

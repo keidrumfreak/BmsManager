@@ -47,8 +47,7 @@ namespace BmsManager.Data
 
         public void Rename(string name)
         {
-            var rename = name.Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
-                .Replace("\"", "”").Replace('?', '？').Replace('|', '｜');
+            var rename = Utility.ToFileNameString(name);
 
             var dst = PathUtil.Combine(SysPath.GetDirectoryName(Path), rename);
             var tmp = PathUtil.Combine(SysPath.GetDirectoryName(Path), "tmp");
