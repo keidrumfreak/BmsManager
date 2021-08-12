@@ -154,6 +154,14 @@ namespace BmsManager
         {
             try
             {
+                if (folder.Files.Any(f => f.MD5 == diffFile.MD5))
+                {
+                    // 重複する場合はインストールしない
+                    File.Delete(diffFile.Path);
+                    Application.Current.Dispatcher.Invoke(() => diffFile.Remove());
+                    return;
+                }
+
                 var toPath = PathUtil.Combine(folder.Path, SysPath.GetFileName(diffFile.Path));
                 var i = 1;
                 var dst = toPath;

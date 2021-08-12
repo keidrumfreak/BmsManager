@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Windows.Input;
 using BmsManager.Data;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
+using SysPath = System.IO.Path;
 
 namespace BmsManager
 {
@@ -60,6 +62,11 @@ namespace BmsManager
 
         public void Remove()
         {
+            // ディレクトリが空になるなら消す
+            var dir = SysPath.GetDirectoryName(Path);
+            if (!SystemProvider.FileSystem.Directory.EnumerateFiles(dir, "*.*", SearchOption.AllDirectories).Any())
+                SystemProvider.FileSystem.Directory.Delete(dir, true);
+
             vm.DiffFiles.Remove(this);
         }
     }
