@@ -11,8 +11,7 @@ namespace BmsManager.Data
     [Table("BmsFile")]
     class BmsFile
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public int FolderID { get; set; }

@@ -13,8 +13,7 @@ namespace BmsManager.Data
     [Table("RootDirectory")]
     class RootDirectory
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         public string Path { get; set; }
