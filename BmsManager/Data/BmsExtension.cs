@@ -35,6 +35,7 @@ namespace BmsManager.Data
                         new BmsExtension { Extension = "bml" },
                         new BmsExtension { Extension = "pms" },
                     });
+                    con.SaveChanges();
                 }
 
                 extensions = con.Extensions.AsNoTracking().Select(e => e.Extension).ToArray();
