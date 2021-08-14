@@ -12,25 +12,37 @@ namespace BmsManager
 {
     class BmsFileListViewModel : ViewModelBase, IBmsFolderParentViewModel
     {
-        ObservableCollection<BmsFileViewModel> bmsFiles;
         public ObservableCollection<BmsFileViewModel> BmsFiles
         {
-            get { return bmsFiles; }
-            set { SetProperty(ref bmsFiles, value); }
+            get
+            {
+                if (Folders == null)
+                {
+                    return null;
+                }
+                else if (Narrowed && SelectedBmsFolder != null)
+                {
+                    return SelectedBmsFolder.Files;
+                }
+                else
+                {
+                    return new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files).ToArray());
+                }
+            }
         }
 
         ObservableCollection<BmsFolderViewModel> folders;
         public ObservableCollection<BmsFolderViewModel> Folders
         {
             get { return folders; }
-            set { SetProperty(ref folders, value); searchFile(); }
+            set { SetProperty(ref folders, value); OnPropertyChanged(nameof(BmsFiles)); }
         }
 
         BmsFolderViewModel selectedBmsFolder;
         public BmsFolderViewModel SelectedBmsFolder
         {
             get { return selectedBmsFolder; }
-            set { SetProperty(ref selectedBmsFolder, value); searchFile(); }
+            set { SetProperty(ref selectedBmsFolder, value); OnPropertyChanged(nameof(BmsFiles)); }
         }
 
         BmsFileViewModel selectedBmsFile;
@@ -46,23 +58,23 @@ namespace BmsManager
 
         public BmsFileListViewModel()
         {
-            ChangeNarrowing = CreateCommand(input => searchFile());
+            ChangeNarrowing = CreateCommand(input => OnPropertyChanged(nameof(BmsFiles)));
         }
 
         private void searchFile()
         {
-            if (Folders == null)
-            {
-                BmsFiles = null;
-            }
-            else if (Narrowed && SelectedBmsFolder != null)
-            {
-                BmsFiles = new ObservableCollection<BmsFileViewModel>(SelectedBmsFolder.Files);
-            }
-            else
-            {
-                BmsFiles = new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files).ToArray());
-            }
+            //if (Folders == null)
+            //{
+            //    BmsFiles = null;
+            //}
+            //else if (Narrowed && SelectedBmsFolder != null)
+            //{
+            //    BmsFiles = new ObservableCollection<BmsFileViewModel>(SelectedBmsFolder.Files);
+            //}
+            //else
+            //{
+            //    BmsFiles = new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files).ToArray());
+            //}
         }
     }
 }
