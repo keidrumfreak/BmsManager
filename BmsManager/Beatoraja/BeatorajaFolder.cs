@@ -11,6 +11,9 @@ namespace BmsManager.Beatoraja
     [Table("folder")]
     class BeatorajaFolder
     {
+        [NotMapped]
+        public static readonly string RootCrc = "e2977170";
+
         [Column("path"), Key]
         public string Path { get; set; }
 

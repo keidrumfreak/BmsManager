@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BmsManager;
+using CommonLib.TestHelper.UnitTesting;
+using System.Text;
 
 namespace BmsManager.Tests
 {
@@ -42,6 +44,17 @@ namespace BmsManager.Tests
         public void RemoveObjerTest(string name, string result)
         {
             Assert.AreEqual(result, Utility.RemoveObjer(name));
+        }
+
+        [DataTestMethod]
+        [DataRow(@"F:\bms\BMS", "6168b62b")]
+        [DataRow(@"F:\bms\Events\2005", "318c1bfa")]
+        [DataRow(@"F:\bms\Events\2005\Rise in Revolt", "d853334b")]
+        [DataRow(@"F:\bms\Events\2005\‘æŒÜ‰ñ©Ì–³–¼BMSì‰Æ‚ª•¨\‚·I", "d1fe61ba")]
+        public void GetCrc32(string path, string crc)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Utility.GetCrc32(path).AreEqual(crc);
         }
     }
 }
