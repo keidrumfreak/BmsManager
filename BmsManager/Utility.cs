@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace BmsManager
 {
-    class Utility
+    static class Utility
     {
         public static string GetCrc32(string path)
         {
@@ -28,6 +28,16 @@ namespace BmsManager
                 }
             }
             return (~crc).ToString("x");
+        }
+
+        /// <summary>
+        /// 日時をミリ秒に変換します
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static int ToUnixMilliseconds(this DateTime dt)
+        {
+            return (int)((dt - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds / 1000);
         }
 
         public static string GetMd5Hash(string path)
