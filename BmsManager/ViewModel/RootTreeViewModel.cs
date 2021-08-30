@@ -47,7 +47,11 @@ namespace BmsManager
                     return;
                 }
 
-                var root = new RootDirectory { Path = TargetDirectory };
+                var root = new RootDirectory
+                {
+                    Path = TargetDirectory,
+                    FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(TargetDirectory).LastWriteTimeUtc
+                };
                 var parent = con.RootDirectories.FirstOrDefault(r => r.Path == Path.GetDirectoryName(TargetDirectory));
                 if (parent != default)
                     root.ParentRootID = parent.ID;

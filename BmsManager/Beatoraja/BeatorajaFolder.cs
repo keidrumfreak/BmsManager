@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BmsManager.Data;
+using SysPath = System.IO.Path;
 
 namespace BmsManager.Beatoraja
 {
@@ -43,5 +45,21 @@ namespace BmsManager.Beatoraja
 
         [Column("adddate")]
         public int AddDate { get; set; }
+
+        public BeatorajaFolder(BmsFolder folder)
+        {
+            Title = SysPath.GetFileName(folder.Path);
+            Path = folder.Path;
+            Parent = Utility.GetCrc32(folder.Root.Path);
+            Date = folder.FolderUpdateDate.ToUnixMilliseconds();
+        }
+
+        public BeatorajaFolder(RootDirectory root)
+        {
+            Title = SysPath.GetFileName(root.Path);
+            Path = root.Path;
+            Parent = root.Parent == null ? RootCrc : Utility.GetCrc32(root.Parent.Path);
+            Date = root.FolderUpdateDate.ToUnixMilliseconds();
+        }
     }
 }

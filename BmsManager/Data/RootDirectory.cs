@@ -20,6 +20,8 @@ namespace BmsManager.Data
 
         public int? ParentRootID { get; set; }
 
+        public DateTime FolderUpdateDate { get; set; }
+
         [InverseProperty(nameof(BmsFolder.Root))]
         public virtual ICollection<BmsFolder> Folders { get; set; }
 
@@ -34,6 +36,7 @@ namespace BmsManager.Data
             var extentions = BmsExtension.GetExtensions();
             Folders = new List<BmsFolder>();
             Children = new List<RootDirectory>();
+            FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(Path).LastWriteTimeUtc;
             foreach (var folder in SystemProvider.FileSystem.Directory.EnumerateDirectories(Path))
             {
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
@@ -44,13 +47,18 @@ namespace BmsManager.Data
                     {
                         Path = folder,
                         Files = files.Select(file => new BmsFile(file)).ToList(),
+                        FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc
                     };
                     fol.SetMetaFromName();
                     Folders.Add(fol);
                 }
                 else
                 {
-                    var child = new RootDirectory { Path = folder };
+                    var child = new RootDirectory
+                    {
+                        Path = folder,
+                        FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc
+                    };
                     child.LoadFromFileSystem();
                     if (child.Children.Any() || child.Folders.Any())
                         Children.Add(child);
