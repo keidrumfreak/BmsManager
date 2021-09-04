@@ -1,3 +1,6 @@
 [submodule "DotNetLibraries"]
 	path = DotNetLibraries
 	url = https://github.com/keidrumfreak/DotNetLibraries.git
+[submodule "BmsParser"]
+	path = BmsParser
+	url = https://github.com/keidrumfreak/BmsParser.git
