@@ -27,6 +27,8 @@ namespace BmsManager.Data
 
         public string Title { get; set; }
 
+        public bool HasText { get; set; }
+
         public DateTime FolderUpdateDate { get; set; }
 
         [InverseProperty(nameof(BmsFile.Folder))]

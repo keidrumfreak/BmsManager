@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BmsParser\BmsParser\BmsParser.csproj" />
     <ProjectReference Include="..\DotNetLibraries\CommonLib\CommonLib.Wpf\CommonLib.Wpf.csproj" />
     <ProjectReference Include="..\DotNetLibraries\CommonLib\CommonLib\CommonLib.csproj" />
   </ItemGroup>

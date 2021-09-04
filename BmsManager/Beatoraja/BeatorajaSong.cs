@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BmsParser;
+using CrSha256 = System.Security.Cryptography.SHA256;
 
 namespace BmsManager.Beatoraja
 {
@@ -97,5 +99,93 @@ namespace BmsManager.Beatoraja
 
         [Column("length")]
         public int Length { get; set; }
+
+        public BeatorajaSong() { }
+
+        public BeatorajaSong(BmsModel model, bool containsText = false)
+        {
+            Title = model.Title;
+            SubTitle = model.SubTitle;
+            Genre = model.Genre;
+            Artist = model.Artist;
+            SubArtist = model.SubArtist;
+            Path = model.Path;
+            MD5 = model.MD5;
+            Sha256 = model.Sha256;
+            Banner = model.Banner;
+            StageFile = model.StageFile;
+            BackBmp = model.BackBmp;
+            Preview = model.Preview;
+            if (int.TryParse(model.PlayLevel, out var level))
+            {
+                Level = level;
+            }
+            Mode = model.Mode.ID;
+            Difficulty = (int)model.Difficulty;
+            Judge = model.JudgeRank;
+            MinBpm = (int)model.MinBpm;
+            MaxBpm = (int)model.MaxBpm;
+            Features feature = 0;
+            foreach (var tl in model.TimeLines)
+            {
+                if (tl.StopTime > 0)
+                {
+                    feature |= Features.StopSequence;
+                }
+                if (tl.Scroll != 1.0)
+                {
+                    feature |= Features.Scroll;
+                }
+                foreach (var i in Enumerable.Range(0, model.Mode.Key))
+                {
+                    if (tl.GetNote(i) is LongNote ln)
+                    {
+                        feature |= ln.Type switch
+                        {
+                            LNMode.Undefined => Features.UndefinedLN,
+                            LNMode.LongNote => Features.LongNote,
+                            LNMode.ChargeNote => Features.ChargeNote,
+                            LNMode.HellChargeNote => Features.HellChargeNote,
+                            _ => throw new NotSupportedException()
+                        };
+                    }
+                    if (tl.GetNote(i) is MineNote)
+                        feature |= Features.MineNote;
+                }
+            }
+            Length = model.LastTime;
+            Notes = model.GetTotalNotes();
+            feature |= (model.Random?.Length ?? 0) > 0 ? Features.Random : 0;
+            var content = containsText ? Contents.Text : 0;
+            content |= (model.BgaList?.Length ?? 0) > 0 ? Contents.Bga : 0;
+            content |= Length >= 30000 && (model.WavList?.Length ?? 0) <= (Length / (50 * 1000)) + 3 ? Contents.NoKeySound : 0;
+            Feature = (int)feature;
+            Content = (int)content;
+            var sha256 = CrSha256.Create();
+            var arr = sha256.ComputeHash(Encoding.GetEncoding("shift-jis").GetBytes(model.ToChartString()));
+            ChartHash = BitConverter.ToString(arr).ToLower().Replace("-", "");
+        }
+
+        [Flags]
+        enum Features
+        {
+            UndefinedLN = 1,
+            MineNote = 2,
+            Random = 4,
+            LongNote = 8,
+            ChargeNote = 16,
+            HellChargeNote = 32,
+            StopSequence = 64,
+            Scroll = 128
+        }
+
+        [Flags]
+        enum Contents
+        {
+            Text = 1,
+            Bga = 2,
+            Preview = 4,
+            NoKeySound = 128
+        }
     }
 }
