@@ -149,6 +149,7 @@ CREATE TABLE [dbo].[RootDirectory](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[Path] [nvarchar](max) NOT NULL,
 	[ParentRootID] [int] NULL,
+	[FolderUpdateDate] [datetime] NOT NULL,
  CONSTRAINT [PK_Root] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC
@@ -173,6 +174,8 @@ CREATE TABLE [dbo].[BmsFolder](
 	[Path] [nvarchar](max) NOT NULL,
 	[Artist] [nvarchar](max) NULL,
 	[Title] [nvarchar](max) NULL,
+	[HasText] [bit] NOT NULL,
+	[FolderUpdateDate] [datetime] NOT NULL,
  CONSTRAINT [PK_Folder] PRIMARY KEY CLUSTERED 
 (
 	[ID] ASC

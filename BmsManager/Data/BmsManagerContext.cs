@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BmsManager.Beatoraja;
+using BmsParser;
 using CommonLib.IO;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +56,26 @@ namespace BmsManager.Data
                         Cache = SqliteCacheMode.Shared
                     }.ToString());
                     break;
+            }
+        }
+
+        public void ExportToBeatoragja(string songDB, string songInfoDB)
+        {
+            var decoder = new BmsDecoder();
+            var files = Files.Include(f => f.Folder).AsNoTracking().ToArray()
+                .Select(f => (decoder.Decode(f.Path), f.Folder.HasText));
+            using (var con = new BeatorajaSongdataContext(songDB))
+            {
+                con.Folders.AddRange(RootDirectories.Include(r => r.Parent).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r)));
+                con.Folders.AddRange(BmsFolders.Include(f => f.Root).AsNoTracking().ToArray().Select(f => new BeatorajaFolder(f)));
+                con.Songs.AddRange(files.Select(f => new BeatorajaSong(f.Item1, f.HasText)));
+                con.SaveChanges();
+            }
+
+            using (var con = new BeatorajaSonginfoContext(songInfoDB))
+            {
+                con.Informations.AddRange(files.Select(f => new BeatorajaInformation(f.Item1)));
+                con.SaveChanges();
             }
         }
     }

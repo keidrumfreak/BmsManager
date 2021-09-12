@@ -17,6 +17,7 @@ namespace BmsManager.Beatoraja
         public BeatorajaSonginfoContext(string path)
         {
             this.path = path;
+            Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

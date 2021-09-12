@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BmsManager"
         mc:Ignorable="d"
-        Title="MainWindow" Height="200" Width="300">
+        Title="MainWindow" Height="250" Width="300">
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
@@ -15,6 +15,7 @@
             <Button Margin="10" Content="難易度表管理" Command="{Binding ShowTableManager}"/>
             <Button Margin="10" Content="重複ファイルチェック" Command="{Binding ShowDuplicateChecker}"/>
             <Button Margin="10" Content="差分登録" Command="{Binding ShowDiffRegister}"/>
+            <Button Margin="10" Content="エクスポート" Command="{Binding ShowExporter}"/>
         </StackPanel>
     </Grid>
 </Window>
