@@ -24,7 +24,7 @@ namespace BmsManager.Beatoraja
         {
             optionsBuilder.UseSqlite(new SqliteConnectionStringBuilder
             {
-                Mode = SqliteOpenMode.ReadWrite,
+                Mode = SqliteOpenMode.ReadWriteCreate,
                 DataSource = path,
                 Cache = SqliteCacheMode.Shared
             }.ToString());

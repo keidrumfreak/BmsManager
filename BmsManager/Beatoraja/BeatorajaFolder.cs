@@ -46,6 +46,8 @@ namespace BmsManager.Beatoraja
         [Column("adddate")]
         public int AddDate { get; set; }
 
+        public BeatorajaFolder() { }
+
         public BeatorajaFolder(BmsFolder folder)
         {
             Title = SysPath.GetFileName(folder.Path);

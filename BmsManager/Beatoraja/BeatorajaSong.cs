@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BmsParser;
 using CrSha256 = System.Security.Cryptography.SHA256;
+using SysPath = System.IO.Path;
 
 namespace BmsManager.Beatoraja
 {
@@ -16,7 +17,7 @@ namespace BmsManager.Beatoraja
         [Column("md5"), Required]
         public string MD5 { get; set; }
 
-        [Column("sha256", Order = 0), Key]
+        [Column("sha256")]
         public string Sha256 { get; set; }
 
         [Column("title")]
@@ -37,7 +38,7 @@ namespace BmsManager.Beatoraja
         [Column("tag")]
         public string Tag { get; set; }
 
-        [Column("path", Order = 1), Key]
+        [Column("path")]
         public string Path { get; set; }
 
         [Column("folder")]
@@ -164,6 +165,25 @@ namespace BmsManager.Beatoraja
             var sha256 = CrSha256.Create();
             var arr = sha256.ComputeHash(Encoding.GetEncoding("shift-jis").GetBytes(model.ToChartString()));
             ChartHash = BitConverter.ToString(arr).ToLower().Replace("-", "");
+            Folder = Utility.GetCrc32(SysPath.GetDirectoryName(model.Path));
+            Parent = Utility.GetCrc32(SysPath.GetDirectoryName(SysPath.GetDirectoryName(model.Path)));
+
+            if (Difficulty == 0)
+            {
+                var title = (Title + SubTitle).ToUpper();
+                Difficulty = title.Contains("BEGINNER") ? 1
+                    : title.Contains("NORMAL") ? 2
+                    : title.Contains("HYPER") ? 3
+                    : title.Contains("ANOTHER") ? 4
+                    : title.Contains("INSANE") ? 5
+                    : Notes < 250 ? 1
+                    : Notes < 600 ? 2
+                    : Notes < 1000 ? 3
+                    : Notes < 2000 ? 4
+                    : 5;
+            }
+
+            // TODO: preview
         }
 
         [Flags]

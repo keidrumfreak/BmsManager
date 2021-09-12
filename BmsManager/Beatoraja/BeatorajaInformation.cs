@@ -51,6 +51,8 @@ namespace BmsManager.Beatoraja
         [Column("lanenotes")]
         public string LaneNotes { get; set; }
 
+        public BeatorajaInformation() { }
+
         public BeatorajaInformation(BmsModel model)
         {
             Sha256 = model.Sha256;
@@ -107,11 +109,13 @@ namespace BmsManager.Beatoraja
                 }
             }
 
-            var bd = model.GetTotalNotes() / data.Length / 4;
+            var arrCnt = data.GetUpperBound(0) + 1;
+
+            var bd = model.GetTotalNotes() / arrCnt / 4;
             Density = 0;
             PeakDensity = 0;
             var count = 0;
-            foreach (var i in Enumerable.Range(0, data.Length))
+            foreach (var i in Enumerable.Range(0, arrCnt))
             {
                 var notes = data[i, 0] + data[i, 1] + data[i, 2] + data[i, 3] + data[i, 4] + data[i, 5];
                 PeakDensity = PeakDensity > notes ? PeakDensity : notes;
@@ -122,9 +126,9 @@ namespace BmsManager.Beatoraja
                 }
             }
 
-            var d = 5 < (data.Length - borderpos - 1) ? 5 : (data.Length - borderpos - 1);
+            var d = 5 < (arrCnt - borderpos - 1) ? 5 : (arrCnt - borderpos - 1);
             EndDensity = 0;
-            for (var i = borderpos; i < data.Length - d; i++)
+            for (var i = borderpos; i < arrCnt - d; i++)
             {
                 var notes = 0;
                 foreach (var j in Enumerable.Range(0, d))
@@ -136,7 +140,7 @@ namespace BmsManager.Beatoraja
 
             var distribution = new StringBuilder();
             distribution.Append('#');
-            foreach (var i in Enumerable.Range(0, data.Length))
+            foreach (var i in Enumerable.Range(0, arrCnt))
             {
                 foreach (var j in Enumerable.Range(0, 7))
                 {

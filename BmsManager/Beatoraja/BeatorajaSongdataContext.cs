@@ -26,10 +26,16 @@ namespace BmsManager.Beatoraja
         {
             optionsBuilder.UseSqlite(new SqliteConnectionStringBuilder
             {
-                Mode = SqliteOpenMode.ReadWrite,
+                Mode = SqliteOpenMode.ReadWriteCreate,
                 DataSource = path,
                 Cache = SqliteCacheMode.Shared
             }.ToString());
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<BeatorajaSong>()
+                .HasKey(s => new { s.Sha256, s.Path });
         }
     }
 }
