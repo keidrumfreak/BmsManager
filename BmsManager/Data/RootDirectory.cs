@@ -5,13 +5,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 using ClsPath = System.IO.Path;
 
 namespace BmsManager.Data
 {
     [Table("RootDirectory")]
-    class RootDirectory
+    class RootDirectory : BindableBase
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
@@ -31,7 +32,15 @@ namespace BmsManager.Data
         [InverseProperty(nameof(Parent))]
         public virtual ICollection<RootDirectory> Children { get; set; }
 
-        public void LoadFromFileSystem()
+        string loadingPath;
+        [NotMapped]
+        public string LoadingPath
+        {
+            get { return loadingPath; }
+            set { SetProperty(ref loadingPath, value); }
+        }
+
+        public void LoadFromFileSystem(RootDirectory root = null)
         {
             var extentions = BmsExtension.GetExtensions();
             Folders = new List<BmsFolder>();
@@ -39,6 +48,7 @@ namespace BmsManager.Data
             FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(Path).LastWriteTimeUtc;
             foreach (var folder in SystemProvider.FileSystem.Directory.EnumerateDirectories(Path))
             {
+                (root ?? this).LoadingPath = folder;
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
                     .Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()));
                 if (files.Any())
@@ -47,7 +57,8 @@ namespace BmsManager.Data
                     {
                         Path = folder,
                         Files = files.Select(file => new BmsFile(file)).ToList(),
-                        FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc
+                        FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc,
+                        HasText = SystemProvider.FileSystem.Directory.EnumerateFiles(folder, "*.txt").Any()
                     };
                     fol.SetMetaFromName();
                     Folders.Add(fol);
@@ -59,11 +70,12 @@ namespace BmsManager.Data
                         Path = folder,
                         FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc
                     };
-                    child.LoadFromFileSystem();
+                    child.LoadFromFileSystem(root ?? this);
                     if (child.Children.Any() || child.Folders.Any())
                         Children.Add(child);
                 }
             }
+            LoadingPath = string.Empty;
         }
 
         public static IEnumerable<RootDirectory> LoadTopRoot()

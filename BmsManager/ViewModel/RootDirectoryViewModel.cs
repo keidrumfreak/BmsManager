@@ -29,6 +29,8 @@ namespace BmsManager
             set { SetProperty(ref folders, value); }
         }
 
+        public string LoadingPath => root.LoadingPath;
+
         public ICommand LoadFromFileSystem { get; set; }
 
         public ICommand LoadFromDB { get; set; }
@@ -45,7 +47,7 @@ namespace BmsManager
             this.vm = vm;
             this.parent = parent;
 
-            LoadFromFileSystem = CreateCommand(loadFromFileSystem);
+            LoadFromFileSystem = CreateCommand(input => Task.Run(() => loadFromFileSystem()));
             LoadFromDB = CreateCommand(loadFromDB);
             Remove = CreateCommand(input => remove());
 
@@ -54,9 +56,11 @@ namespace BmsManager
             else
                 Children = new ObservableCollection<RootDirectoryViewModel>(root.Children.Select(m => new RootDirectoryViewModel(m, vm, this)).ToArray());
             Folders = new ObservableCollection<BmsFolderViewModel>(root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).Select(f => new BmsFolderViewModel(f, this)).ToArray());
+
+            AddModelObserver(root);
         }
 
-        private void loadFromFileSystem(object input)
+        private void loadFromFileSystem()
         {
             root.LoadFromFileSystem();
             if (root.Children == null)
