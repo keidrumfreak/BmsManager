@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BmsManager.Data;
 using BmsParser;
 using CrSha256 = System.Security.Cryptography.SHA256;
 using SysPath = System.IO.Path;
@@ -103,70 +104,36 @@ namespace BmsManager.Beatoraja
 
         public BeatorajaSong() { }
 
-        public BeatorajaSong(BmsModel model, bool containsText = false)
+        public BeatorajaSong(BmsFile file)
         {
-            Title = model.Title;
-            SubTitle = model.SubTitle;
-            Genre = model.Genre;
-            Artist = model.Artist;
-            SubArtist = model.SubArtist;
-            Path = model.Path;
-            MD5 = model.MD5;
-            Sha256 = model.Sha256;
-            Banner = model.Banner;
-            StageFile = model.StageFile;
-            BackBmp = model.BackBmp;
-            Preview = model.Preview;
-            if (int.TryParse(model.PlayLevel, out var level))
+            Title = file.Title;
+            SubTitle = file.SubTitle;
+            Genre = file.Genre;
+            Artist = file.Artist;
+            SubArtist = file.SubArtist;
+            Path = file.Path;
+            MD5 = file.MD5;
+            Sha256 = file.Sha256;
+            Banner = file.Banner;
+            StageFile = file.StageFile;
+            BackBmp = file.BackBmp;
+            Preview = file.Preview;
+            if (int.TryParse(file.PlayLevel, out var level))
             {
                 Level = level;
             }
-            Mode = model.Mode.ID;
-            Difficulty = (int)model.Difficulty;
-            Judge = model.JudgeRank;
-            MinBpm = (int)model.MinBpm;
-            MaxBpm = (int)model.MaxBpm;
-            Features feature = 0;
-            foreach (var tl in model.TimeLines)
-            {
-                if (tl.StopTime > 0)
-                {
-                    feature |= Features.StopSequence;
-                }
-                if (tl.Scroll != 1.0)
-                {
-                    feature |= Features.Scroll;
-                }
-                foreach (var i in Enumerable.Range(0, model.Mode.Key))
-                {
-                    if (tl.GetNote(i) is LongNote ln)
-                    {
-                        feature |= ln.Type switch
-                        {
-                            LNMode.Undefined => Features.UndefinedLN,
-                            LNMode.LongNote => Features.LongNote,
-                            LNMode.ChargeNote => Features.ChargeNote,
-                            LNMode.HellChargeNote => Features.HellChargeNote,
-                            _ => throw new NotSupportedException()
-                        };
-                    }
-                    if (tl.GetNote(i) is MineNote)
-                        feature |= Features.MineNote;
-                }
-            }
-            Length = model.LastTime;
-            Notes = model.GetTotalNotes();
-            feature |= (model.Random?.Length ?? 0) > 0 ? Features.Random : 0;
-            var content = containsText ? Contents.Text : 0;
-            content |= (model.BgaList?.Length ?? 0) > 0 ? Contents.Bga : 0;
-            content |= Length >= 30000 && (model.WavList?.Length ?? 0) <= (Length / (50 * 1000)) + 3 ? Contents.NoKeySound : 0;
-            Feature = (int)feature;
-            Content = (int)content;
-            var sha256 = CrSha256.Create();
-            var arr = sha256.ComputeHash(Encoding.GetEncoding("shift-jis").GetBytes(model.ToChartString()));
-            ChartHash = BitConverter.ToString(arr).ToLower().Replace("-", "");
-            Folder = Utility.GetCrc32(SysPath.GetDirectoryName(model.Path));
-            Parent = Utility.GetCrc32(SysPath.GetDirectoryName(SysPath.GetDirectoryName(model.Path)));
+            Mode = file.Mode;
+            Difficulty = (int)file.Difficulty;
+            Judge = file.Judge;
+            MinBpm = (int)file.MinBpm;
+            MaxBpm = (int)file.MaxBpm;
+            Length = file.Length;
+            Notes = file.Notes;
+            Feature = file.Feature;
+            Content = file.Content;
+            ChartHash = file.ChartHash;
+            Folder = Utility.GetCrc32(file.Folder.Path);
+            Parent = Utility.GetCrc32(file.Folder.Root.Path);
 
             if (Difficulty == 0)
             {
@@ -183,29 +150,12 @@ namespace BmsManager.Beatoraja
                     : 5;
             }
 
-            // TODO: preview
+            if (string.IsNullOrEmpty(Preview))
+            {
+                Preview = file.Folder.Preview;
+            }
         }
 
-        [Flags]
-        enum Features
-        {
-            UndefinedLN = 1,
-            MineNote = 2,
-            Random = 4,
-            LongNote = 8,
-            ChargeNote = 16,
-            HellChargeNote = 32,
-            StopSequence = 64,
-            Scroll = 128
-        }
 
-        [Flags]
-        enum Contents
-        {
-            Text = 1,
-            Bga = 2,
-            Preview = 4,
-            NoKeySound = 128
-        }
     }
 }

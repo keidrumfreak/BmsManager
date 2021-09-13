@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BmsManager.Beatoraja;
 using BmsParser;
 using CommonLib.IO;
@@ -62,19 +58,19 @@ namespace BmsManager.Data
         public void ExportToBeatoragja(string songDB, string songInfoDB)
         {
             var decoder = new BmsDecoder();
-            var files = Files.Include(f => f.Folder).AsNoTracking().ToArray()
-                .Select(f => (decoder.Decode(f.Path), f.Folder.HasText));
+            var files = Files.Include(f => f.Folder)
+                .ThenInclude(f => f.Root).AsNoTracking().ToArray();
             using (var con = new BeatorajaSongdataContext(songDB))
             {
                 con.Folders.AddRange(RootDirectories.Include(r => r.Parent).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r)));
                 con.Folders.AddRange(BmsFolders.Include(f => f.Root).AsNoTracking().ToArray().Select(f => new BeatorajaFolder(f)));
-                con.Songs.AddRange(files.Select(f => new BeatorajaSong(f.Item1, f.HasText)));
+                con.Songs.AddRange(files.Select(f => new BeatorajaSong(f)));
                 con.SaveChanges();
             }
 
             using (var con = new BeatorajaSonginfoContext(songInfoDB))
             {
-                con.Informations.AddRange(files.Select(f => new BeatorajaInformation(f.Item1)));
+                con.Informations.AddRange(files.Select(f => new BeatorajaInformation(f)));
                 con.SaveChanges();
             }
         }
