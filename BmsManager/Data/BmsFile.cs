@@ -97,6 +97,9 @@ namespace BmsManager.Data
         public BmsFile(string path)
         {
             var model = new BmsDecoder().Decode(path);
+            if (model == null)
+                return;
+
             Path = path;
             Title = model.Title;
             SubTitle = model.SubTitle;

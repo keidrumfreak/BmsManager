@@ -47,7 +47,25 @@ namespace BmsManager.Data
             Folders = new List<BmsFolder>();
             Children = new List<RootDirectory>();
             FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(Path).LastWriteTimeUtc;
-            foreach (var folder in SystemProvider.FileSystem.Directory.EnumerateDirectories(Path))
+            var folders = SystemProvider.FileSystem.Directory.EnumerateDirectories(Path).ToArray();
+
+            using (var con = new BmsManagerContext())
+            {
+                var ent = con.RootDirectories
+                    .Include(r => r.Folders)
+                    .Include(r => r.Children).AsNoTracking().FirstOrDefault(r => r.Path == Path);
+                if (ent != default)
+                {
+                    var delFol = ent.Folders?.Where(f => !folders.Contains(f.Path));
+                    if (delFol?.Any() ?? false)
+                        con.BmsFolders.RemoveRange(delFol);
+                    var delRoot = ent.Children?.Where(f => !folders.Contains(f.Path));
+                    if (delRoot?.Any() ?? false)
+                        con.RootDirectories.RemoveRange(delRoot);
+                }
+            }
+
+            foreach (var folder in folders)
             {
                 (root ?? this).LoadingPath = folder;
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
@@ -55,33 +73,77 @@ namespace BmsManager.Data
                     extentions.Concat(new[] { "txt" }).Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())
                     || f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
 
-                var bmsFiles = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()));
+                var bmsFiles = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())).ToArray();
                 if (bmsFiles.Any())
                 {
-                    var fol = new BmsFolder
-                    {
-                        Path = folder,
-                        Files = bmsFiles.Select(file => new BmsFile(file)).ToList(),
-                        FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc,
-                        HasText = files.Any(f => f.ToLower().EndsWith("txt"))
-                    };
+                    var bmsEntities = bmsFiles.Select(file => new BmsFile(file)).Where(f => !string.IsNullOrEmpty(f.Path)).ToList();
+                    var meta = bmsEntities.GetMetaFromFiles();
 
-                    var previews = files.Where(f => f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
-                    if (previews.Any())
+                    BmsFolder bmsFolder;
+                    using (var con = new BmsManagerContext())
                     {
-                        fol.Preview = previews.First();
+                        bmsFolder = con.BmsFolders
+                            .Include(f => f.Files).FirstOrDefault(f => f.Path == folder);
+                        var isNew = bmsFolder == default;
+                        if (isNew)
+                            bmsFolder = new BmsFolder();
+                        bmsFolder.Path = folder;
+                        bmsFolder.Title = meta.Title;
+                        bmsFolder.Artist = meta.Artist;
+                        bmsFolder.FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc;
+                        bmsFolder.HasText = files.Any(f => f.ToLower().EndsWith("txt"));
+                        var previews = files.Where(f => f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
+                        if (previews.Any())
+                        {
+                            bmsFolder.Preview = previews.First();
+                        }
+                        bmsFolder.RootID = ID;
+
+                        if (isNew)
+                            con.BmsFolders.Add(bmsFolder);
+
+                        if (!(bmsFolder.Files?.Any() ?? false))
+                        {
+                            bmsFolder.Files = bmsEntities;
+                        }
+                        else
+                        {
+                            con.Files.RemoveRange(bmsFolder.Files.Where(f => !bmsFiles.Contains(f.Path)));
+                            foreach (var file in bmsEntities)
+                            {
+                                var ent = bmsFolder.Files.FirstOrDefault(f => f.Path == file.Path);
+                                if (ent == default)
+                                {
+                                    bmsFolder.Files.Add(file);
+                                    continue;
+                                }
+                                if (ent.MD5 == file.MD5)
+                                    continue;
+                                bmsFolder.Files.Remove(ent);
+                                bmsFolder.Files.Add(file);
+                            }
+                        }
+                        con.SaveChanges();
                     }
 
-                    fol.SetMetaFromFileMeta();
-                    Folders.Add(fol);
+                    Folders.Add(bmsFolder);
                 }
                 else
                 {
-                    var child = new RootDirectory
+                    RootDirectory child;
+                    using (var con = new BmsManagerContext())
                     {
-                        Path = folder,
-                        FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc
-                    };
+                        child = con.RootDirectories.FirstOrDefault(r => r.Path == folder);
+                        var isNew = child == default;
+                        if (isNew)
+                            child = new RootDirectory();
+                        child.Path = folder;
+                        child.FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc;
+                        child.ParentRootID = ID;
+                        if (isNew)
+                            con.RootDirectories.Add(child);
+                        con.SaveChanges();
+                    }
                     child.LoadFromFileSystem(root ?? this);
                     if (child.Children.Any() || child.Folders.Any())
                         Children.Add(child);
