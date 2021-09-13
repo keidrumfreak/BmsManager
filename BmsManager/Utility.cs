@@ -54,11 +54,14 @@ namespace BmsManager
                         {
                             var index = ret.LastIndexOf('(');
                             index = index == -1 ? ret.LastIndexOf('（') : index;
-                            ret = ret.GetRange(0, index);
+                            if (index != -1)
+                                ret = ret.GetRange(0, index);
                         }
                         if (ret.Count(c => c == '[') != ret.Count(c => c == ']'))
                         {
-                            ret = ret.GetRange(0, ret.LastIndexOf('['));
+                            var index = ret.LastIndexOf('[');
+                            if (index != -1)
+                                ret = ret.GetRange(0, index);
                         }
 
                         var str = new string(ret.ToArray()).TrimEnd(' ', '/');

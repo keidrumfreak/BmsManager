@@ -72,7 +72,7 @@ namespace BmsManager.Tests
 
         private string intersect(IEnumerable<string> source)
         {
-            foreach (var skip in Enumerable.Range(0, source.Count()))
+            foreach (var skip in Enumerable.Range(0, source.Count() + 1))
             {
                 var arr = skip == 0 ? source : source.Take(skip - 1).Concat(source.Skip(skip));
                 var ret = new List<char>();
