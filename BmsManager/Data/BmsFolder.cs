@@ -104,6 +104,48 @@ namespace BmsManager.Data
             }
         }
 
+        public void SetMetaFromFileMeta()
+        {
+            Title = intersect(Files.Select(f => f.Title));
+            Artist = intersect(Files.Select(f => f.Artist));
+        }
+
+        private string intersect(IEnumerable<string> source)
+        {
+            foreach (var skip in Enumerable.Range(0, source.Count()))
+            {
+                var arr = skip == 0 ? source : source.Take(skip - 1).Concat(source.Skip(skip));
+                var ret = new List<char>();
+                var tmp = arr.Take(1).First();
+                foreach (var i in Enumerable.Range(0, arr.Min(s => s.Length)))
+                {
+                    if (arr.Skip(1).All(s => tmp[i] == s[i]))
+                        ret.Add(tmp[i]);
+                    else
+                        break;
+                }
+                if (ret.Any())
+                {
+                    if (ret.Count(c => c == '(') != ret.Count(c => c == ')'))
+                    {
+                        ret = ret.GetRange(0, ret.LastIndexOf('('));
+                    }
+                    if (ret.Count(c => c == '[') != ret.Count(c => c == ']'))
+                    {
+                        ret = ret.GetRange(0, ret.LastIndexOf('['));
+                    }
+
+                    var str = new string(ret.ToArray()).TrimEnd(' ', '/');
+                    if (ret.Count(c => c == '-') % 2 != 0)
+                    {
+                        str = str.TrimEnd('-');
+                    }
+                    return str.TrimEnd(' ', '/');
+                }
+            }
+            return string.Empty;
+        }
+
         public void SetMetaFromName()
         {
             var name = SysPath.GetFileName(Path);

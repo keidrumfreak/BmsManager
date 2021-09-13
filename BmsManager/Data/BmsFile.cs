@@ -59,7 +59,9 @@ namespace BmsManager.Data
 
         public int Feature { get; set; }
 
-        public int Content { get; set; }
+        public bool HasBga { get; set; }
+
+        public bool IsNoKeySound { get; set; }
 
         public string ChartHash { get; set; }
 
@@ -143,11 +145,9 @@ namespace BmsManager.Data
             Length = model.LastTime;
             Notes = model.GetTotalNotes();
             feature |= (model.Random?.Length ?? 0) > 0 ? Features.Random : 0;
-            var content = Folder.HasText ? Contents.Text : 0;
-            content |= (model.BgaList?.Length ?? 0) > 0 ? Contents.Bga : 0;
-            content |= Length >= 30000 && (model.WavList?.Length ?? 0) <= (Length / (50 * 1000)) + 3 ? Contents.NoKeySound : 0;
+            HasBga = (model.BgaList?.Length ?? 0) > 0;
+            IsNoKeySound = Length >= 30000 && (model.WavList?.Length ?? 0) <= (Length / (50 * 1000)) + 3;
             Feature = (int)feature;
-            Content = (int)content;
             var sha256 = CrSha256.Create();
             var arr = sha256.ComputeHash(Encoding.GetEncoding("shift-jis").GetBytes(model.ToChartString()));
             ChartHash = BitConverter.ToString(arr).ToLower().Replace("-", "");
@@ -319,23 +319,5 @@ namespace BmsManager.Data
             StopSequence = 64,
             Scroll = 128
         }
-
-        [Flags]
-        enum Contents
-        {
-            Text = 1,
-            Bga = 2,
-            Preview = 4,
-            NoKeySound = 128
-        }
-
-        //public BmsFile(string path)
-        //{
-        //    Path = path;
-        //    var file = new BmsText(path);
-        //    Artist = file.Artist;
-        //    Title = file.Title;
-        //    MD5 = Utility.GetMd5Hash(path);
-        //}
     }
 }

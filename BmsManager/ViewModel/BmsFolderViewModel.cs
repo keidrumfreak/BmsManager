@@ -81,7 +81,7 @@ namespace BmsManager
         public void merge()
         {
             var roots = Duplicates.Select(d => d.Root).ToArray();
-            var ext = BmsExtension.GetExtensions();
+            var ext = Settings.Default.Extentions;
 
             foreach (var fol in Duplicates)
             {

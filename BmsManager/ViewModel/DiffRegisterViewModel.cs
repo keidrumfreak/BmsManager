@@ -72,7 +72,7 @@ namespace BmsManager
             if (string.IsNullOrEmpty(TargetPath))
                 return;
 
-            var extentions = BmsExtension.GetExtensions();
+            var extentions = Settings.Default.Extentions;
             var files = SystemProvider.FileSystem.Directory.EnumerateFiles(TargetPath, "*.*", SearchOption.AllDirectories)
                 .Where(f => extentions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant())).ToArray();
             DiffFiles = new ObservableCollection<DiffFileViewModel>(files.Select(f => new DiffFileViewModel(f, this)));

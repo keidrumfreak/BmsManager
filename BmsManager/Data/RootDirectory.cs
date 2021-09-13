@@ -42,7 +42,8 @@ namespace BmsManager.Data
 
         public void LoadFromFileSystem(RootDirectory root = null)
         {
-            var extentions = BmsExtension.GetExtensions();
+            var previewExt = new[] { "wav", "ogg", "mp3", "flac" };
+            var extentions = Settings.Default.Extentions;
             Folders = new List<BmsFolder>();
             Children = new List<RootDirectory>();
             FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(Path).LastWriteTimeUtc;
@@ -60,7 +61,16 @@ namespace BmsManager.Data
                         FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc,
                         HasText = SystemProvider.FileSystem.Directory.EnumerateFiles(folder, "*.txt").Any()
                     };
-                    fol.SetMetaFromName();
+
+                    var previews = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
+                        .Where(f => f.ToLower().StartsWith("preview")
+                        && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
+                    if (previews.Any())
+                    {
+                        fol.Preview = previews.First();
+                    }
+
+                    fol.SetMetaFromFileMeta();
                     Folders.Add(fol);
                 }
                 else

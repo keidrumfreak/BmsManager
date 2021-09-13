@@ -101,7 +101,7 @@ namespace BmsManager
 
         private string getTargetPath(string targetDir, string url)
         {
-            var exts = BmsExtension.GetExtensions();
+            var exts = Settings.Default.Extentions; ;
             if (exts.Any(e => url.EndsWith(e)) || url.EndsWith("zip") || url.EndsWith("rar"))
             {
                 return PathUtil.Combine(targetDir, Path.GetFileName(url));

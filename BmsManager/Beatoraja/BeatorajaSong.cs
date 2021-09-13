@@ -130,7 +130,12 @@ namespace BmsManager.Beatoraja
             Length = file.Length;
             Notes = file.Notes;
             Feature = file.Feature;
-            Content = file.Content;
+            var content = file.Folder.HasText ? Contents.Text : 0;
+            content |= file.HasBga ? Contents.Bga : 0;
+            content |= file.IsNoKeySound ? Contents.NoKeySound : 0;
+            content |= (!string.IsNullOrEmpty(file.Preview) || !string.IsNullOrEmpty(file.Folder.Preview)) ? Contents.Preview : 0;
+            Content = (int)content;
+
             ChartHash = file.ChartHash;
             Folder = Utility.GetCrc32(file.Folder.Path);
             Parent = Utility.GetCrc32(file.Folder.Root.Path);
@@ -157,5 +162,13 @@ namespace BmsManager.Beatoraja
         }
 
 
+        [Flags]
+        enum Contents
+        {
+            Text = 1,
+            Bga = 2,
+            Preview = 4,
+            NoKeySound = 128
+        }
     }
 }
