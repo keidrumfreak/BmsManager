@@ -51,20 +51,22 @@ namespace BmsManager.Data
             {
                 (root ?? this).LoadingPath = folder;
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
-                    .Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()));
-                if (files.Any())
+                    .Where(f =>
+                    extentions.Concat(new[] { "txt" }).Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())
+                    || f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
+
+                var bmsFiles = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()));
+                if (bmsFiles.Any())
                 {
                     var fol = new BmsFolder
                     {
                         Path = folder,
-                        Files = files.Select(file => new BmsFile(file)).ToList(),
+                        Files = bmsFiles.Select(file => new BmsFile(file)).ToList(),
                         FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc,
-                        HasText = SystemProvider.FileSystem.Directory.EnumerateFiles(folder, "*.txt").Any()
+                        HasText = files.Any(f => f.ToLower().EndsWith("txt"))
                     };
 
-                    var previews = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
-                        .Where(f => f.ToLower().StartsWith("preview")
-                        && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
+                    var previews = files.Where(f => f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
                     if (previews.Any())
                     {
                         fol.Preview = previews.First();
