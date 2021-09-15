@@ -40,8 +40,25 @@ namespace BmsManager.Data
             set { SetProperty(ref loadingPath, value); }
         }
 
-        public async Task LoadFromFileSystem(RootDirectory root = null)
+        public void LoadFromFileSystem(RootDirectory root = null, IEnumerable<RootDirectory> cacheRoots = null, IEnumerable<BmsFolder> cacheFolders = null, IEnumerable<BmsFile> cacheFiles = null, Task parentRegister = null, List<Task> allTasks = null)
         {
+            IEnumerable<RootDirectory> dbRoots = cacheRoots;
+            IEnumerable<BmsFolder> dbFolders = cacheFolders;
+            IEnumerable<BmsFile> dbFiles = cacheFiles;
+            if (root == null)
+            {
+                using (var con = new BmsManagerContext())
+                {
+                    dbRoots = con.RootDirectories.AsNoTracking().ToArray();
+                    dbFolders = con.BmsFolders.AsNoTracking().ToArray();
+                    dbFiles = con.Files.AsNoTracking().ToArray();
+                }
+                allTasks = new List<Task>();
+            }
+
+            var childrenRoots = dbRoots.Where(r => r.ParentRootID == ID);
+            var childrenFolders = dbFolders.Where(r => r.RootID == ID);
+
             var previewExt = new[] { "wav", "ogg", "mp3", "flac" };
             var extentions = Settings.Default.Extentions;
             Folders = new List<BmsFolder>();
@@ -49,117 +66,166 @@ namespace BmsManager.Data
             FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(Path).LastWriteTimeUtc;
             var folders = SystemProvider.FileSystem.Directory.EnumerateDirectories(Path).ToArray();
 
-            var clearnRoot = Task.Run(() =>
+            allTasks.Add(Task.Run(() =>
             {
                 using (var con = new BmsManagerContext())
                 {
-                    var ent = con.RootDirectories
-                        .Include(r => r.Folders)
-                        .Include(r => r.Children).AsNoTracking().FirstOrDefault(r => r.Path == Path);
-                    if (ent != default)
-                    {
-                        var delFol = ent.Folders?.Where(f => !folders.Contains(f.Path));
-                        if (delFol?.Any() ?? false)
-                            con.BmsFolders.RemoveRange(delFol);
-                        var delRoot = ent.Children?.Where(f => !folders.Contains(f.Path));
-                        if (delRoot?.Any() ?? false)
-                            con.RootDirectories.RemoveRange(delRoot);
-                    }
+                    var delRoot = childrenRoots.Where(r => !folders.Contains(r.Path));
+                    if (delRoot.Any())
+                        con.RootDirectories.RemoveRange();
+                    var delFol = childrenFolders.Where(r => !folders.Contains(r.Path));
+                    if (delFol.Any())
+                        con.BmsFolders.RemoveRange(delFol);
+                    if (delRoot.Any() || delFol.Any())
+                        con.SaveChanges();
                 }
-            });
+            }));
 
-            List<Task> tasks = new List<Task>();
             foreach (var folder in folders)
             {
                 (root ?? this).LoadingPath = folder;
+
+                var updateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc;
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
                     .Where(f =>
                     extentions.Concat(new[] { "txt" }).Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())
                     || f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
 
-                var bmsFiles = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())).ToArray();
+                var bmsFiles = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()))
+                    .Select(file => new BmsFile(file)).Where(f => !string.IsNullOrEmpty(f.Path)).ToArray();
                 if (bmsFiles.Any())
                 {
-                    var bmsEntities = bmsFiles.Select(file => new BmsFile(file)).Where(f => !string.IsNullOrEmpty(f.Path)).ToList();
-
-                    tasks.Add(Task.Run(() =>
+                    var bmsFolder = dbFolders.FirstOrDefault(f => f.Path == folder);
+                    var meta = bmsFiles.GetMetaFromFiles();
+                    var hasText = files.Any(f => f.ToLower().EndsWith("txt"));
+                    var preview = files.FirstOrDefault(f => f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
+                    if (bmsFolder == default)
                     {
-                        var meta = bmsEntities.GetMetaFromFiles();
-
-                        BmsFolder bmsFolder;
-                        using (var con = new BmsManagerContext())
+                        bmsFolder = new BmsFolder
                         {
-                            bmsFolder = con.BmsFolders
-                                .Include(f => f.Files).FirstOrDefault(f => f.Path == folder);
-                            var isNew = bmsFolder == default;
-                            if (isNew)
-                                bmsFolder = new BmsFolder();
-                            bmsFolder.Path = folder;
-                            bmsFolder.Title = meta.Title;
-                            bmsFolder.Artist = meta.Artist;
-                            bmsFolder.FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc;
-                            bmsFolder.HasText = files.Any(f => f.ToLower().EndsWith("txt"));
-                            var previews = files.Where(f => f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
-                            if (previews.Any())
-                            {
-                                bmsFolder.Preview = previews.First();
-                            }
-                            bmsFolder.RootID = ID;
-
-                            if (isNew)
-                                con.BmsFolders.Add(bmsFolder);
-
-                            if (!(bmsFolder.Files?.Any() ?? false))
-                            {
-                                bmsFolder.Files = bmsEntities;
-                            }
-                            else
-                            {
-                                con.Files.RemoveRange(bmsFolder.Files.Where(f => !bmsFiles.Contains(f.Path)));
-                                foreach (var file in bmsEntities)
-                                {
-                                    var ent = bmsFolder.Files.FirstOrDefault(f => f.Path == file.Path);
-                                    if (ent == default)
-                                    {
-                                        bmsFolder.Files.Add(file);
-                                        continue;
-                                    }
-                                    if (ent.MD5 == file.MD5)
-                                        continue;
-                                    bmsFolder.Files.Remove(ent);
-                                    bmsFolder.Files.Add(file);
-                                }
-                            }
+                            Path = folder,
+                            Title = meta.Title,
+                            Artist = meta.Artist,
+                            FolderUpdateDate = updateDate,
+                            HasText = hasText,
+                            Preview = preview,
+                            RootID = ID,
+                            Files = bmsFiles
+                        };
+                        // 新規Folder
+                        allTasks.Add(Task.Run(async () =>
+                        {
+                            if (parentRegister != null)
+                                await parentRegister;
+                            using var con = new BmsManagerContext();
+                            con.BmsFolders.Add(bmsFolder);
                             con.SaveChanges();
+                        }));
+                    }
+                    else
+                    {
+                        // 既存Folder
+                        if (bmsFolder.Title != meta.Title || bmsFolder.Artist != meta.Artist || bmsFolder.HasText != hasText || bmsFolder.Preview != preview
+                            || (bmsFolder.FolderUpdateDate.Date != updateDate.Date
+                            && bmsFolder.FolderUpdateDate.Hour != updateDate.Hour
+                            && bmsFolder.FolderUpdateDate.Minute != updateDate.Minute
+                            && bmsFolder.FolderUpdateDate.Second != updateDate.Second)) // 何故かミリ秒がずれるのでミリ秒以外で比較
+                        {
+                            allTasks.Add(Task.Run(() =>
+                            {
+                                using var con = new BmsManagerContext();
+                                var entity = con.BmsFolders.Find(bmsFolder.ID);
+                                entity.Title = meta.Title;
+                                entity.Artist = meta.Artist;
+                                entity.FolderUpdateDate = updateDate;
+                                entity.HasText = hasText;
+                                entity.Preview = preview;
+                                con.SaveChanges();
+                            }));
                         }
 
-                        Folders.Add(bmsFolder);
-                    }));
+                        var childrenFiles = dbFiles.Where(f => f.FolderID == bmsFolder.ID);
+                        var delete = Task.Run(() =>
+                        {
+                            using var con = new BmsManagerContext();
+                            var del = childrenFiles.Where(f => !bmsFiles.Any(e => f.MD5 == e.MD5));
+                            if (del.Any())
+                            {
+                                con.Files.RemoveRange(del);
+                                con.SaveChanges();
+                            }
+                        });
+
+                        allTasks.Add(Task.Run(async () =>
+                        {
+                            var upd = bmsFiles.Where(f => !childrenFiles.Any(e => e.MD5 == f.MD5));
+                            if (!upd.Any())
+                                return;
+                            if (parentRegister != null)
+                                await parentRegister;
+                            await delete;
+                            using var con = new BmsManagerContext();
+                            foreach (var file in upd)
+                            {
+                                file.FolderID = bmsFolder.ID;
+                                con.Files.Add(file);
+                            }
+                            con.SaveChanges();
+                        }));
+                    }
+
+                    bmsFolder.Files = bmsFiles;
+                    Folders.Add(bmsFolder);
                 }
                 else
                 {
-                    await clearnRoot;
-                    RootDirectory child;
-                    using (var con = new BmsManagerContext())
+                    Task registerer = null;
+                    RootDirectory child = dbRoots.FirstOrDefault(r => r.Path == folder);
+                    if (child == default)
                     {
-                        child = con.RootDirectories.FirstOrDefault(r => r.Path == folder);
-                        var isNew = child == default;
-                        if (isNew)
-                            child = new RootDirectory();
-                        child.Path = folder;
-                        child.FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc;
-                        child.ParentRootID = ID;
-                        if (isNew)
-                            con.RootDirectories.Add(child);
-                        con.SaveChanges();
+                        // 新規Root
+                        child = new RootDirectory
+                        {
+                            Path = folder,
+                            FolderUpdateDate = updateDate,
+                            ParentRootID = ID
+                        };
+                        registerer = Task.Run(async () =>
+                        {
+                            if (parentRegister != null)
+                                await parentRegister;
+                            using (var con = new BmsManagerContext())
+                            {
+                                con.RootDirectories.Add(child);
+                                await con.SaveChangesAsync();
+                            }
+                        });
                     }
-                    await child.LoadFromFileSystem(root ?? this);
+                    else
+                    {
+                        // 既存Root
+                        if (child.FolderUpdateDate != updateDate)
+                        {
+                            allTasks.Add(Task.Run(() =>
+                            {
+                                using (var con = new BmsManagerContext())
+                                {
+                                    con.RootDirectories.Find(child.ID).FolderUpdateDate = updateDate;
+                                    con.SaveChanges();
+                                }
+                            }));
+                        }
+                    }
+                    child.LoadFromFileSystem(root ?? this, dbRoots, dbFolders, dbFiles, registerer, allTasks);
                     if (child.Children.Any() || child.Folders.Any())
                         Children.Add(child);
                 }
             }
-            LoadingPath = "DB登録中...";
-            await Task.WhenAll(tasks.ToArray());
+            if (root == null)
+            {
+                LoadingPath = "DB登録中...";
+                Task.WhenAll(allTasks.ToArray()).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
             LoadingPath = string.Empty;
         }
 
