@@ -94,9 +94,11 @@ namespace BmsManager.Data
 
         public BmsFile() { }
 
-        public BmsFile(string path)
+        public BmsFile(string path) : this(path, SystemProvider.FileSystem.File.ReadAllLines(path, Encoding.GetEncoding("shift-jis"))) { }
+
+        public BmsFile(string path, string[] fileLines)
         {
-            var model = new BmsDecoder().Decode(path);
+            var model = new BmsDecoder().Decode(path, fileLines);
             if (model == null)
                 return;
 
@@ -160,8 +162,10 @@ namespace BmsManager.Data
             LS = model.GetTotalNotes(BmsModel.NoteType.LongScratch);
             Total = model.Total;
 
-            var laneNotes = new int[model.Mode.Key, 3];
-            var data = new int[model.LastTime / 1000 + 2, 7];
+            var laneNotes = new int[model.Mode.Key][];
+            foreach (var i in Enumerable.Range(0, laneNotes.Length)) { laneNotes[i] = new int[3]; }
+            var data = new int[model.LastTime / 1000 + 2][];
+            foreach (var i in Enumerable.Range(0, data.Length)) { data[i] = new int[7]; }
             var pos = 0;
             var border = (int)(model.GetTotalNotes() * (1.0 - 100.0 / model.Total));
             var borderpos = 0;
@@ -178,7 +182,7 @@ namespace BmsManager.Data
                     {
                         for (int index = tl.Time / 1000; index <= ln.Pair.Time / 1000; index++)
                         {
-                            data[index, model.Mode.IsScratchKey(i) ? 1 : 4]++;
+                            data[index][model.Mode.IsScratchKey(i) ? 1 : 4]++;
                         }
                         if (model.LNType == LNType.LongNote)
                             continue;
@@ -187,17 +191,17 @@ namespace BmsManager.Data
                     switch (note)
                     {
                         case NormalNote:
-                            data[tl.Time / 1000, model.Mode.IsScratchKey(i) ? 2 : 5]++;
-                            laneNotes[i, 0]++;
+                            data[tl.Time / 1000][model.Mode.IsScratchKey(i) ? 2 : 5]++;
+                            laneNotes[i][0]++;
                             break;
                         case LongNote:
-                            data[tl.Time / 1000, model.Mode.IsScratchKey(i) ? 0 : 3]++;
-                            data[tl.Time / 1000, model.Mode.IsScratchKey(i) ? 1 : 4]++;
-                            laneNotes[i, 1]++;
+                            data[tl.Time / 1000][model.Mode.IsScratchKey(i) ? 0 : 3]++;
+                            data[tl.Time / 1000][model.Mode.IsScratchKey(i) ? 1 : 4]++;
+                            laneNotes[i][1]++;
                             break;
                         case MineNote:
-                            data[tl.Time / 1000, 6]++;
-                            laneNotes[i, 2]++;
+                            data[tl.Time / 1000][6]++;
+                            laneNotes[i][2]++;
                             break;
                     }
 
@@ -207,15 +211,13 @@ namespace BmsManager.Data
                 }
             }
 
-            var arrCnt = data.GetUpperBound(0) + 1;
-
-            var bd = model.GetTotalNotes() / arrCnt / 4;
+            var bd = model.GetTotalNotes() / data.Length / 4;
             Density = 0;
             PeakDensity = 0;
             var count = 0;
-            foreach (var i in Enumerable.Range(0, arrCnt))
+            foreach (var i in Enumerable.Range(0, data.Length))
             {
-                var notes = data[i, 0] + data[i, 1] + data[i, 2] + data[i, 3] + data[i, 4] + data[i, 5];
+                var notes = data[i][0] + data[i][1] + data[i][2] + data[i][3] + data[i][4] + data[i][5];
                 PeakDensity = PeakDensity > notes ? PeakDensity : notes;
                 if (notes >= bd)
                 {
@@ -224,29 +226,29 @@ namespace BmsManager.Data
                 }
             }
 
-            var d = 5 < (arrCnt - borderpos - 1) ? 5 : (arrCnt - borderpos - 1);
+            var d = Math.Min(5, data.Length - borderpos - 1);
             EndDensity = 0;
-            for (var i = borderpos; i < arrCnt - d; i++)
+            for (var i = borderpos; i < data.Length - d; i++)
             {
                 var notes = 0;
                 foreach (var j in Enumerable.Range(0, d))
                 {
-                    notes += data[i + j, 0] + data[i + j, 1] + data[i + j, 2] + data[i + j, 3] + data[i + j, 4] + data[i + j, 5];
+                    notes += data[i + j][0] + data[i + j][1] + data[i + j][2] + data[i + j][3] + data[i + j][4] + data[i + j][5];
                 }
                 EndDensity = EndDensity > ((double)notes / d) ? EndDensity : ((double)notes / d);
             }
 
             var distribution = new StringBuilder();
             distribution.Append('#');
-            foreach (var i in Enumerable.Range(0, arrCnt))
+            foreach (var i in Enumerable.Range(0, data.Length))
             {
                 foreach (var j in Enumerable.Range(0, 7))
                 {
-                    var value = data[i, j] < 36 * 36 - 1 ? data[i, j] : 36 * 36 - 1;
+                    var value = Math.Min(data[i][j], 36 * 36 - 1);
                     var val1 = value / 36;
-                    distribution.Append(value >= 10 ? val1 - 10 + 'a' : val1 + '0');
+                    distribution.Append((char)(val1 >= 10 ? val1 - 10 + 'a' : val1 + '0'));
                     val1 = value % 36;
-                    distribution.Append(value >= 10 ? val1 - 10 + 'a' : val1 + '0');
+                    distribution.Append((char)(val1 >= 10 ? val1 - 10 + 'a' : val1 + '0'));
                 }
             }
             Distribution = distribution.ToString();
@@ -300,11 +302,11 @@ namespace BmsManager.Data
             var laneNote = new StringBuilder();
             foreach (var i in Enumerable.Range(0, laneNotes.GetUpperBound(0) + 1))
             {
-                laneNote.Append(laneNotes[i, 0])
+                laneNote.Append(laneNotes[i][0])
                     .Append(',')
-                    .Append(laneNotes[i, 1])
+                    .Append(laneNotes[i][1])
                     .Append(',')
-                    .Append(laneNotes[i, 2]);
+                    .Append(laneNotes[i][2]);
             }
             laneNote.Remove(laneNote.Length - 1, 1);
             LaneNotes = laneNote.ToString();
