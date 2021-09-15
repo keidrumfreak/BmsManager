@@ -69,16 +69,22 @@ namespace BmsManager.Data
 
             allTasks.Add(Task.Run(() =>
             {
-                using var con = new BmsManagerContext();
-                con.ChangeTracker.AutoDetectChangesEnabled = false;
                 var delRoot = childrenRoots.Where(r => !folders.Contains(r.Path));
                 if (delRoot.Any())
-                    con.RootDirectories.RemoveRange();
+                {
+                    using var con = new BmsManagerContext();
+                    con.ChangeTracker.AutoDetectChangesEnabled = false;
+                    con.RootDirectories.RemoveRange(delRoot);
+                    con.SaveChanges();
+                }
                 var delFol = childrenFolders.Where(r => !folders.Contains(r.Path));
                 if (delFol.Any())
+                {
+                    using var con = new BmsManagerContext();
+                    con.ChangeTracker.AutoDetectChangesEnabled = false;
                     con.BmsFolders.RemoveRange(delFol);
-                if (delRoot.Any() || delFol.Any())
                     con.SaveChanges();
+                }
             }));
 
             foreach (var folder in folders) // ディスク読込のため、並列化する意味は無い
@@ -157,11 +163,11 @@ namespace BmsManager.Data
                             var childrenFiles = dbFiles.Where(f => f.FolderID == bmsFolder.ID);
                             var delete = Task.Run(() =>
                             {
-                                using var con = new BmsManagerContext();
-                                con.ChangeTracker.AutoDetectChangesEnabled = false;
                                 var del = childrenFiles.Where(f => !bmsFiles.Any(e => f.MD5 == e.MD5));
                                 if (del.Any())
                                 {
+                                    using var con = new BmsManagerContext();
+                                    con.ChangeTracker.AutoDetectChangesEnabled = false;
                                     con.Files.RemoveRange(del);
                                     con.SaveChanges();
                                 }
@@ -244,7 +250,10 @@ namespace BmsManager.Data
                     else
                     {
                         // 既存Root
-                        if (child.FolderUpdateDate != updateDate)
+                        if (child.FolderUpdateDate.Date != updateDate.Date
+                            && child.FolderUpdateDate.Hour != updateDate.Hour
+                            && child.FolderUpdateDate.Minute != updateDate.Minute
+                            && child.FolderUpdateDate.Second != updateDate.Second) // 何故かミリ秒がずれるのでミリ秒以外で比較
                         {
                             allTasks.Add(Task.Run(() =>
                             {

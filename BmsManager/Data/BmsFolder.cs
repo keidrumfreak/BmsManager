@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLib.IO;
+using CommonLib.Linq;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SysPath = System.IO.Path;
@@ -208,9 +209,12 @@ VALUES
     ,[SpeedChange]
     ,[LaneNotes])
      VALUES");
-                        foreach (var (file, index) in Files.Select((f, i) => (f, i)))
+                        // TODO: .NET6 でChunkメソッドに変更する
+                        foreach (var fol in Files.Select((file, i) => (file, i)).GroupBy(x => x.i / 50).Select(g => g.Select(x => x.file)))
                         {
-                            sql.AppendLine(@$"(@{nameof(BmsFile.FolderID)}{index}
+                            foreach (var (file, index) in Files.Select((f, i) => (f, i)))
+                            {
+                                sql.AppendLine(@$"(@{nameof(BmsFile.FolderID)}{index}
     ,@{nameof(BmsFile.Path)}{index}
     ,@{nameof(BmsFile.Title)}{index}
     ,@{nameof(BmsFile.SubTitle)}{index}
@@ -247,47 +251,48 @@ VALUES
     ,@{nameof(BmsFile.MainBpm)}{index}
     ,@{nameof(BmsFile.SpeedChange)}{index}
     ,@{nameof(BmsFile.LaneNotes)}{index}),");
-                            cmd.AddParameter($"@{nameof(BmsFile.FolderID)}{index}", ID, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Path)}{index}", file.Path, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Title)}{index}", file.Title, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.SubTitle)}{index}", file.SubTitle, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Genre)}{index}", file.Genre, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Artist)}{index}", file.Artist, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.SubArtist)}{index}", file.SubArtist, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.MD5, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Preview)}{index}", file.Preview ?? (object)DBNull.Value, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.PlayLevel)}{index}", file.PlayLevel, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Mode)}{index}", file.Mode, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Difficulty)}{index}", file.Difficulty, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Judge)}{index}", file.Judge, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.MinBpm)}{index}", file.MinBpm, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.MaxBpm)}{index}", file.MaxBpm, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.Length)}{index}", file.Length, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Notes)}{index}", file.Notes, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Feature)}{index}", file.Feature, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.HasBga)}{index}", file.HasBga, DbType.Boolean);
-                            cmd.AddParameter($"@{nameof(BmsFile.IsNoKeySound)}{index}", file.IsNoKeySound, DbType.Boolean);
-                            cmd.AddParameter($"@{nameof(BmsFile.ChartHash)}{index}", file.ChartHash, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.N)}{index}", file.N, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.LN)}{index}", file.LN, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.S)}{index}", file.S, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.LS)}{index}", file.LS, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Total)}{index}", file.Total, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.Density)}{index}", file.Density, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.PeakDensity)}{index}", file.PeakDensity, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.EndDensity)}{index}", file.EndDensity, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.Distribution)}{index}", file.Distribution, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.MainBpm)}{index}", file.MainBpm, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.SpeedChange)}{index}", file.SpeedChange, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.LaneNotes)}{index}", file.LaneNotes, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.FolderID)}{index}", ID, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.Path)}{index}", file.Path, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Title)}{index}", file.Title, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.SubTitle)}{index}", file.SubTitle, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Genre)}{index}", file.Genre, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Artist)}{index}", file.Artist, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.SubArtist)}{index}", file.SubArtist, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.MD5, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Preview)}{index}", file.Preview ?? (object)DBNull.Value, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.PlayLevel)}{index}", file.PlayLevel, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Mode)}{index}", file.Mode, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.Difficulty)}{index}", file.Difficulty, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.Judge)}{index}", file.Judge, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.MinBpm)}{index}", file.MinBpm, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.MaxBpm)}{index}", file.MaxBpm, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.Length)}{index}", file.Length, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.Notes)}{index}", file.Notes, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.Feature)}{index}", file.Feature, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.HasBga)}{index}", file.HasBga, DbType.Boolean);
+                                cmd.AddParameter($"@{nameof(BmsFile.IsNoKeySound)}{index}", file.IsNoKeySound, DbType.Boolean);
+                                cmd.AddParameter($"@{nameof(BmsFile.ChartHash)}{index}", file.ChartHash, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.N)}{index}", file.N, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.LN)}{index}", file.LN, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.S)}{index}", file.S, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.LS)}{index}", file.LS, DbType.Int32);
+                                cmd.AddParameter($"@{nameof(BmsFile.Total)}{index}", file.Total, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.Density)}{index}", file.Density, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.PeakDensity)}{index}", file.PeakDensity, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.EndDensity)}{index}", file.EndDensity, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.Distribution)}{index}", file.Distribution, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.MainBpm)}{index}", file.MainBpm, DbType.Double);
+                                cmd.AddParameter($"@{nameof(BmsFile.SpeedChange)}{index}", file.SpeedChange, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.LaneNotes)}{index}", file.LaneNotes, DbType.String);
+                            }
+                            sql.Remove(sql.Length - 3, 3);
+                            cmd.CommandText = sql.ToString();
+                            cmd.ExecuteNonQuery();
                         }
-                        sql.Remove(sql.Length - 3, 3);
-                        cmd.CommandText = sql.ToString();
-                        cmd.ExecuteNonQuery();
                     }
                 }
             }
