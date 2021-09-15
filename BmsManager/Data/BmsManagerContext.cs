@@ -64,15 +64,63 @@ namespace BmsManager.Data
                 .ThenInclude(f => f.Root).AsNoTracking().ToArray();
             using (var con = new BeatorajaSongdataContext(songDB))
             {
-                con.Folders.AddRange(RootDirectories.Include(r => r.Parent).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r)));
-                con.Folders.AddRange(BmsFolders.Include(f => f.Root).AsNoTracking().ToArray().Select(f => new BeatorajaFolder(f)));
-                con.Songs.AddRange(files.Select(f => new BeatorajaSong(f)));
+                var mnFol = BmsFolders.Include(r => r.Root).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r))
+                    .Concat(RootDirectories.Include(r => r.Parent).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r)));
+                var boFol = con.Folders.ToArray();
+                var delFol = boFol.AsParallel().Where(bo => !mnFol.Any(mn => mn.Path == bo.Path));
+                if (delFol.Any())
+                    con.Folders.RemoveRange(delFol);
+                foreach (var folder in mnFol)
+                {
+                    var entity = boFol.FirstOrDefault(bo => bo.Path == folder.Path);
+                    if (entity == default)
+                    {
+                        con.Folders.Add(entity);
+                    }
+                    else
+                    {
+                        if (entity.Date != folder.Date)
+                        {
+                            entity.Date = folder.Date;
+                        }
+                    }
+                }
+
+                var songs = con.Songs.ToArray();
+                var delSong = songs.AsParallel().Where(s => !files.Any(f => f.Path == s.Path));
+                if (delSong.Any())
+                    con.Songs.RemoveRange(delSong);
+
+                foreach (var file in files)
+                {
+                    var song = songs.FirstOrDefault(s => s.Path == file.Path);
+                    if (song == default)
+                    {
+                        con.Songs.Add(song);
+                    }
+                    else
+                    {
+                        // 同一なら変更無しのはず
+                        if (file.Sha256 != song.Sha256)
+                        {
+                            // UPDATEが面倒なのでDELETE-INSERT
+                            con.Songs.Remove(song);
+                            con.Songs.Add(new BeatorajaSong(file));
+                        }
+                    }
+                }
                 con.SaveChanges();
             }
 
             using (var con = new BeatorajaSonginfoContext(songInfoDB))
             {
-                con.Informations.AddRange(files.Select(f => new BeatorajaInformation(f)));
+                con.ChangeTracker.AutoDetectChangesEnabled = false;
+                var distinctFile = files.GroupBy(f => f.Sha256).Select(f => f.First());
+                var infos = con.Informations.AsNoTracking().ToArray();
+                foreach (var file in distinctFile.AsParallel().Where(f => !infos.Any(i => f.Sha256 == i.Sha256)))
+                {
+                    con.Informations.Add(new BeatorajaInformation(file));
+                }
                 con.SaveChanges();
             }
         }

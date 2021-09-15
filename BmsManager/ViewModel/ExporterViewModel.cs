@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
 using CommonLib.IO;
@@ -27,6 +28,7 @@ namespace BmsManager
         {
             using var con = new BmsManagerContext();
             con.ExportToBeatoragja(PathUtil.Combine(BeatorajaFolder, "songdata.db"), PathUtil.Combine(BeatorajaFolder, "songinfo.db"));
+            MessageBox.Show("完了しました");
         }
     }
 }
