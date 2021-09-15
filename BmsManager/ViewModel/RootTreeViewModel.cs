@@ -57,9 +57,9 @@ namespace BmsManager
                     root.ParentRootID = parent.ID;
                 con.RootDirectories.Add(root);
                 con.SaveChanges();
-            }
 
-            RootTree = new ObservableCollection<RootDirectoryViewModel>(RootDirectory.LoadTopRoot().Select(r => new RootDirectoryViewModel(r, this, null)));
+                RootTree.Add(new RootDirectoryViewModel(root, this, null));
+            }
         }
     }
 }
