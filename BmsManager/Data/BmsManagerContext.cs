@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Data;
+using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using BmsManager.Beatoraja;
@@ -73,6 +75,18 @@ namespace BmsManager.Data
                 con.Informations.AddRange(files.Select(f => new BeatorajaInformation(f)));
                 con.SaveChanges();
             }
+        }
+    }
+
+    static class DBExtensions
+    {
+        public static void AddParameter(this DbCommand cmd, string name, object value, DbType type)
+        {
+            var param = cmd.CreateParameter();
+            param.ParameterName = name;
+            param.Value = value;
+            param.DbType = type;
+            cmd.Parameters.Add(param);
         }
     }
 }

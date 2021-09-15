@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,7 +41,6 @@ namespace BmsManager.Data
             set { SetProperty(ref loadingPath, value); }
         }
 
-        static object dbLock = new object();
         public void LoadFromFileSystem(RootDirectory root = null, IEnumerable<RootDirectory> cacheRoots = null, IEnumerable<BmsFolder> cacheFolders = null, IEnumerable<BmsFile> cacheFiles = null, Task parentRegister = null, List<Task> allTasks = null)
         {
             IEnumerable<RootDirectory> dbRoots = cacheRoots;
@@ -125,10 +125,11 @@ namespace BmsManager.Data
                                 if (parentRegister != null)
                                     await parentRegister;
                                 bmsFolder.RootID = ID;
-                                using var con = new BmsManagerContext();
-                                con.ChangeTracker.AutoDetectChangesEnabled = false;
-                                con.BmsFolders.Add(bmsFolder);
-                                con.SaveChanges();
+                                //using var con = new BmsManagerContext();
+                                //con.ChangeTracker.AutoDetectChangesEnabled = false;
+                                //con.BmsFolders.Add(bmsFolder);
+                                //con.SaveChanges();
+                                bmsFolder.Register();
                             });
                         }
                         else
@@ -188,8 +189,8 @@ namespace BmsManager.Data
                         if ((root ?? this).LoadingPath.StartsWith("DB登録"))
                             (root ?? this).LoadingPath = $"DB登録完了:{folder}";
 
-                        bmsFolder.Files = bmsFiles;
-                        Folders.Add(bmsFolder);
+                        //bmsFolder.Files = bmsFiles;
+                        //Folders.Add(bmsFolder);
                     }));
                 }
                 else
@@ -206,13 +207,38 @@ namespace BmsManager.Data
                         };
                         rootRegisterer = Task.Run(async () =>
                         {
-                            if (parentRegister != null)
-                                await parentRegister;
-                            child.ParentRootID = ID;
-                            using var con = new BmsManagerContext();
-                            con.ChangeTracker.AutoDetectChangesEnabled = false;
-                            con.RootDirectories.Add(child);
-                            con.SaveChanges();
+                            try
+                            {
+                                if (parentRegister != null)
+                                    await parentRegister;
+                                child.ParentRootID = ID;
+                                using var context = new BmsManagerContext();
+                                //con.ChangeTracker.AutoDetectChangesEnabled = false;
+                                //con.RootDirectories.Add(child);
+                                //con.SaveChanges();
+                                using var con = context.Database.GetDbConnection();
+                                con.Open();
+                                using (var cmd = con.CreateCommand())
+                                {
+                                    cmd.CommandText = $"INSERT INTO [dbo].[RootDirectory] ([Path],[ParentRootID],[FolderUpdateDate]) VALUES (@{nameof(Path)},@{nameof(ParentRootID)},@{nameof(FolderUpdateDate)})";
+                                    cmd.AddParameter($"{nameof(Path)}", child.Path, DbType.String);
+                                    cmd.AddParameter($"{nameof(ParentRootID)}", child.ParentRootID, DbType.Int32);
+                                    cmd.AddParameter($"{nameof(FolderUpdateDate)}", child.FolderUpdateDate, DbType.DateTime);
+                                    cmd.ExecuteNonQuery();
+                                }
+                                using (var cmd = con.CreateCommand())
+                                {
+                                    cmd.CommandText = $"SELECT ID FROM RootDirectory WHERE Path = @{nameof(Path)}";
+                                    cmd.AddParameter($"@{nameof(Path)}", child.Path, DbType.String);
+                                    var reader = cmd.ExecuteReader();
+                                    reader.Read();
+                                    child.ID = (int)reader[0];
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
                         });
                     }
                     else
@@ -229,14 +255,15 @@ namespace BmsManager.Data
                         }
                     }
                     child.LoadFromFileSystem(root ?? this, dbRoots, dbFolders, dbFiles, rootRegisterer, allTasks);
-                    if (child.Children.Any() || child.Folders.Any())
-                        Children.Add(child);
+                    //if (child.Children.Any() || child.Folders.Any())
+                    //    Children.Add(child);
                 }
             }
             if (root == null)
             {
                 LoadingPath = "DB登録中...";
                 Task.WhenAll(allTasks.ToArray()).ConfigureAwait(false).GetAwaiter().GetResult();
+                LoadFromDB();
             }
             LoadingPath = string.Empty;
         }
