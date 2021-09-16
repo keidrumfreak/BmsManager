@@ -99,7 +99,7 @@ namespace BmsManager.Data
 
         public BmsFile(string path, string[] fileLines)
         {
-            var model = new BmsDecoder().Decode(path, fileLines);
+            var model = BmsModel.Decode(path, fileLines);
             if (model == null)
                 return;
 
@@ -151,8 +151,8 @@ namespace BmsManager.Data
             Length = model.LastTime;
             Notes = model.GetTotalNotes();
             feature |= (model.Random?.Length ?? 0) > 0 ? Features.Random : 0;
-            HasBga = (model.BgaList?.Length ?? 0) > 0;
-            IsNoKeySound = Length >= 30000 && (model.WavList?.Length ?? 0) <= (Length / (50 * 1000)) + 3;
+            HasBga = (model.BgaList?.Count() ?? 0) > 0;
+            IsNoKeySound = Length >= 30000 && (model.WavList?.Count() ?? 0) <= (Length / (50 * 1000)) + 3;
             Feature = (int)feature;
             var sha256 = CrSha256.Create();
             var arr = sha256.ComputeHash(Encoding.GetEncoding("shift-jis").GetBytes(model.ToChartString()));

@@ -59,7 +59,6 @@ namespace BmsManager.Data
 
         public void ExportToBeatoragja(string songDB, string songInfoDB)
         {
-            var decoder = new BmsDecoder();
             var files = Files.Include(f => f.Folder)
                 .ThenInclude(f => f.Root).AsNoTracking().ToArray();
             using (var con = new BeatorajaSongdataContext(songDB))

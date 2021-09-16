@@ -164,13 +164,16 @@ VALUES
                     }
                 }
 
-                using (var context = new BmsManagerContext())
-                using (var con = context.Database.GetDbConnection())
+                // TODO: .NET6 でChunkメソッドに変更する
+                foreach (var files in Files.Select((file, i) => (file, i)).GroupBy(x => x.i / 50).Select(g => g.Select(x => x.file)))
                 {
-                    con.Open();
-                    using (var cmd = con.CreateCommand())
+                    using (var context = new BmsManagerContext())
+                    using (var con = context.Database.GetDbConnection())
                     {
-                        var sql = new StringBuilder(@"INSERT INTO [dbo].[BmsFile]
+                        con.Open();
+                        using (var cmd = con.CreateCommand())
+                        {
+                            var sql = new StringBuilder(@"INSERT INTO [dbo].[BmsFile]
     ([FolderID]
     ,[Path]
     ,[Title]
@@ -209,10 +212,7 @@ VALUES
     ,[SpeedChange]
     ,[LaneNotes])
      VALUES");
-                        // TODO: .NET6 でChunkメソッドに変更する
-                        foreach (var fol in Files.Select((file, i) => (file, i)).GroupBy(x => x.i / 50).Select(g => g.Select(x => x.file)))
-                        {
-                            foreach (var (file, index) in Files.Select((f, i) => (f, i)))
+                            foreach (var (file, index) in files.Select((f, i) => (f, i)))
                             {
                                 sql.AppendLine(@$"(@{nameof(BmsFile.FolderID)}{index}
     ,@{nameof(BmsFile.Path)}{index}
@@ -259,7 +259,7 @@ VALUES
                                 cmd.AddParameter($"@{nameof(BmsFile.Artist)}{index}", file.Artist, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.SubArtist)}{index}", file.SubArtist, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5, DbType.String);
-                                cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.MD5, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.Sha256, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp, DbType.String);
@@ -298,7 +298,7 @@ VALUES
             }
             catch (Exception ex)
             {
-
+                throw;
             }
         }
     }
