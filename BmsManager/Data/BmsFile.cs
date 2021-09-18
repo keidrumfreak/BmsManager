@@ -22,7 +22,7 @@ namespace BmsManager.Data
 
         public string Title { get; set; }
 
-        public string SubTitle { get; set; }
+        public string Subtitle { get; set; }
 
         public string Genre { get; set; }
 
@@ -95,17 +95,17 @@ namespace BmsManager.Data
 
         public BmsFile() { }
 
-        public BmsFile(string path) : this(path, SystemProvider.FileSystem.File.ReadAllLines(path, Encoding.GetEncoding("shift-jis"))) { }
+        public BmsFile(string path) : this(path, SystemProvider.FileSystem.File.ReadAllText(path, Encoding.GetEncoding("shift-jis"))) { }
 
-        public BmsFile(string path, string[] fileLines)
+        public BmsFile(string path, string input)
         {
-            var model = BmsModel.Decode(path, fileLines);
+            var model = BmsModel.Decode(path, input);
             if (model == null)
                 return;
 
             Path = path;
             Title = model.Title;
-            SubTitle = model.SubTitle;
+            Subtitle = model.Subtitle;
             Genre = model.Genre;
             Artist = model.Artist;
             SubArtist = model.SubArtist;

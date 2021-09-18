@@ -200,7 +200,7 @@ CREATE TABLE [dbo].[BmsFile](
 	[FolderID] [int] NULL,
 	[Path] [nvarchar](max) NOT NULL,
 	[Title] [nvarchar](max) NULL,
-	[SubTitle] [nvarchar](max) NULL,
+	[Subtitle] [nvarchar](max) NULL,
 	[Genre] [nvarchar](max) NULL,
 	[Artist] [nvarchar](max) NULL,
 	[SubArtist] [nvarchar](max) NULL,

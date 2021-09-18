@@ -177,7 +177,7 @@ VALUES
     ([FolderID]
     ,[Path]
     ,[Title]
-    ,[SubTitle]
+    ,[Subtitle]
     ,[Genre]
     ,[Artist]
     ,[SubArtist]
@@ -217,7 +217,7 @@ VALUES
                                 sql.AppendLine(@$"(@{nameof(BmsFile.FolderID)}{index}
     ,@{nameof(BmsFile.Path)}{index}
     ,@{nameof(BmsFile.Title)}{index}
-    ,@{nameof(BmsFile.SubTitle)}{index}
+    ,@{nameof(BmsFile.Subtitle)}{index}
     ,@{nameof(BmsFile.Genre)}{index}
     ,@{nameof(BmsFile.Artist)}{index}
     ,@{nameof(BmsFile.SubArtist)}{index}
@@ -254,15 +254,15 @@ VALUES
                                 cmd.AddParameter($"@{nameof(BmsFile.FolderID)}{index}", ID, DbType.Int32);
                                 cmd.AddParameter($"@{nameof(BmsFile.Path)}{index}", file.Path, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Title)}{index}", file.Title, DbType.String);
-                                cmd.AddParameter($"@{nameof(BmsFile.SubTitle)}{index}", file.SubTitle, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Subtitle)}{index}", file.Subtitle, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Genre)}{index}", file.Genre, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Artist)}{index}", file.Artist, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.SubArtist)}{index}", file.SubArtist, DbType.String);
-                                cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5 ?? (object)DBNull.Value, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.Sha256, DbType.String);
-                                cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner, DbType.String);
-                                cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile, DbType.String);
-                                cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner ?? (object)DBNull.Value, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile ?? (object)DBNull.Value, DbType.String);
+                                cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp ?? (object)DBNull.Value, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Preview)}{index}", file.Preview ?? (object)DBNull.Value, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.PlayLevel)}{index}", file.PlayLevel, DbType.String);
                                 cmd.AddParameter($"@{nameof(BmsFile.Mode)}{index}", file.Mode, DbType.Int32);

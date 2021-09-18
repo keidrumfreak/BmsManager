@@ -23,7 +23,7 @@ namespace BmsManager.Beatoraja
         public string Title { get; set; }
 
         [Column("subtitle")]
-        public string SubTitle { get; set; }
+        public string Subtitle { get; set; }
 
         [Column("command")]
         public string Command { get; set; }

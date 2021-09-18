@@ -107,7 +107,7 @@ namespace BmsManager.Beatoraja
         public BeatorajaSong(BmsFile file)
         {
             Title = file.Title;
-            SubTitle = file.SubTitle;
+            SubTitle = file.Subtitle;
             Genre = file.Genre;
             Artist = file.Artist;
             SubArtist = file.SubArtist;
