@@ -23,17 +23,24 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Row="0" Grid.Column="0" Margin="5" Content="検索" Command="{Binding Search}"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding SearchText, Mode=TwoWay}"/>
-            <Button Grid.Row="0" Grid.Column="2" Margin="5" Content="クリア" Command="{Binding Clear}"/>
-            <Button Grid.Row="1" Grid.Column="0" Margin="5" Content="自動リネーム" Command="{Binding AutoRename}"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Margin="5" Text="{Binding RenameText, Mode=TwoWay}"/>
-            <Button Grid.Row="1" Grid.Column="2" Margin="5" Content="手動リネーム" Command="{Binding Rename}"/>
-            <Button Grid.Row="1" Grid.Column="3" Margin="5" Content="DB登録" Command="{Binding Register}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Margin="5" Text="{Binding SearchText, Mode=TwoWay}"/>
+            <Button Grid.Row="0" Grid.Column="5" Margin="5" Content="クリア" Command="{Binding Clear}"/>
+            <Button Grid.Row="1" Grid.Column="0" Margin="5" Content="全てリネーム" Command="{Binding RenameAll}"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="タイトル" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="1" Grid.Column="2" Margin="5" Text="{Binding Title, Mode=TwoWay}"/>
+            <TextBlock Grid.Row="1" Grid.Column="3" Text="アーティスト" VerticalAlignment="Center"/>
+            <TextBox Grid.Row="1" Grid.Column="4" Margin="5" Text="{Binding Artist, Mode=TwoWay}"/>
+            <Button Grid.Row="1" Grid.Column="5" Margin="5" Content="メタ更新" Command="{Binding UpdateMeta}"/>
+            <Button Grid.Row="1" Grid.Column="6" Margin="5" Content="リネーム" Command="{Binding Rename}"/>
         </Grid>
         <local:BmsFileList Grid.Row="1" DataContext="{Binding FileList}"/>
     </Grid>

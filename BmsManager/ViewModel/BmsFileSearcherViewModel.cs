@@ -41,11 +41,11 @@ namespace BmsManager
 
         public ICommand Clear { get; set; }
 
-        public ICommand AutoRename { get; set; }
+        public ICommand RenameAll { get; set; }
+
+        public ICommand UpdateMeta { get; set; }
 
         public ICommand Rename { get; set; }
-
-        public ICommand Register { get; set; }
 
         string seachText;
         public string SearchText
@@ -54,11 +54,18 @@ namespace BmsManager
             set { SetProperty(ref seachText, value); }
         }
 
-        string renameText;
-        public string RenameText
+        string title;
+        public string Title
         {
-            get { return renameText; }
-            set { SetProperty(ref renameText, value); }
+            get { return title; }
+            set { SetProperty(ref title, value); }
+        }
+
+        string artist;
+        public string Artist
+        {
+            get { return artist; }
+            set { SetProperty(ref artist, value); }
         }
 
         public BmsFileSearcherViewModel()
@@ -66,9 +73,9 @@ namespace BmsManager
             FileList = new BmsFileListViewModel();
             FileList.PropertyChanged += FileList_PropertyChanged;
 
-            AutoRename = CreateCommand(input => Task.Run(() => autoRename()));
+            RenameAll = CreateCommand(input => Task.Run(() => renameAll()));
+            UpdateMeta = CreateCommand(input => updateMeta());
             Rename = CreateCommand(rename);
-            Register = CreateCommand(register);
             Search = CreateCommand(input => search());
             Clear = CreateCommand(input => { SearchText = null; search(); });
         }
@@ -105,19 +112,28 @@ namespace BmsManager
             {
                 if (FileList.SelectedBmsFolder != null)
                 {
-                    RenameText = Path.GetFileName(FileList.SelectedBmsFolder.Path);
+                    Title = FileList.SelectedBmsFolder.Title;
+                    Artist = FileList.SelectedBmsFolder.Artist;
                 }
             }
             else if (e.PropertyName == nameof(BmsFileListViewModel.SelectedBmsFile))
             {
                 if (FileList.SelectedBmsFile != null)
                 {
-                    RenameText = $"[{FileList.SelectedBmsFile.Artist}]{Utility.GetTitle(FileList.SelectedBmsFile.Title)}";
+                    Title = Utility.GetTitle(FileList.SelectedBmsFile.Title);
+                    Artist = FileList.SelectedBmsFile.Artist;
                 }
             }
         }
 
-        private void autoRename()
+        private void updateMeta()
+        {
+            FileList.SelectedBmsFolder.Title = Title;
+            FileList.SelectedBmsFolder.Artist = Artist;
+            FileList.SelectedBmsFolder.UpdateMeta();
+        }
+
+        private void renameAll()
         {
             if (FileList.Folders == null)
                 return;
@@ -126,7 +142,7 @@ namespace BmsManager
             {
                 try
                 {
-                    folder.AutoRename();
+                    folder.Rename();
                 }
                 catch (Exception ex)
                 {
@@ -141,12 +157,9 @@ namespace BmsManager
 
         private void rename(object input)
         {
-            if (string.IsNullOrEmpty(RenameText))
-                return;
-
             try
             {
-                FileList.SelectedBmsFolder.Rename(RenameText);
+                FileList.SelectedBmsFolder.Rename();
             }
             catch (Exception ex)
             {

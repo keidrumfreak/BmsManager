@@ -16,7 +16,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DataGrid Margin="5" Grid.Row="0" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False">
+        <DataGrid Margin="5" Grid.Row="0" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Setter Property="ContextMenu">
@@ -37,7 +37,7 @@
             </DataGrid.Columns>
         </DataGrid>
         <CheckBox Margin="5" Grid.Row="1" Content="BMSファイルを絞り込み表示する" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
-        <DataGrid Margin="5" Grid.Row="2" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False">
+        <DataGrid Margin="5" Grid.Row="2" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
                     <Setter Property="ContextMenu">

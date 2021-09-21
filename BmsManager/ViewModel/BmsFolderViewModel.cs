@@ -23,9 +23,17 @@ namespace BmsManager
 
     class BmsFolderViewModel : ViewModelBase
     {
-        public string Title => folder.Title;
+        public string Title
+        {
+            get { return folder.Title; }
+            set { folder.Title = value; }
+        }
 
-        public string Artist => folder.Artist;
+        public string Artist
+        {
+            get { return folder.Artist; }
+            set { folder.Artist = value; }
+        }
 
         public string Path => folder.Path;
 
@@ -59,18 +67,20 @@ namespace BmsManager
             Install = CreateCommand(input => install(), input => diffFile != null);
         }
 
-        public void AutoRename()
+        public void Rename()
         {
-            folder.AutoRename();
-        }
-
-        public void Rename(string name)
-        {
-            folder.Rename(name);
+            folder.Rename();
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Artist));
             OnPropertyChanged(nameof(Path));
             Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, this)).ToArray());
+        }
+
+        public void UpdateMeta()
+        {
+            folder.UpdateMeta();
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(Artist));
         }
 
         private void openFolder()

@@ -171,8 +171,9 @@ namespace BmsManager
 
         public static string ToFileNameString(string name)
         {
-            return name.Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
+            var ret = name.Replace('\\', '￥').Replace('<', '＜').Replace('>', '＞').Replace('/', '／').Replace('*', '＊').Replace(":", "：")
                 .Replace("\"", "”").Replace('?', '？').Replace('|', '｜');
+            return ret.Length > 50 ? ret[..50] : ret;
         }
     }
 

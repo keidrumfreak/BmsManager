@@ -43,21 +43,9 @@ namespace BmsManager.Data
         [ForeignKey(nameof(RootID))]
         public virtual RootDirectory Root { get; set; }
 
-        public void AutoRename()
+        public void Rename()
         {
-            var artist = Utility.GetArtist(Files.Select(f => f.Artist));
-            var title = Utility.GetTitle(Files.Where(f => !string.IsNullOrWhiteSpace(f.Title)).FirstOrDefault()?.Title);
-            if (artist.Length > 50)
-                artist = artist.Substring(0, 50);
-            if (title.Length > 50)
-                title = title.Substring(0, 50);
-            var rename = $"[{Utility.GetArtist(Files.Select(f => f.Artist))}]{Utility.GetTitle(Files.First().Title)}".Trim();
-            Rename(rename);
-        }
-
-        public void Rename(string name)
-        {
-            var rename = Utility.ToFileNameString(name);
+            var rename = $"[{Utility.ToFileNameString(Artist)}]{Utility.ToFileNameString(Title)}";
 
             var dst = PathUtil.Combine(SysPath.GetDirectoryName(Path), rename);
             var tmp = PathUtil.Combine(SysPath.GetDirectoryName(Path), "tmp");
@@ -117,6 +105,15 @@ namespace BmsManager.Data
                 Artist = name.Substring(1, index - 1);
                 Title = name.Substring(index + 1);
             }
+        }
+
+        public void UpdateMeta()
+        {
+            using var context = new BmsManagerContext();
+            var folder = context.BmsFolders.Find(ID);
+            folder.Title = Title;
+            folder.Artist = Artist;
+            context.SaveChanges();
         }
 
         public void Register()
