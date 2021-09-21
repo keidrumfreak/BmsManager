@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
+using BmsParser;
 using CommonLib.IO;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
@@ -75,7 +76,7 @@ namespace BmsManager
             var extentions = Settings.Default.Extentions;
             var files = SystemProvider.FileSystem.Directory.EnumerateFiles(TargetPath, "*.*", SearchOption.AllDirectories)
                 .Where(f => extentions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant())).ToArray();
-            DiffFiles = new ObservableCollection<DiffFileViewModel>(files.Select(f => new DiffFileViewModel(f, this)));
+            DiffFiles = new ObservableCollection<DiffFileViewModel>(files.Select(f => BmsModel.Decode(f)).Where(m => m != null).Select(m => new DiffFileViewModel(m, this)));
         }
 
         private void estimateAll()
