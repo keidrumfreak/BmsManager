@@ -38,7 +38,7 @@ namespace BmsManager.Tests.Data
             mock.AddDirectory(@"D:\Test");
 
             var folder = new BmsFolder { Path = @"D:\Test" };
-            folder.Rename(name);
+            folder.Rename();
 
             mock.Directory.Exists(@"D:\Test").IsFalse();
             mock.Directory.Exists(@$"D:\{rename}").IsTrue();
@@ -53,7 +53,7 @@ namespace BmsManager.Tests.Data
             mock.AddDirectory(@"D:\Result");
 
             var folder = new BmsFolder { Path = @"D:\Test" };
-            folder.Rename("Result");
+            folder.Rename();
 
             mock.Directory.Exists(@"D:\Test").IsFalse();
             mock.Directory.Exists(@$"D:\Result (2)").IsTrue();
@@ -62,7 +62,7 @@ namespace BmsManager.Tests.Data
             mock.AddDirectory(@"D:\Test");
 
             folder = new BmsFolder { Path = @"D:\Test" };
-            folder.Rename("Result");
+            folder.Rename();
 
             mock.Directory.Exists(@"D:\Test").IsFalse();
             mock.Directory.Exists(@$"D:\Result (3)").IsTrue();
