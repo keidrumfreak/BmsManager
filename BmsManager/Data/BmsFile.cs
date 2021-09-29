@@ -95,11 +95,11 @@ namespace BmsManager.Data
 
         public BmsFile() { }
 
-        public BmsFile(string path) : this(path, SystemProvider.FileSystem.File.ReadAllText(path, Encoding.GetEncoding("shift-jis"))) { }
+        public BmsFile(string path) : this(path, SystemProvider.FileSystem.File.ReadAllBytes(path)) { }
 
-        public BmsFile(string path, string input)
+        public BmsFile(string path, byte[] bin)
         {
-            var model = BmsModel.Decode(path, input);
+            var model = BmsModel.Decode(path, bin);
             if (model == null)
                 return;
 

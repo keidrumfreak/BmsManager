@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using BmsManager.Beatoraja;
 using BmsParser;
 using CommonLib.IO;
@@ -57,7 +58,7 @@ namespace BmsManager.Data
             }
         }
 
-        public void ExportToBeatoragja(string songDB, string songInfoDB)
+        public async Task ExportToBeatoragjaAsync(string songDB, string songInfoDB)
         {
             var files = Files.Include(f => f.Folder)
                 .ThenInclude(f => f.Root).AsNoTracking().ToArray();
@@ -66,48 +67,66 @@ namespace BmsManager.Data
                 var mnFol = BmsFolders.Include(r => r.Root).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r))
                     .Concat(RootDirectories.Include(r => r.Parent).AsNoTracking().ToArray().Select(r => new BeatorajaFolder(r)));
                 var boFol = con.Folders.ToArray();
-                var delFol = boFol.AsParallel().Where(bo => !mnFol.Any(mn => mn.Path == bo.Path));
-                if (delFol.Any())
-                    con.Folders.RemoveRange(delFol);
-                foreach (var folder in mnFol)
+                var delFolTask = Task.Run(() =>
                 {
-                    var entity = boFol.FirstOrDefault(bo => bo.Path == folder.Path);
-                    if (entity == default)
+                    var delFol = boFol.AsParallel().Where(bo => !mnFol.Any(mn => mn.Path == bo.Path)).ToArray();
+                    if (delFol.Any())
+                        con.Folders.RemoveRange(delFol);
+                });
+
+                var regFolTask = Task.Run(() =>
+                {
+                    foreach (var folder in mnFol)
                     {
-                        con.Folders.Add(entity);
-                    }
-                    else
-                    {
-                        if (entity.Date != folder.Date)
+                        var entity = boFol.FirstOrDefault(bo => bo.Path == folder.Path);
+                        if (entity == default)
                         {
-                            entity.Date = folder.Date;
+                            con.Folders.Add(folder);
+                        }
+                        else
+                        {
+                            if (entity.Date != folder.Date)
+                            {
+                                entity.Date = folder.Date;
+                            }
                         }
                     }
-                }
+                });
 
                 var songs = con.Songs.ToArray();
-                var delSong = songs.AsParallel().Where(s => !files.Any(f => f.Path == s.Path));
-                if (delSong.Any())
-                    con.Songs.RemoveRange(delSong);
-
-                foreach (var file in files)
+                var delSongTask = Task.Run(() =>
                 {
-                    var song = songs.FirstOrDefault(s => s.Path == file.Path);
-                    if (song == default)
+                    var delSong = songs.AsParallel().Where(s => !files.Any(f => f.Path == s.Path)).ToArray();
+                    if (delSong.Any())
+                        con.Songs.RemoveRange(delSong);
+                });
+
+                var regSongTask = Task.Run(() =>
+                {
+                    foreach (var file in files)
                     {
-                        con.Songs.Add(song);
-                    }
-                    else
-                    {
-                        // 同一なら変更無しのはず
-                        if (file.Sha256 != song.Sha256)
+                        var song = songs.FirstOrDefault(s => s.Path == file.Path);
+                        if (song == default)
                         {
-                            // UPDATEが面倒なのでDELETE-INSERT
-                            con.Songs.Remove(song);
                             con.Songs.Add(new BeatorajaSong(file));
                         }
+                        else
+                        {
+                            // 同一なら変更無しのはず
+                            if (file.Sha256 != song.Sha256)
+                            {
+                                // UPDATEが面倒なのでDELETE-INSERT
+                                con.Songs.Remove(song);
+                                con.SaveChanges();
+                                con.Songs.Add(new BeatorajaSong(file));
+                                con.SaveChanges();
+                            }
+                        }
                     }
-                }
+                });
+
+                await Task.WhenAll(delFolTask, delSongTask, regFolTask, regSongTask);
+
                 con.SaveChanges();
             }
 

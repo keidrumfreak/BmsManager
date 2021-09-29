@@ -21,13 +21,13 @@ namespace BmsManager
 
         public ExporterViewModel()
         {
-            Export = CreateCommand(input => export());
+            Export = CreateCommand(async input => await export());
         }
 
-        private void export()
+        private async Task export()
         {
             using var con = new BmsManagerContext();
-            con.ExportToBeatoragja(PathUtil.Combine(BeatorajaFolder, "songdata.db"), PathUtil.Combine(BeatorajaFolder, "songinfo.db"));
+            await con.ExportToBeatoragjaAsync(PathUtil.Combine(BeatorajaFolder, "songdata.db"), PathUtil.Combine(BeatorajaFolder, "songinfo.db"));
             MessageBox.Show("完了しました");
         }
     }

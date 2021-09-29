@@ -98,7 +98,7 @@ namespace BmsManager.Data
                     || f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
 
                 var bmsFileDatas = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()))
-                    .Select(file => (file, file.EndsWith("bmson") ? SystemProvider.FileSystem.File.ReadAllText(file) : SystemProvider.FileSystem.File.ReadAllText(file, Encoding.GetEncoding("shift-jis"))));
+                    .Select(file => (file, SystemProvider.FileSystem.File.ReadAllBytes(file)));
                 
                 if (bmsFileDatas.Any())
                 {
