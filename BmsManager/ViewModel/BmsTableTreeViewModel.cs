@@ -30,7 +30,7 @@ namespace BmsManager
         {
             LoadFromUrl = CreateCommand(loadFromUrlAsync);
 
-            BmsTables = new ObservableCollection<BmsTableViewModel>(BmsTable.LoadAllTalbes().Select(t => new BmsTableViewModel(t)).ToList());
+            BmsTables = new ObservableCollection<BmsTableViewModel>(BmsTable.LoadAllTalbes().Select(t => new BmsTableViewModel(t, this)).ToList());
         }
 
         public async void loadFromUrlAsync(object input)
@@ -52,7 +52,13 @@ namespace BmsManager
                 con.SaveChanges();
             }
 
-            BmsTables.Add(new BmsTableViewModel(table));
+            BmsTables.Add(new BmsTableViewModel(table, this));
+        }
+
+        public void Reload()
+        {
+            OnPropertyChanged(nameof(BmsTables));
+            OnPropertyChanged(nameof(SelectedTreeItem));
         }
     }
 }

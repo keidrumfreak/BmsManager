@@ -26,12 +26,22 @@ namespace BmsManager
 
         BmsTable table;
         BmsTableDifficulty difficulty;
+        BmsTableTreeViewModel parent;
 
-        public BmsTableViewModel(BmsTable table)
+        public BmsTableViewModel(BmsTable table, BmsTableTreeViewModel parent)
         {
+            this.parent = parent;
             Name = table.Name;
             this.table = table;
             Children = table.Difficulties.Select(d => new BmsTableViewModel(d));
+            Reload = CreateCommand(async input => await reload());
+        }
+
+        private async Task reload()
+        {
+            await table.Reload();
+            await table.Register();
+            parent.Reload();
         }
 
         public BmsTableViewModel(BmsTableDifficulty difficulty)

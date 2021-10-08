@@ -91,7 +91,41 @@ namespace BmsManager.Data
             return table;
         }
 
-        public void Register()
+        public async Task Reload()
+        {
+            var doc = new BmsTableDocument(Url);
+            await doc.LoadAsync();
+            await doc.LoadHeaderAsync();
+            await doc.LoadDatasAsync();
+
+            Name = doc.Header.Name;
+            Url = doc.Uri.AbsoluteUri;
+            Symbol = doc.Header.Symbol;
+            Tag = doc.Header.Tag;
+            Difficulties = doc.Datas.GroupBy(d => d.Level).Select(d => new BmsTableDifficulty
+            {
+                Difficulty = d.Key,
+                DifficultyOrder = doc.Header.LevelOrder?.Any() ?? false
+                    ? Array.IndexOf(doc.Header.LevelOrder, d.Key) + 1
+                    : int.TryParse(d.Key, out var index) ? index : null,
+                TableDatas = d.Select(d => new BmsTableData
+                {
+                    MD5 = d.MD5,
+                    LR2BmsID = d.LR2BmsID,
+                    Title = d.Title,
+                    Artist = d.Artist,
+                    Url = d.Url,
+                    DiffUrl = d.UrlDiff,
+                    DiffName = d.NameDiff,
+                    PackUrl = d.UrlPack,
+                    PackName = d.NamePack,
+                    Comment = d.Comment,
+                    OrgMD5 = d.OrgMD5
+                }).ToList()
+            }).ToList();
+        }
+
+        public async Task Register()
         {
             using (var con = new BmsManagerContext())
             {
@@ -100,7 +134,7 @@ namespace BmsManager.Data
                 {
                     // 未登録の場合は追加するだけ
                     con.Tables.Add(this);
-                    con.SaveChanges();
+                    await con.SaveChangesAsync();
                     return;
                 }
 
@@ -126,7 +160,7 @@ namespace BmsManager.Data
                     dbDiff.DifficultyOrder = difficulty.DifficultyOrder;
 
                     // TODO: 本来最初に読んでおくべきだが、現状ThenIncludeに難があるためここで読み込み
-                    con.Entry(dbDiff).Collection(d => d.TableDatas);
+                    await con.Entry(dbDiff).Collection(d => d.TableDatas).LoadAsync();
 
                     foreach (var data in dbDiff.TableDatas.Where(db => !difficulty.TableDatas.Any(doc => doc.MD5 == db.MD5)).ToArray())
                     {
@@ -140,6 +174,7 @@ namespace BmsManager.Data
                         if (dbData == default)
                         {
                             dbDiff.TableDatas.Add(data);
+                            continue;
                         }
                         dbData.MD5 = data.MD5;
                         dbData.LR2BmsID = data.LR2BmsID;
@@ -154,7 +189,7 @@ namespace BmsManager.Data
                         dbData.OrgMD5 = data.OrgMD5;
                     }
                 }
-                con.SaveChanges();
+                await con.SaveChangesAsync();
             }
         }
     }
