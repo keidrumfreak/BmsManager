@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
 using System.IO;
@@ -60,6 +61,7 @@ namespace BmsManager.Data
 
         public async Task ExportToBeatoragjaAsync(string songDB, string songInfoDB)
         {
+            var now = DateTime.Now;
             var files = Files.Include(f => f.Folder)
                 .ThenInclude(f => f.Root).AsNoTracking().ToArray();
             using (var con = new BeatorajaSongdataContext(songDB))
@@ -81,6 +83,7 @@ namespace BmsManager.Data
                         var entity = boFol.FirstOrDefault(bo => bo.Path == folder.Path);
                         if (entity == default)
                         {
+                            folder.AddDate = now.ToUnixMilliseconds();
                             con.Folders.Add(folder);
                         }
                         else
@@ -108,7 +111,7 @@ namespace BmsManager.Data
                         var song = songs.FirstOrDefault(s => s.Path == file.Path);
                         if (song == default)
                         {
-                            con.Songs.Add(new BeatorajaSong(file));
+                            con.Songs.Add(new BeatorajaSong(file) { AddDate = now.ToUnixMilliseconds() });
                         }
                         else
                         {
@@ -118,7 +121,7 @@ namespace BmsManager.Data
                                 // UPDATEが面倒なのでDELETE-INSERT
                                 con.Songs.Remove(song);
                                 con.SaveChanges();
-                                con.Songs.Add(new BeatorajaSong(file));
+                                con.Songs.Add(new BeatorajaSong(file) { AddDate = now.ToUnixMilliseconds() });
                                 con.SaveChanges();
                             }
                         }

@@ -61,37 +61,37 @@ namespace BmsManager.Beatoraja
         public string Parent { get; set; }
 
         [Column("level")]
-        public int Level { get; set; }
+        public int? Level { get; set; }
 
         [Column("difficulty")]
-        public int Difficulty { get; set; }
+        public int? Difficulty { get; set; }
 
         [Column("maxbpm")]
-        public int MaxBpm { get; set; }
+        public int? MaxBpm { get; set; }
 
         [Column("minbpm")]
-        public int MinBpm { get; set; }
+        public int? MinBpm { get; set; }
 
         [Column("mode")]
-        public int Mode { get; set; }
+        public int? Mode { get; set; }
 
         [Column("judge")]
-        public int Judge { get; set; }
+        public int? Judge { get; set; }
 
         [Column("feature")]
-        public int Feature { get; set; }
+        public int? Feature { get; set; }
 
         [Column("content")]
-        public int Content { get; set; }
+        public int? Content { get; set; }
 
         [Column("date")]
-        public int Date { get; set; }
+        public int? Date { get; set; }
 
         [Column("favorite")]
-        public int Favorite { get; set; }
+        public int? Favorite { get; set; }
 
         [Column("notes")]
-        public int Notes { get; set; }
+        public int? Notes { get; set; }
 
         [Column("adddate")]
         public int AddDate { get; set; }
@@ -100,7 +100,7 @@ namespace BmsManager.Beatoraja
         public string ChartHash { get; set; }
 
         [Column("length")]
-        public int Length { get; set; }
+        public int? Length { get; set; }
 
         public BeatorajaSong() { }
 

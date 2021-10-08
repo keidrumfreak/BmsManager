@@ -17,34 +17,34 @@ namespace BmsManager.Beatoraja
         public string Sha256 { get; set; }
 
         [Column("n")]
-        public int N { get; set; }
+        public int? N { get; set; }
 
         [Column("ln")]
-        public int LN { get; set; }
+        public int? LN { get; set; }
 
         [Column("s")]
-        public int S { get; set; }
+        public int? S { get; set; }
 
         [Column("ls")]
-        public int LS { get; set; }
+        public int? LS { get; set; }
 
         [Column("total")]
-        public double Total { get; set; }
+        public double? Total { get; set; }
 
         [Column("density")]
-        public double Density { get; set; }
+        public double? Density { get; set; }
 
         [Column("peakdensity")]
-        public double PeakDensity { get; set; }
+        public double? PeakDensity { get; set; }
 
         [Column("enddensity")]
-        public double EndDensity { get; set; }
+        public double? EndDensity { get; set; }
 
         [Column("distribution")]
         public string Distribution { get; set; }
 
         [Column("mainbpm")]
-        public double MainBpm { get; set; }
+        public double? MainBpm { get; set; }
 
         [Column("speedchange")]
         public string SpeedChange { get; set; }

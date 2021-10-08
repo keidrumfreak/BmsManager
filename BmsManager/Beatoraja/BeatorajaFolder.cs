@@ -29,7 +29,7 @@ namespace BmsManager.Beatoraja
         public string Command { get; set; }
 
         [Column("type")]
-        public int Type { get; set; }
+        public int? Type { get; set; }
 
         [Column("banner")]
         public string Text { get; set; }
@@ -38,13 +38,13 @@ namespace BmsManager.Beatoraja
         public string Parent { get; set; }
 
         [Column("date")]
-        public int Date { get; set; }
+        public int? Date { get; set; }
 
         [Column("max")]
-        public int Max { get; set; }
+        public int? Max { get; set; }
 
         [Column("adddate")]
-        public int AddDate { get; set; }
+        public int? AddDate { get; set; }
 
         public BeatorajaFolder() { }
 
