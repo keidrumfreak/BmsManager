@@ -126,14 +126,14 @@ namespace BmsManager.Data
                     con.Open();
                     using (var cmd = con.CreateCommand())
                     {
-                        cmd.CommandText = @$"INSERT INTO [dbo].[BmsFolder]
-    ([RootID]
-    ,[Path]
-    ,[Artist]
-    ,[Title]
-    ,[HasText]
-    ,[Preview]
-    ,[FolderUpdateDate])
+                        cmd.CommandText = @$"INSERT INTO BmsFolder
+    (RootID
+    ,Path
+    ,Artist
+    ,Title
+    ,HasText
+    ,Preview
+    ,FolderUpdateDate)
 VALUES
     (@{nameof(RootID)}
     ,@{nameof(Path)}
@@ -157,7 +157,7 @@ VALUES
                         cmd.AddParameter($"@{nameof(Path)}", Path, DbType.String);
                         var reader = cmd.ExecuteReader();
                         reader.Read();
-                        ID = (int)reader[0];
+                        ID = unchecked((int)reader[0]); // SQLServer(int) と SQLite(long)でDataReaderから返ってくる型が違う
                     }
                 }
 
@@ -170,44 +170,44 @@ VALUES
                         con.Open();
                         using (var cmd = con.CreateCommand())
                         {
-                            var sql = new StringBuilder(@"INSERT INTO [dbo].[BmsFile]
-    ([FolderID]
-    ,[Path]
-    ,[Title]
-    ,[Subtitle]
-    ,[Genre]
-    ,[Artist]
-    ,[SubArtist]
-    ,[MD5]
-    ,[Sha256]
-    ,[Banner]
-    ,[StageFile]
-    ,[BackBmp]
-    ,[Preview]
-    ,[PlayLevel]
-    ,[Mode]
-    ,[Difficulty]
-    ,[Judge]
-    ,[MinBpm]
-    ,[MaxBpm]
-    ,[Length]
-    ,[Notes]
-    ,[Feature]
-    ,[HasBga]
-    ,[IsNoKeySound]
-    ,[ChartHash]
-    ,[N]
-    ,[LN]
-    ,[S]
-    ,[LS]
-    ,[Total]
-    ,[Density]
-    ,[PeakDensity]
-    ,[EndDensity]
-    ,[Distribution]
-    ,[MainBpm]
-    ,[SpeedChange]
-    ,[LaneNotes])
+                            var sql = new StringBuilder(@"INSERT INTO BmsFile
+    (FolderID
+    ,Path
+    ,Title
+    ,Subtitle
+    ,Genre
+    ,Artist
+    ,SubArtist
+    ,MD5
+    ,Sha256
+    ,Banner
+    ,StageFile
+    ,BackBmp
+    ,Preview
+    ,PlayLevel
+    ,Mode
+    ,Difficulty
+    ,Judge
+    ,MinBpm
+    ,MaxBpm
+    ,Length
+    ,Notes
+    ,Feature
+    ,HasBga
+    ,IsNoKeySound
+    ,ChartHash
+    ,N
+    ,LN
+    ,S
+    ,LS
+    ,Total
+    ,Density
+    ,PeakDensity
+    ,EndDensity
+    ,Distribution
+    ,MainBpm
+    ,SpeedChange
+    ,LaneNotes)
      VALUES");
                             foreach (var (file, index) in files.Select((f, i) => (f, i)))
                             {

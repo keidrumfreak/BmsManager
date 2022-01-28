@@ -226,7 +226,7 @@ namespace BmsManager.Data
                                 con.Open();
                                 using (var cmd = con.CreateCommand())
                                 {
-                                    cmd.CommandText = $"INSERT INTO [dbo].[RootDirectory] ([Path],[ParentRootID],[FolderUpdateDate]) VALUES (@{nameof(Path)},@{nameof(ParentRootID)},@{nameof(FolderUpdateDate)})";
+                                    cmd.CommandText = $"INSERT INTO RootDirectory (Path,ParentRootID,FolderUpdateDate) VALUES (@{nameof(Path)},@{nameof(ParentRootID)},@{nameof(FolderUpdateDate)})";
                                     cmd.AddParameter($"{nameof(Path)}", child.Path, DbType.String);
                                     cmd.AddParameter($"{nameof(ParentRootID)}", child.ParentRootID, DbType.Int32);
                                     cmd.AddParameter($"{nameof(FolderUpdateDate)}", child.FolderUpdateDate, DbType.DateTime);
@@ -238,7 +238,7 @@ namespace BmsManager.Data
                                     cmd.AddParameter($"@{nameof(Path)}", child.Path, DbType.String);
                                     var reader = cmd.ExecuteReader();
                                     reader.Read();
-                                    child.ID = (int)reader[0];
+                                    child.ID = unchecked((int)reader[0]); // SQLServer(int) と SQLite(long)でDataReaderから返ってくる型が違う
                                 }
                             }
                             catch (Exception ex)
