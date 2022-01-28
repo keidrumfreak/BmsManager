@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using BmsParser;
 using CrSha256 = System.Security.Cryptography.SHA256;
 
@@ -324,6 +325,18 @@ namespace BmsManager.Data
             HellChargeNote = 32,
             StopSequence = 64,
             Scroll = 128
+        }
+
+        public async Task DeleteAsync()
+        {
+            SystemProvider.FileSystem.File.Delete(Path);
+            using var con = new BmsManagerContext();
+            var entity = con.Files.SingleOrDefault(f => f.Path == Path);
+            if (entity != default)
+            {
+                con.Files.Remove(entity);
+                await con.SaveChangesAsync();
+            }
         }
     }
 }

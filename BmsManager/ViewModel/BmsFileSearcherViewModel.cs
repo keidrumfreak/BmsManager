@@ -99,7 +99,7 @@ namespace BmsManager
                         var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
                         if (!files.Any()) continue;
                         //var vm = new BmsFolderViewModel(folder, FileList);
-                        folder.Files = new ObservableCollection<BmsFileViewModel>(files.ToArray());
+                        folder.Files = new ObservableCollection<BmsFile>(files.ToArray());
                         yield return folder;
                     }
                 }

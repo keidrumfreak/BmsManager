@@ -12,7 +12,7 @@ namespace BmsManager
 {
     class BmsFileListViewModel : ViewModelBase, IBmsFolderParentViewModel
     {
-        public ObservableCollection<BmsFileViewModel> BmsFiles
+        public ObservableCollection<BmsFile> BmsFiles
         {
             get
             {
@@ -26,7 +26,7 @@ namespace BmsManager
                 }
                 else
                 {
-                    return new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files).ToArray());
+                    return new ObservableCollection<BmsFile>(Folders.SelectMany(f => f.Files).ToArray());
                 }
             }
         }
@@ -45,8 +45,8 @@ namespace BmsManager
             set { SetProperty(ref selectedBmsFolder, value); OnPropertyChanged(nameof(BmsFiles)); }
         }
 
-        BmsFileViewModel selectedBmsFile;
-        public BmsFileViewModel SelectedBmsFile
+        BmsFile selectedBmsFile;
+        public BmsFile SelectedBmsFile
         {
             get { return selectedBmsFile; }
             set { SetProperty(ref selectedBmsFile, value); }
@@ -56,25 +56,19 @@ namespace BmsManager
 
         public ICommand ChangeNarrowing { get; set; }
 
+        public ICommand DeleteFile { get; set; }
+
         public BmsFileListViewModel()
         {
             ChangeNarrowing = CreateCommand(input => OnPropertyChanged(nameof(BmsFiles)));
+            DeleteFile = CreateCommand(deleteFileAsync);
         }
 
-        private void searchFile()
+        private async Task deleteFileAsync(object input)
         {
-            //if (Folders == null)
-            //{
-            //    BmsFiles = null;
-            //}
-            //else if (Narrowed && SelectedBmsFolder != null)
-            //{
-            //    BmsFiles = new ObservableCollection<BmsFileViewModel>(SelectedBmsFolder.Files);
-            //}
-            //else
-            //{
-            //    BmsFiles = new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files).ToArray());
-            //}
+            var file = (BmsFile)input;
+            await file.DeleteAsync();
+            BmsFiles.Remove(file);
         }
     }
 }

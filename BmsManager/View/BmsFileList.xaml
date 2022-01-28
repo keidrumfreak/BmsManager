@@ -40,10 +40,13 @@
         <DataGrid Margin="5" Grid.Row="2" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
+                    <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=DataContext}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
-                                <MenuItem Header="削除する" Command="{Binding Remove}"/>
+                                <MenuItem Header="削除する"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.DeleteFile}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>

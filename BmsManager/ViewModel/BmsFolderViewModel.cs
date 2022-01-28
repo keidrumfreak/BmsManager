@@ -43,8 +43,8 @@ namespace BmsManager
 
         public ICommand Install { get; set; }
 
-        ObservableCollection<BmsFileViewModel> files;
-        public ObservableCollection<BmsFileViewModel> Files
+        ObservableCollection<BmsFile> files;
+        public ObservableCollection<BmsFile> Files
         {
             get { return files; }
             set { SetProperty(ref files, value); }
@@ -61,7 +61,7 @@ namespace BmsManager
             this.parent = parent;
             this.folder = folder;
             this.diffFile = diffFile;
-            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, this)).ToArray());
+            Files = new ObservableCollection<BmsFile>(folder.Files);
             OpenFolder = CreateCommand(input => openFolder());
             Merge = CreateCommand(input => Task.Run(() => merge()), input => Duplicates?.Any() ?? false);
             Install = CreateCommand(input => install(), input => diffFile != null);
@@ -73,7 +73,7 @@ namespace BmsManager
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Artist));
             OnPropertyChanged(nameof(Path));
-            Files = new ObservableCollection<BmsFileViewModel>(folder.Files.Select(f => new BmsFileViewModel(f, this)).ToArray());
+            Files = new ObservableCollection<BmsFile>(folder.Files);
         }
 
         public void UpdateMeta()
