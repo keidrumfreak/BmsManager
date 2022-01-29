@@ -60,13 +60,12 @@ namespace BmsManager
 
         public BmsFileListViewModel()
         {
-            ChangeNarrowing = CreateCommand(input => OnPropertyChanged(nameof(BmsFiles)));
-            DeleteFile = CreateCommand(deleteFileAsync);
+            ChangeNarrowing = CreateCommand(() => OnPropertyChanged(nameof(BmsFiles)));
+            DeleteFile = CreateCommand<BmsFile>(deleteFileAsync);
         }
 
-        private async Task deleteFileAsync(object input)
+        private async Task deleteFileAsync(BmsFile file)
         {
-            var file = (BmsFile)input;
             await file.DeleteAsync();
             BmsFiles.Remove(file);
         }

@@ -73,11 +73,11 @@ namespace BmsManager
             FileList = new BmsFileListViewModel();
             FileList.PropertyChanged += FileList_PropertyChanged;
 
-            RenameAll = CreateCommand(input => Task.Run(() => renameAll()));
-            UpdateMeta = CreateCommand(input => updateMeta());
+            RenameAll = CreateCommand(() => Task.Run(() => renameAll()));
+            UpdateMeta = CreateCommand(updateMeta);
             Rename = CreateCommand(rename);
-            Search = CreateCommand(input => search());
-            Clear = CreateCommand(input => { SearchText = null; search(); });
+            Search = CreateCommand(search);
+            Clear = CreateCommand(() => { SearchText = null; search(); });
         }
 
         private void search()
@@ -155,7 +155,7 @@ namespace BmsManager
             search();
         }
 
-        private void rename(object input)
+        private void rename()
         {
             try
             {

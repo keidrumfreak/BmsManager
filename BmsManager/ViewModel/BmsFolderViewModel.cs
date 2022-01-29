@@ -62,9 +62,9 @@ namespace BmsManager
             this.folder = folder;
             this.diffFile = diffFile;
             Files = new ObservableCollection<BmsFile>(folder.Files);
-            OpenFolder = CreateCommand(input => openFolder());
-            Merge = CreateCommand(input => Task.Run(() => merge()), input => Duplicates?.Any() ?? false);
-            Install = CreateCommand(input => install(), input => diffFile != null);
+            OpenFolder = CreateCommand(openFolder);
+            Merge = CreateCommand(() => Task.Run(() => merge()), () => Duplicates?.Any() ?? false);
+            Install = CreateCommand(install, () => diffFile != null);
         }
 
         public void Rename()

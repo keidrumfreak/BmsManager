@@ -62,10 +62,10 @@ namespace BmsManager
         public DiffRegisterViewModel()
         {
             FileList = new BmsFileListViewModel();
-            SearchDiff = CreateCommand(input => searchDiff());
-            EstimateAll = CreateCommand(input => estimateAll());
-            InstallByTable = CreateCommand(input => installByTable());
-            InstallAll = CreateCommand(input => Task.Run(() => installAll()));
+            SearchDiff = CreateCommand(searchDiff);
+            EstimateAll = CreateCommand(estimateAll);
+            InstallByTable = CreateCommand(installByTable);
+            InstallAll = CreateCommand(() => Task.Run(() => installAll()));
         }
 
         private void searchDiff()

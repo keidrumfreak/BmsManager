@@ -34,7 +34,7 @@ namespace BmsManager
             RootTree = new ObservableCollection<RootDirectoryViewModel>(RootDirectory.LoadTopRoot().Select(r => new RootDirectoryViewModel(r, this, null)));
         }
 
-        private void addRoot(object input)
+        private void addRoot()
         {
             if (string.IsNullOrEmpty(TargetDirectory))
                 return;

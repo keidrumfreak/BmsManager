@@ -25,11 +25,11 @@ namespace BmsManager
 
         public MainWindowViewModel()
         {
-            ShowFileRegister = CreateCommand(input => new FolderRegister().Show());
-            ShowTableManager = CreateCommand(input => new BmsTableManager().Show());
-            ShowDuplicateChecker = CreateCommand(input => new DuplicateBmsChecker().Show());
-            ShowDiffRegister = CreateCommand(input => new DiffRegister().Show());
-            ShowExporter = CreateCommand(input => new Exporter().Show());
+            ShowFileRegister = CreateCommand(() => new FolderRegister().Show());
+            ShowTableManager = CreateCommand(() => new BmsTableManager().Show());
+            ShowDuplicateChecker = CreateCommand(() => new DuplicateBmsChecker().Show());
+            ShowDiffRegister = CreateCommand(() => new DiffRegister().Show());
+            ShowExporter = CreateCommand(() => new Exporter().Show());
         }
     }
 }

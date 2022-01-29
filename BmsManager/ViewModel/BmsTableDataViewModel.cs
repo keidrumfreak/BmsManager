@@ -40,10 +40,10 @@ namespace BmsManager
         {
             this.data = data;
 
-            OpenUrl = CreateCommand(input => openUrl(data.Url), input => !string.IsNullOrEmpty(data.Url));
-            OpenDiffUrl = CreateCommand(input => openUrl(data.DiffUrl), input => !string.IsNullOrEmpty(data.DiffUrl));
-            OpenPackUrl = CreateCommand(input => openUrl(data.PackUrl), input => !string.IsNullOrEmpty(data.PackUrl));
-            OpenLR2IR = CreateCommand(input => openUrl($"http://www.dream-pro.info/~lavalse/LR2IR/search.cgi?mode=ranking&bmsmd5={data.MD5}"), input => !string.IsNullOrEmpty(data.MD5));
+            OpenUrl = CreateCommand(() => openUrl(data.Url), () => !string.IsNullOrEmpty(data.Url));
+            OpenDiffUrl = CreateCommand(() => openUrl(data.DiffUrl), () => !string.IsNullOrEmpty(data.DiffUrl));
+            OpenPackUrl = CreateCommand(() => openUrl(data.PackUrl), () => !string.IsNullOrEmpty(data.PackUrl));
+            OpenLR2IR = CreateCommand(() => openUrl($"http://www.dream-pro.info/~lavalse/LR2IR/search.cgi?mode=ranking&bmsmd5={data.MD5}"), () => !string.IsNullOrEmpty(data.MD5));
         }
 
         private void openUrl(string url)

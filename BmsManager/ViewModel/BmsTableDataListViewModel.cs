@@ -35,8 +35,8 @@ namespace BmsManager
 
         public BmsTableDataListViewModel()
         {
-            ChangeNarrowing = CreateCommand(input => loadTableData());
-            DownloadAll = CreateCommand(async input => await downloadAllAsync());
+            ChangeNarrowing = CreateCommand(loadTableData);
+            DownloadAll = CreateCommand(downloadAllAsync);
         }
 
         private void loadTableData()

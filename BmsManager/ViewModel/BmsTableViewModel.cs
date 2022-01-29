@@ -34,7 +34,7 @@ namespace BmsManager
             Name = table.Name;
             this.table = table;
             Children = table.Difficulties.Select(d => new BmsTableViewModel(d));
-            Reload = CreateCommand(async input => await reload());
+            Reload = CreateCommand(reload);
         }
 
         private async Task reload()

@@ -24,8 +24,8 @@ namespace BmsManager
         {
             FileList = new BmsFileListViewModel();
 
-            CheckByMD5 = CreateCommand(input => checkByMD5());
-            CheckByMeta = CreateCommand(input => checkByMeta());
+            CheckByMD5 = CreateCommand(checkByMD5);
+            CheckByMeta = CreateCommand(checkByMeta);
         }
 
         private void checkByMD5()

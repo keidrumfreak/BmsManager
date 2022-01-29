@@ -47,9 +47,9 @@ namespace BmsManager
             this.vm = vm;
             this.parent = parent;
 
-            LoadFromFileSystem = CreateCommand(input => Task.Run(() => loadFromFileSystem()));
+            LoadFromFileSystem = CreateCommand(() => Task.Run(() => loadFromFileSystem()));
             LoadFromDB = CreateCommand(loadFromDB);
-            Remove = CreateCommand(input => remove());
+            Remove = CreateCommand(remove);
 
             if (root.Children == null)
                 Children = null;
@@ -70,7 +70,7 @@ namespace BmsManager
             Folders = new ObservableCollection<BmsFolderViewModel>(root.Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).Select(f => new BmsFolderViewModel(f, this)).ToArray());
         }
 
-        private void loadFromDB(object input)
+        private void loadFromDB()
         {
             root.LoadFromDB();
             if (root.Children == null)

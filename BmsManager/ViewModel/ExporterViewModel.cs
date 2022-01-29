@@ -21,7 +21,7 @@ namespace BmsManager
 
         public ExporterViewModel()
         {
-            Export = CreateCommand(async input => await export());
+            Export = CreateCommand(export);
         }
 
         private async Task export()

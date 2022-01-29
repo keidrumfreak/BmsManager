@@ -33,7 +33,7 @@ namespace BmsManager
             BmsTables = new ObservableCollection<BmsTableViewModel>(BmsTable.LoadAllTalbes().Select(t => new BmsTableViewModel(t, this)).ToList());
         }
 
-        public async void loadFromUrlAsync(object input)
+        public async void loadFromUrlAsync()
         {
             using (var con = new BmsManagerContext())
             {

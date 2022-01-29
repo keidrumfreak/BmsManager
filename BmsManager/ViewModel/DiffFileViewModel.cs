@@ -40,7 +40,7 @@ namespace BmsManager
 
             MD5 = bms.MD5;
 
-            EstimateDestination = CreateCommand(input => GetEstimatedDestination());
+            EstimateDestination = CreateCommand(GetEstimatedDestination);
         }
 
         public void GetEstimatedDestination()
