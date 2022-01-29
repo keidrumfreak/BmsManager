@@ -10,7 +10,7 @@ using CommonLib.Wpf;
 
 namespace BmsManager
 {
-    class BmsFileListViewModel : ViewModelBase, IBmsFolderParentViewModel
+    class BmsFileListViewModel : ViewModelBase
     {
         public ObservableCollection<BmsFile> BmsFiles
         {
@@ -31,8 +31,8 @@ namespace BmsManager
             }
         }
 
-        ObservableCollection<BmsFolderViewModel> folders;
-        public ObservableCollection<BmsFolderViewModel> Folders
+        ObservableCollection<BmsFolder> folders;
+        public ObservableCollection<BmsFolder> Folders
         {
             get { return folders; }
             set { SetProperty(ref folders, value); OnPropertyChanged(nameof(BmsFiles)); }

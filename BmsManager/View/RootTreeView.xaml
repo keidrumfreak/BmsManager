@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BmsManager"
+             xmlns:data="clr-namespace:BmsManager.Data"
              d:DataContext="{d:DesignInstance Type=local:RootTreeViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -24,13 +25,19 @@
         <Button Grid.Row="0" Grid.Column ="1" Margin="5" Content="ルートフォルダ登録" Command="{Binding AddRoot}"/>
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding RootTree}" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="local:RootDirectoryViewModel" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding FolderPath}">
+                <HierarchicalDataTemplate DataType="data:RootDirectory" ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Path}" Tag="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=DataContext}">
                         <TextBlock.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="フォルダ読み込み" Command="{Binding LoadFromFileSystem}"/>
-                                <MenuItem Header="DB読み込み" Command="{Binding LoadFromDB}"/>
-                                <MenuItem Header="登録解除" Command="{Binding Remove}"/>
+                                <MenuItem Header="フォルダ読み込み"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.LoadFromFileSystem}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                <MenuItem Header="DB読み込み"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.LoadFromDB}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                <MenuItem Header="登録解除"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.Remove}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
                             </ContextMenu>
                         </TextBlock.ContextMenu>
                     </TextBlock>

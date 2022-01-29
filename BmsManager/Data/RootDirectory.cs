@@ -41,6 +41,9 @@ namespace BmsManager.Data
             set { SetProperty(ref loadingPath, value); }
         }
 
+        [NotMapped]
+        public BmsFolder[] DescendantFolders => Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
+
         public void LoadFromFileSystem(RootDirectory root = null, IEnumerable<RootDirectory> cacheRoots = null, IEnumerable<BmsFolder> cacheFolders = null, IEnumerable<BmsFile> cacheFiles = null, Task parentRegister = null, List<Task> allTasks = null)
         {
             IEnumerable<RootDirectory> dbRoots = cacheRoots;
@@ -213,37 +216,30 @@ namespace BmsManager.Data
                         };
                         rootRegisterer = Task.Run(async () =>
                         {
-                            try
+                            if (parentRegister != null)
+                                await parentRegister;
+                            child.ParentRootID = ID;
+                            using var context = new BmsManagerContext();
+                            //con.ChangeTracker.AutoDetectChangesEnabled = false;
+                            //con.RootDirectories.Add(child);
+                            //con.SaveChanges();
+                            using var con = context.Database.GetDbConnection();
+                            con.Open();
+                            using (var cmd = con.CreateCommand())
                             {
-                                if (parentRegister != null)
-                                    await parentRegister;
-                                child.ParentRootID = ID;
-                                using var context = new BmsManagerContext();
-                                //con.ChangeTracker.AutoDetectChangesEnabled = false;
-                                //con.RootDirectories.Add(child);
-                                //con.SaveChanges();
-                                using var con = context.Database.GetDbConnection();
-                                con.Open();
-                                using (var cmd = con.CreateCommand())
-                                {
-                                    cmd.CommandText = $"INSERT INTO RootDirectory (Path,ParentRootID,FolderUpdateDate) VALUES (@{nameof(Path)},@{nameof(ParentRootID)},@{nameof(FolderUpdateDate)})";
-                                    cmd.AddParameter($"{nameof(Path)}", child.Path, DbType.String);
-                                    cmd.AddParameter($"{nameof(ParentRootID)}", child.ParentRootID, DbType.Int32);
-                                    cmd.AddParameter($"{nameof(FolderUpdateDate)}", child.FolderUpdateDate, DbType.DateTime);
-                                    cmd.ExecuteNonQuery();
-                                }
-                                using (var cmd = con.CreateCommand())
-                                {
-                                    cmd.CommandText = $"SELECT ID FROM RootDirectory WHERE Path = @{nameof(Path)}";
-                                    cmd.AddParameter($"@{nameof(Path)}", child.Path, DbType.String);
-                                    var reader = cmd.ExecuteReader();
-                                    reader.Read();
-                                    child.ID = unchecked((int)reader[0]); // SQLServer(int) と SQLite(long)でDataReaderから返ってくる型が違う
-                                }
+                                cmd.CommandText = $"INSERT INTO RootDirectory (Path,ParentRootID,FolderUpdateDate) VALUES (@{nameof(Path)},@{nameof(ParentRootID)},@{nameof(FolderUpdateDate)})";
+                                cmd.AddParameter($"{nameof(Path)}", child.Path, DbType.String);
+                                cmd.AddParameter($"{nameof(ParentRootID)}", child.ParentRootID, DbType.Int32);
+                                cmd.AddParameter($"{nameof(FolderUpdateDate)}", child.FolderUpdateDate, DbType.DateTime);
+                                cmd.ExecuteNonQuery();
                             }
-                            catch (Exception ex)
+                            using (var cmd = con.CreateCommand())
                             {
-
+                                cmd.CommandText = $"SELECT ID FROM RootDirectory WHERE Path = @{nameof(Path)}";
+                                cmd.AddParameter($"@{nameof(Path)}", child.Path, DbType.String);
+                                var reader = cmd.ExecuteReader();
+                                reader.Read();
+                                child.ID = Convert.ToInt32(reader[0]);
                             }
                         });
                     }
@@ -331,9 +327,15 @@ namespace BmsManager.Data
                     }
                 }
 
+                // 親子関係を放り込む
                 foreach (var parent in allRoots)
                 {
-                    parent.Children = allRoots.Where(r => r.ParentRootID == parent.ID).ToList();
+                    var children = allRoots.Where(r => r.ParentRootID == parent.ID);
+                    parent.Children = children.ToList();
+                    foreach (var child in children)
+                    {
+                        child.Parent = parent;
+                    }
                 }
 
                 var root = allRoots.FirstOrDefault(r => r.Path == Path);
@@ -344,6 +346,8 @@ namespace BmsManager.Data
                 Children = root.Children;
                 Folders = root.Folders;
             }
+            OnPropertyChanged(nameof(Children));
+            OnPropertyChanged(nameof(Folders));
         }
 
         public void Register()
@@ -468,6 +472,8 @@ namespace BmsManager.Data
 
                 con.SaveChanges();
             }
+            OnPropertyChanged(nameof(Children));
+            OnPropertyChanged(nameof(Folders));
         }
 
         public IEnumerable<RootDirectory> Descendants()

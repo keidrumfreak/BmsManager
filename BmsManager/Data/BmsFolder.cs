@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CommonLib.IO;
 using CommonLib.Linq;
+using CommonLib.Wpf;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SysPath = System.IO.Path;
@@ -18,7 +19,7 @@ using SysPath = System.IO.Path;
 namespace BmsManager.Data
 {
     [Table("BmsFolder")]
-    class BmsFolder
+    class BmsFolder : BindableBase
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
@@ -43,8 +44,13 @@ namespace BmsManager.Data
         [ForeignKey(nameof(RootID))]
         public virtual RootDirectory Root { get; set; }
 
+        IEnumerable<BmsFolder> duplicates;
         [NotMapped]
-        public IEnumerable<BmsFolder> Duplicates { get; set; }
+        public IEnumerable<BmsFolder> Duplicates
+        {
+            get => duplicates;
+            set => SetProperty(ref duplicates, value);
+        }
 
         public void Rename()
         {
@@ -158,7 +164,7 @@ VALUES
                     cmd.AddParameter($"@{nameof(Path)}", Path, DbType.String);
                     var reader = cmd.ExecuteReader();
                     reader.Read();
-                    ID = unchecked((int)reader[0]); // SQLServer(int) と SQLite(long)でDataReaderから返ってくる型が違う
+                    ID = Convert.ToInt32(reader[0]);
                 }
             }
 

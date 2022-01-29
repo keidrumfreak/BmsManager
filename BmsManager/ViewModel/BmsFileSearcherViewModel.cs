@@ -14,8 +14,8 @@ namespace BmsManager
 {
     class BmsFileSearcherViewModel : ViewModelBase
     {
-        RootDirectoryViewModel root;
-        public RootDirectoryViewModel RootDirectory
+        RootDirectory root;
+        public RootDirectory RootDirectory
         {
             get { return root; }
             set
@@ -24,14 +24,15 @@ namespace BmsManager
                     root.PropertyChanged -= Root_PropertyChanged;
 
                 root = value;
-                root.PropertyChanged += Root_PropertyChanged;
+                if (root != null)
+                    root.PropertyChanged += Root_PropertyChanged;
                 search();
             }
         }
 
         private void Root_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(RootDirectoryViewModel.Folders))
+            if (e.PropertyName == nameof(RootDirectory.Folders))
                 search();
         }
 
@@ -82,19 +83,22 @@ namespace BmsManager
 
         private void search()
         {
+            if (root == null)
+                return;
+
             if (string.IsNullOrEmpty(SearchText))
             {
-                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(root.Folders.ToArray());
+                FileList.Folders = new ObservableCollection<BmsFolder>(root.DescendantFolders);
                 return;
             }
 
-            FileList.Folders = new ObservableCollection<BmsFolderViewModel>(inner(root).ToArray());
+            FileList.Folders = new ObservableCollection<BmsFolder>(inner(root).ToArray());
 
-            IEnumerable<BmsFolderViewModel> inner(RootDirectoryViewModel root)
+            IEnumerable<BmsFolder> inner(RootDirectory root)
             {
-                if (root.Folders != null)
+                if (root.DescendantFolders != null)
                 {
-                    foreach (var folder in root.Folders)
+                    foreach (var folder in root.DescendantFolders)
                     {
                         var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
                         if (!files.Any()) continue;
@@ -150,7 +154,7 @@ namespace BmsManager
                 }
             }
 
-            RootDirectory.LoadFromFileSystem.Execute(null);
+            //RootDirectory.LoadFromFileSystem.Execute(null);
 
             search();
         }

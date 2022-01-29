@@ -45,7 +45,7 @@ namespace BmsManager
                 else
                 {
                     if (selectedDiffFile.Folders != null)
-                        FileList.Folders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders.Select(f => new BmsFolderViewModel(f, FileList, selectedDiffFile)));
+                        FileList.Folders = new ObservableCollection<BmsFolder>(selectedDiffFile.Folders.ToArray());
                     selectedDiffFile.PropertyChanged += DiffFile_PropertyChanged;
                 }
             }
@@ -138,7 +138,7 @@ namespace BmsManager
         {
             if (e.PropertyName == nameof(DiffFileViewModel.Folders))
             {
-                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders.Select(f => new BmsFolderViewModel(f, FileList, SelectedDiffFile)));
+                FileList.Folders = new ObservableCollection<BmsFolder>(selectedDiffFile.Folders);
             }
         }
 
