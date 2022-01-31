@@ -19,12 +19,19 @@
         <DataGrid Margin="5" Grid.Row="0" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
+                    <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=DataContext}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
-                                <MenuItem Header="エクスプローラで開く" Command="{Binding OpenFolder}"/>
-                                <MenuItem Header="このフォルダに統合する" Command="{Binding Merge}"/>
-                                <MenuItem Header="このフォルダにインストール" Command="{Binding Install}"/>
+                                <MenuItem Header="エクスプローラで開く"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.OpenFolder}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                <MenuItem Header="このフォルダに統合する"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.Merge}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                <MenuItem Header="このフォルダにインストール"
+                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.Install}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>

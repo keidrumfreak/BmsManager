@@ -52,6 +52,8 @@ namespace BmsManager
 
         public IEnumerable<BmsFolder> Duplicates { get; set; }
 
+        public IEnumerable<DiffFileViewModel> DiffFiles { get; set; }
+
         BmsFolder folder;
         IBmsFolderParentViewModel parent;
         DiffFileViewModel diffFile;

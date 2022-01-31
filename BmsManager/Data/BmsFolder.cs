@@ -9,6 +9,8 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using BmsParser;
 using CommonLib.IO;
 using CommonLib.Linq;
 using CommonLib.Wpf;
@@ -45,10 +47,13 @@ namespace BmsManager.Data
         public virtual RootDirectory Root { get; set; }
 
         IEnumerable<BmsFolder> duplicates;
+        /// <summary>
+        /// 重複フォルダ
+        /// </summary>
         [NotMapped]
         public IEnumerable<BmsFolder> Duplicates
         {
-            get => duplicates;
+            get => duplicates ?? Array.Empty<BmsFolder>();
             set => SetProperty(ref duplicates, value);
         }
 
@@ -298,6 +303,112 @@ VALUES
                         cmd.ExecuteNonQuery();
                     }
                 }
+            }
+        }
+
+        public void Merge()
+        {
+            var roots = Duplicates.Select(d => d.Root).ToArray();
+            var ext = Settings.Default.Extentions;
+
+            foreach (var fol in Duplicates)
+            {
+                foreach (var file in fol.Files)
+                {
+                    // 重複BMSファイルは先に削除しておく
+                    if (Files.Any(f => f.MD5 == file.MD5))
+                    {
+                        if (SystemProvider.FileSystem.File.Exists(file.Path))
+                            SystemProvider.FileSystem.File.Delete(file.Path);
+                    }
+                }
+
+                if (SystemProvider.FileSystem.Directory.Exists(fol.Path))
+                {
+                    foreach (var file in SystemProvider.FileSystem.Directory.EnumerateFiles(fol.Path, "*.*", SearchOption.AllDirectories))
+                    {
+                        try
+                        {
+                            var toPath = PathUtil.Combine(Path, SysPath.GetFileName(file));
+                            var fileExt = SysPath.GetExtension(file); // 拡張子が存在しない場合もある
+                            if (fileExt.Length > 1 && ext.Contains(fileExt.Substring(1)))
+                            {
+                                var i = 1;
+                                var dst = toPath;
+                                while (SystemProvider.FileSystem.File.Exists(toPath))
+                                {
+                                    i++;
+                                    toPath = $"{dst} ({i})";
+                                }
+                            }
+
+                            // 統合先のファイルを正とみなす
+                            if (!SystemProvider.FileSystem.File.Exists(toPath))
+                                SystemProvider.FileSystem.File.Move(file, toPath, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.ToString());
+                            return;
+                        }
+                    }
+                }
+
+                try
+                {
+                    SystemProvider.FileSystem.Directory.Delete(fol.Path, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                    return;
+                }
+            }
+
+            foreach (var root in roots)
+            {
+                root.LoadFromFileSystem();
+                root.Register();
+            }
+            Root.LoadFromFileSystem();
+            Root.Register();
+
+            //Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(this));
+        }
+
+        public void Install(BmsModel diffFile)
+        {
+            try
+            {
+                if (Files.Any(f => f.MD5 == diffFile.MD5))
+                {
+                    // 重複する場合はインストールしない
+                    File.Delete(diffFile.Path);
+                    return;
+                }
+
+                var toPath = PathUtil.Combine(Path, SysPath.GetFileName(diffFile.Path));
+                var i = 1;
+                var dst = toPath;
+                while (SystemProvider.FileSystem.File.Exists(toPath))
+                {
+                    i++;
+                    toPath = PathUtil.Combine(Path, $"{SysPath.GetFileNameWithoutExtension(dst)} ({i}){SysPath.GetExtension(dst)}");
+                }
+
+                SystemProvider.FileSystem.File.Move(diffFile.Path, toPath);
+
+                using (var con = new BmsManagerContext())
+                {
+                    var fol = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
+                    var file = new BmsFile(toPath);
+                    fol.Files.Add(file);
+                    con.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
         }
     }

@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
+using BmsParser;
 using CommonLib.Wpf;
 
 namespace BmsManager
@@ -22,7 +26,7 @@ namespace BmsManager
                 }
                 else if (Narrowed && SelectedBmsFolder != null)
                 {
-                    return SelectedBmsFolder.Files;
+                    return new ObservableCollection<BmsFile>(SelectedBmsFolder.Files);
                 }
                 else
                 {
@@ -38,8 +42,8 @@ namespace BmsManager
             set { SetProperty(ref folders, value); OnPropertyChanged(nameof(BmsFiles)); }
         }
 
-        BmsFolderViewModel selectedBmsFolder;
-        public BmsFolderViewModel SelectedBmsFolder
+        BmsFolder selectedBmsFolder;
+        public BmsFolder SelectedBmsFolder
         {
             get { return selectedBmsFolder; }
             set { SetProperty(ref selectedBmsFolder, value); OnPropertyChanged(nameof(BmsFiles)); }
@@ -52,16 +56,24 @@ namespace BmsManager
             set { SetProperty(ref selectedBmsFile, value); }
         }
 
+        public BmsModel SelectedDiffFile { get; set; }
+
         public bool Narrowed { get; set; }
 
         public ICommand ChangeNarrowing { get; set; }
 
         public ICommand DeleteFile { get; set; }
 
+        public ICommand OpenFolder { get; set; }
+
+        public ICommand Merge { get; set; }
+
         public BmsFileListViewModel()
         {
             ChangeNarrowing = CreateCommand(() => OnPropertyChanged(nameof(BmsFiles)));
             DeleteFile = CreateCommand<BmsFile>(deleteFileAsync);
+            OpenFolder = CreateCommand<BmsFolder>(openFolder);
+            Merge = CreateCommand<BmsFolder>(merge);
         }
 
         private async Task deleteFileAsync(BmsFile file)
@@ -69,5 +81,15 @@ namespace BmsManager
             await file.DeleteAsync();
             BmsFiles.Remove(file);
         }
+
+        private void openFolder(BmsFolder folder)
+        {
+            Process.Start(new ProcessStartInfo { FileName = folder.Path, UseShellExecute = true, Verb = "open" });
+        }
+        public void merge(BmsFolder folder)
+        {
+            folder.Merge();
+        }
+
     }
 }
