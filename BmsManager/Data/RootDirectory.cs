@@ -288,6 +288,8 @@ namespace BmsManager.Data
                 foreach (var folder in folders.GroupBy(f => f.RootID))
                 {
                     var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
+                    if (parent == null)
+                        continue;
                     parent.Folders = folder.ToList();
                     foreach (var fol in folder)
                     {
