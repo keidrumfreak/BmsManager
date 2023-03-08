@@ -2,7 +2,7 @@
 
 ## BMSファイルの管理支援ツール
 
-* 動作環境 : .NET5.0 ( https://dotnet.microsoft.com/download/dotnet/5.0 )
+* 動作環境 : .NET6.0 ( https://dotnet.microsoft.com/ja-jp/download/dotnet/6.0 )
   * LR2,beatoraja等は無くても動きます
 * 推奨環境 : SQLServer2019導入
   * SQLiteを使用したモードもあるので、SQLServer導入しなくても動きます。その場合接続文字列は無視して、exeと同階層に ```bms.db``` を作成します
