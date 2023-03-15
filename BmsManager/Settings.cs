@@ -34,6 +34,8 @@ namespace BmsManager
             public string BmsManagerConnectionStrings { get; set; }
             public string DatabaseKind { get; set; }
             public string[] Extentions { get; set; }
+
+            public string LogFolder { get; set; }
         }
     }
 }
