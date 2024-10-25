@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
 using CommonLib.Wpf;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager
@@ -40,14 +41,14 @@ namespace BmsManager
 
             RootTree = new ObservableCollection<RootDirectory>(RootDirectory.LoadTopRoot());
 
-            LoadFromFileSystem = CreateCommand<RootDirectory>(loadFromFileSystem);
+            LoadFromFileSystem = new AsyncRelayCommand<RootDirectory>(loadFromFileSystem);
             LoadFromDB = CreateCommand<RootDirectory>(loadFromDB);
             Remove = CreateCommand<RootDirectory>(remove);
         }
 
-        private void loadFromFileSystem(RootDirectory root)
+        private async Task loadFromFileSystem(RootDirectory root)
         {
-            root.LoadFromFileSystem();
+            await Task.Run(() => root.LoadFromFileSystem());
         }
 
         private void loadFromDB(RootDirectory root)
@@ -108,7 +109,7 @@ namespace BmsManager
                 var root = new RootDirectory
                 {
                     Path = TargetDirectory,
-                    FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(TargetDirectory).LastWriteTimeUtc
+                    FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.New(TargetDirectory).LastWriteTimeUtc
                 };
                 var parent = con.RootDirectories.FirstOrDefault(r => r.Path == Path.GetDirectoryName(TargetDirectory));
                 if (parent != default)

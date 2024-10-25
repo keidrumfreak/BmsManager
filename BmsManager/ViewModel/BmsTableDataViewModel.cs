@@ -64,7 +64,7 @@ namespace BmsManager
                         var client = HttpClientProvider.GetClient();
                         using (var res = await client.GetAsync(data.DiffUrl))
                         using (var stream = await res.Content.ReadAsStreamAsync())
-                        using (var fs = SystemProvider.FileSystem.FileStream.Create(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (var fs = SystemProvider.FileSystem.FileStream.New(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             stream.CopyTo(fs);
                         }
@@ -86,7 +86,7 @@ namespace BmsManager
                         var client = HttpClientProvider.GetClient();
                         using (var res = await client.GetAsync(data.PackUrl))
                         using (var stream = await res.Content.ReadAsStreamAsync())
-                        using (var fs = SystemProvider.FileSystem.FileStream.Create(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (var fs = SystemProvider.FileSystem.FileStream.New(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             stream.CopyTo(fs);
                         }

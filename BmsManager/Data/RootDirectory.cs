@@ -67,7 +67,7 @@ namespace BmsManager.Data
             var extentions = Settings.Default.Extentions;
             Folders = new List<BmsFolder>();
             Children = new List<RootDirectory>();
-            FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(Path).LastWriteTimeUtc;
+            FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.New(Path).LastWriteTimeUtc;
             var folders = SystemProvider.FileSystem.Directory.EnumerateDirectories(Path).ToArray();
 
             allTasks.Add(Task.Run(() =>
@@ -94,7 +94,7 @@ namespace BmsManager.Data
             {
                 (root ?? this).LoadingPath = folder;
 
-                var updateDate = SystemProvider.FileSystem.DirectoryInfo.FromDirectoryName(folder).LastWriteTimeUtc;
+                var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(folder).LastWriteTimeUtc;
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
                     .Where(f =>
                     extentions.Concat(new[] { "txt" }).Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())

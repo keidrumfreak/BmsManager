@@ -17,9 +17,9 @@ namespace BmsManager
             // Javaのコードの実行結果と一致させるための実装。要調査
             var polynomial = 0xEDB88320u;
             var crc = ~0;
-            foreach (var b in Encoding.GetEncoding("shift-jis").GetBytes(path + "\\\0").Cast<sbyte>())
+            foreach (var b in Encoding.GetEncoding("shift-jis").GetBytes(path + "\\\0"))
             {
-                crc ^= b; // sbyteにしない場合ここで差異が出ていると思われる
+                crc ^= (sbyte)b; // sbyteにしない場合ここで差異が出ていると思われる
                 for (var i = 0; i < 8; i++)
                 {
                     if ((crc & 1) != 0)
