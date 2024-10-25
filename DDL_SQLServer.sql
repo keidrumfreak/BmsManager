@@ -188,7 +188,7 @@ GO
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[BmsFile]    Script Date: 2021/08/12 19:12:17 ******/
+/****** Object:  Table [dbo].[BmsFile]    Script Date: 2024/10/25 22:44:37 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -221,6 +221,8 @@ CREATE TABLE [dbo].[BmsFile](
 	[Feature] [int] NOT NULL,
 	[Content] [int] NOT NULL,
 	[ChartHash] [nvarchar](max) NULL,
+	[HasBga] [bit] NOT NULL,
+	[IsNoKeySound] [bit] NOT NULL,
 	[N] [int] NOT NULL,
 	[LN] [int] NOT NULL,
 	[S] [int] NOT NULL,
