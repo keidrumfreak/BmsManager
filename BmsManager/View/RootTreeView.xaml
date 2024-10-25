@@ -5,9 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BmsManager"
              xmlns:data="clr-namespace:BmsManager.Data"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              d:DataContext="{d:DesignInstance Type=local:RootTreeViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding LoadRootTree}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type local:RootTreeViewModel}"/>
     </UserControl.Resources>
@@ -23,7 +29,7 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <TextBox Grid.Row="0" Grid.Column="0" Margin="5" Text="{Binding TargetDirectory, Mode=TwoWay}"/>
-        <Button Grid.Row="0" Grid.Column="1" Margin="5" Content="参照" />
+        <Button Grid.Row="0" Grid.Column="1" Margin="5" Content="参照" Command="{Binding SelectFolder}" />
         <Button Grid.Row="0" Grid.Column ="2" Margin="5" Content="ルートフォルダ登録" Command="{Binding AddRoot}"/>
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" ItemsSource="{Binding RootTree}" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>

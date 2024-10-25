@@ -273,36 +273,40 @@ namespace BmsManager.Data
             LoadingPath = string.Empty;
         }
 
-        public static IEnumerable<RootDirectory> LoadTopRoot()
+        public static async Task<IEnumerable<RootDirectory>> LoadTopRootAsync()
         {
             using (var con = new BmsManagerContext())
             {
                 // TODO: 検索処理の改善 (EntityFrameworkの改善待ち)
-                var folders = con.BmsFolders
-                    .Include(f => f.Files)
-                    .AsNoTracking().ToArray();
+                var roots = await con.RootDirectories
+                    .Include(r => r.Folders)
+                    .ThenInclude(f => f.Files)
+                    .AsNoTracking().ToArrayAsync();
+                //var folders = con.BmsFolders
+                //    .Include(f => f.Files)
+                //    .AsNoTracking().ToArray();
 
-                var allRoots = con.RootDirectories
-                    .AsNoTracking().ToArray();
+                //var allRoots = con.RootDirectories
+                //    .AsNoTracking().ToArray();
 
-                foreach (var folder in folders.GroupBy(f => f.RootID))
+                //foreach (var folder in folders.GroupBy(f => f.RootID))
+                //{
+                //    var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
+                //    if (parent == null)
+                //        continue;
+                //    parent.Folders = folder.ToList();
+                //    foreach (var fol in folder)
+                //    {
+                //        fol.Root = parent;
+                //    }
+                //}
+
+                foreach (var parent in roots)
                 {
-                    var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
-                    if (parent == null)
-                        continue;
-                    parent.Folders = folder.ToList();
-                    foreach (var fol in folder)
-                    {
-                        fol.Root = parent;
-                    }
+                    parent.Children = roots.Where(r => r.ParentRootID == parent.ID).ToList();
                 }
 
-                foreach (var parent in allRoots)
-                {
-                    parent.Children = allRoots.Where(r => r.ParentRootID == parent.ID).ToList();
-                }
-
-                return allRoots.Where(r => r.ParentRootID == null).ToArray();
+                return roots.Where(r => r.ParentRootID == null).ToArray();
             }
         }
 

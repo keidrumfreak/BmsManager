@@ -9,22 +9,34 @@ using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
 using CommonLib.Wpf;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 
 namespace BmsManager
 {
-    class RootTreeViewModel : ViewModelBase
+    class RootTreeViewModel : ObservableObject
     {
-        public string TargetDirectory { get; set; }
+        string targetDirectory;
+        public string TargetDirectory
+        {
+            get => targetDirectory;
+            set => SetProperty(ref targetDirectory, value);
+        }
 
-        public ObservableCollection<RootDirectory> RootTree { get; set; }
+        ObservableCollection<RootDirectory> rootTree;
+        public ObservableCollection<RootDirectory> RootTree
+        {
+            get => rootTree;
+            set => SetProperty(ref rootTree, value);
+        }
 
         RootDirectory selectedRoot;
         public RootDirectory SelectedRoot
         {
-            get { return selectedRoot; }
-            set { SetProperty(ref selectedRoot, value); }
+            get => selectedRoot;
+            set => SetProperty(ref selectedRoot, value);
         }
 
         public ICommand AddRoot { get; set; }
@@ -35,15 +47,33 @@ namespace BmsManager
 
         public ICommand Remove { get; set; }
 
+        public ICommand SelectFolder { get; }
+
+        public ICommand LoadRootTree { get; }
+
         public RootTreeViewModel()
         {
-            AddRoot = CreateCommand(addRoot);
-
-            RootTree = new ObservableCollection<RootDirectory>(RootDirectory.LoadTopRoot());
-
+            AddRoot = new AsyncRelayCommand(addRoot);
+            LoadRootTree = new AsyncRelayCommand(loadRootTree);
+            SelectFolder = new RelayCommand(selectFolder);
             LoadFromFileSystem = new AsyncRelayCommand<RootDirectory>(loadFromFileSystem);
-            LoadFromDB = CreateCommand<RootDirectory>(loadFromDB);
-            Remove = CreateCommand<RootDirectory>(remove);
+            LoadFromDB = new RelayCommand<RootDirectory>(loadFromDB);
+            Remove = new RelayCommand<RootDirectory>(remove);
+        }
+
+        private async Task loadRootTree()
+        {
+            RootTree = new ObservableCollection<RootDirectory> { new RootDirectory { Path = "loading..." } };
+            RootTree = new ObservableCollection<RootDirectory>(await RootDirectory.LoadTopRootAsync());
+        }
+
+        private void selectFolder()
+        {
+            var dialog = new OpenFolderDialog() { Multiselect = false };
+            if (dialog.ShowDialog() ?? false)
+            {
+                TargetDirectory = dialog.FolderName;
+            }
         }
 
         private async Task loadFromFileSystem(RootDirectory root)
@@ -93,7 +123,7 @@ namespace BmsManager
             }
         }
 
-        private void addRoot()
+        private async Task addRoot()
         {
             if (string.IsNullOrEmpty(TargetDirectory))
                 return;
@@ -117,7 +147,7 @@ namespace BmsManager
                 con.RootDirectories.Add(root);
                 con.SaveChanges();
 
-                RootTree.Add(root);
+                await loadRootTree();
             }
         }
     }
