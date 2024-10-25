@@ -219,7 +219,6 @@ CREATE TABLE [dbo].[BmsFile](
 	[Length] [int] NOT NULL,
 	[Notes] [int] NOT NULL,
 	[Feature] [int] NOT NULL,
-	[Content] [int] NOT NULL,
 	[ChartHash] [nvarchar](max) NULL,
 	[HasBga] [bit] NOT NULL,
 	[IsNoKeySound] [bit] NOT NULL,
