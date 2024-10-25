@@ -130,7 +130,7 @@ namespace BmsManager.Data
             context.SaveChanges();
         }
 
-        public void Register()
+        public async Task RegisterAsync()
         {
             using (var context = new BmsManagerContext())
             using (var con = context.Database.GetDbConnection())
@@ -167,7 +167,7 @@ VALUES
                 {
                     cmd.CommandText = $"SELECT ID FROM BmsFolder WHERE Path = @{nameof(Path)}";
                     cmd.AddParameter($"@{nameof(Path)}", Path, DbType.String);
-                    var reader = cmd.ExecuteReader();
+                    var reader = await cmd.ExecuteReaderAsync();
                     reader.Read();
                     ID = Convert.ToInt32(reader[0]);
                 }
@@ -300,7 +300,7 @@ VALUES
                         }
                         sql.Remove(sql.Length - 3, 3);
                         cmd.CommandText = sql.ToString();
-                        cmd.ExecuteNonQuery();
+                        await cmd.ExecuteNonQueryAsync();
                     }
                 }
             }

@@ -52,6 +52,6 @@
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
-        <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding SelectedRoot.LoadingPath}"/>
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{Binding LoadingPath}"/>
     </Grid>
 </UserControl>

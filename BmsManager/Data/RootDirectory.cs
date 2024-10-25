@@ -138,7 +138,7 @@ namespace BmsManager.Data
                                 //con.ChangeTracker.AutoDetectChangesEnabled = false;
                                 //con.BmsFolders.Add(bmsFolder);
                                 //con.SaveChanges();
-                                bmsFolder.Register();
+                                bmsFolder.RegisterAsync();
                             });
                         }
                         else
