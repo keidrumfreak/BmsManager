@@ -79,7 +79,7 @@ namespace BmsManager.Model
         public async Task LoadFromFileSystemAsync(RootDirectory root)
         {
             using var con = new BmsManagerContext();
-            var roots = await con.RootDirectories.AsNoTracking().ToArrayAsync().ConfigureAwait(false);
+            var roots = await con.RootDirectories.AsNoTracking().ToListAsync().ConfigureAwait(false);
             var folders = await con.BmsFolders.AsNoTracking().ToArrayAsync().ConfigureAwait(false);
             var files = await con.Files.AsNoTracking().ToArrayAsync().ConfigureAwait(false);
             await loadFromFileSystemAsync(root, roots, folders, files).ConfigureAwait(false);
