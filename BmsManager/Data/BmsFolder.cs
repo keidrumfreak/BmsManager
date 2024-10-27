@@ -167,7 +167,7 @@ VALUES
                 {
                     cmd.CommandText = $"SELECT ID FROM BmsFolder WHERE Path = @{nameof(Path)}";
                     cmd.AddParameter($"@{nameof(Path)}", Path, DbType.String);
-                    var reader = await cmd.ExecuteReaderAsync();
+                    var reader = await cmd.ExecuteReaderAsync().ConfigureAwait(false);
                     reader.Read();
                     ID = Convert.ToInt32(reader[0]);
                 }
@@ -300,7 +300,7 @@ VALUES
                         }
                         sql.Remove(sql.Length - 3, 3);
                         cmd.CommandText = sql.ToString();
-                        await cmd.ExecuteNonQueryAsync();
+                        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
                     }
                 }
             }

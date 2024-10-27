@@ -29,13 +29,14 @@ namespace BmsManager.Model
             set => SetProperty(ref loadingPath, value);
         }
 
-        readonly string[] previewExt = new[] { "wav", "ogg", "mp3", "flac" };
+        readonly string[] previewExt = ["wav", "ogg", "mp3", "flac"];
 
         public async Task LoadRootTreeAsync()
         {
             RootTree = new ObservableCollection<RootDirectory> { new RootDirectory { Path = "loading..." } };
 
             var con = new BmsManagerContext();
+
             var roots = await con.RootDirectories
                 .Include(r => r.Folders)
                 .ThenInclude(f => f.Files)
@@ -78,34 +79,26 @@ namespace BmsManager.Model
 
         public async Task LoadFromFileSystemAsync(RootDirectory root)
         {
-            using var con = new BmsManagerContext();
-            var roots = await con.RootDirectories.AsNoTracking().ToListAsync().ConfigureAwait(false);
-            var folders = await con.BmsFolders.AsNoTracking().ToArrayAsync().ConfigureAwait(false);
-            var files = await con.Files.AsNoTracking().ToArrayAsync().ConfigureAwait(false);
-            await loadFromFileSystemAsync(root, roots, folders, files).ConfigureAwait(false);
-        }
-
-        private async Task loadFromFileSystemAsync(RootDirectory root, ICollection<RootDirectory> cacheRoots, IEnumerable<BmsFolder> cacheFolders, IEnumerable<BmsFile> cacheFiles)
-        {
             LoadingPath = root.Path;
 
             var folders = SystemProvider.FileSystem.Directory.EnumerateDirectories(root.Path);
 
-            var delRoot = cacheRoots.Where(c => c.ParentRootID == root.ID && !folders.Contains(c.Path));
-            if (delRoot.Any())
+            using (var con = new BmsManagerContext())
             {
-                using var con = new BmsManagerContext();
-                con.ChangeTracker.AutoDetectChangesEnabled = false;
-                con.RootDirectories.RemoveRange(delRoot);
-                await con.SaveChangesAsync().ConfigureAwait(false);
-            }
-            var delFol = cacheFolders.Where(c => c.RootID == root.ParentRootID && !folders.Contains(c.Path));
-            if (delFol.Any())
-            {
-                using var con = new BmsManagerContext();
-                con.ChangeTracker.AutoDetectChangesEnabled = false;
-                con.BmsFolders.RemoveRange(delFol);
-                await con.SaveChangesAsync().ConfigureAwait(false);
+                var delRoot = await con.RootDirectories.Where(c => c.ParentRootID == root.ID && !folders.Contains(c.Path)).ToArrayAsync().ConfigureAwait(false);
+                if (delRoot.Any())
+                {
+                    con.ChangeTracker.AutoDetectChangesEnabled = false;
+                    con.RootDirectories.RemoveRange(delRoot);
+                    await con.SaveChangesAsync().ConfigureAwait(false);
+                }
+                var delFol = await con.BmsFolders.Where(c => c.RootID == root.ParentRootID && !folders.Contains(c.Path)).ToArrayAsync().ConfigureAwait(false);
+                if (delFol.Any())
+                {
+                    con.ChangeTracker.AutoDetectChangesEnabled = false;
+                    con.BmsFolders.RemoveRange(delFol);
+                    await con.SaveChangesAsync().ConfigureAwait(false);
+                }
             }
 
             var extentions = Settings.Default.Extentions;
@@ -125,55 +118,57 @@ namespace BmsManager.Model
 
                 if (bmsFileDatas.Any())
                 {
-                    await loadBmsFolderAsync(folder, files, bmsFileDatas, root, cacheFolders, cacheFiles).ConfigureAwait(false);
+                    await loadBmsFolderAsync(folder, files, bmsFileDatas, root).ConfigureAwait(false);
                 }
                 else
                 {
-                    await loadRootDirectoryAsync(folder, root, cacheRoots, cacheFolders, cacheFiles).ConfigureAwait(false);
+                    await loadRootDirectoryAsync(folder, root).ConfigureAwait(false);
                 }
             }
 
             LoadingPath = "読込完了";
         }
 
-        private async Task loadRootDirectoryAsync(string path, RootDirectory parent, ICollection<RootDirectory> cacheRoots, IEnumerable<BmsFolder> cacheFolders, IEnumerable<BmsFile> cacheFiles)
+        private async Task loadRootDirectoryAsync(string path, RootDirectory parent)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
-            var root = cacheRoots.FirstOrDefault(c => c.Path == path);
-            if (root == default)
+            RootDirectory root;
+            using (var con = new BmsManagerContext())
             {
-                root = new RootDirectory
+                root = await con.RootDirectories.FirstOrDefaultAsync(c => c.Path == path).ConfigureAwait(false);
+                if (root == default)
                 {
-                    Path = path,
-                    FolderUpdateDate = updateDate,
-                    ParentRootID = parent.ID,
-                };
-                using var con = new BmsManagerContext();
-                con.RootDirectories.Add(root);
-                await con.SaveChangesAsync().ConfigureAwait(false);
-                cacheRoots.Add(root);
-            }
-            else
-            {
-                // 既存Root
-                if (root.FolderUpdateDate.Date != updateDate.Date
-                    && root.FolderUpdateDate.Hour != updateDate.Hour
-                    && root.FolderUpdateDate.Minute != updateDate.Minute
-                    && root.FolderUpdateDate.Second != updateDate.Second) // 何故かミリ秒がずれるのでミリ秒以外で比較
-                {
-                    using var con = new BmsManagerContext();
-                    con.RootDirectories.Find(root.ID).FolderUpdateDate = updateDate;
+                    root = new RootDirectory
+                    {
+                        Path = path,
+                        FolderUpdateDate = updateDate,
+                        ParentRootID = parent.ID,
+                    };
+                    con.RootDirectories.Add(root);
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
+                else
+                {
+                    // 既存Root
+                    if (root.FolderUpdateDate.Date != updateDate.Date
+                        && root.FolderUpdateDate.Hour != updateDate.Hour
+                        && root.FolderUpdateDate.Minute != updateDate.Minute
+                        && root.FolderUpdateDate.Second != updateDate.Second) // 何故かミリ秒がずれるのでミリ秒以外で比較
+                    {
+                        con.RootDirectories.Find(root.ID).FolderUpdateDate = updateDate;
+                        await con.SaveChangesAsync().ConfigureAwait(false);
+                    }
+                }
             }
-            await loadFromFileSystemAsync(root, cacheRoots, cacheFolders, cacheFiles).ConfigureAwait(false);
+            await LoadFromFileSystemAsync(root).ConfigureAwait(false);
         }
 
-        private async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectory parent, IEnumerable<BmsFolder> cacheFolders, IEnumerable<BmsFile> cacheFiles)
+        private async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectory parent)
         {
             LoadingPath = path;
 
-            var bmsFolder = cacheFolders.FirstOrDefault(f => f.Path == path);
+            using var con = new BmsManagerContext();
+            var bmsFolder = con.BmsFolders.FirstOrDefault(f => f.Path == path);
 
             // 読込済データの解析なので並列化
             var bmsFiles = bmsFileDatas.AsParallel().Select(d => new BmsFile(d.file, d.data)).Where(f => !string.IsNullOrEmpty(f.Path)).ToArray();
@@ -181,7 +176,6 @@ namespace BmsManager.Model
             {
                 if (bmsFolder != default)
                 {
-                    using var con = new BmsManagerContext();
                     con.BmsFolders.Remove(bmsFolder);
                 }
                 return;
@@ -210,11 +204,10 @@ namespace BmsManager.Model
             }
             else
             {
-                var childrenFiles = cacheFiles.Where(f => f.FolderID == bmsFolder.ID);
+                var childrenFiles = await con.Files.Where(f => f.FolderID == bmsFolder.ID).ToArrayAsync().ConfigureAwait(false);
                 var del = childrenFiles.Where(f => !bmsFiles.Any(e => f.MD5 == e.MD5));
                 if (del.Any())
                 {
-                    using var con = new BmsManagerContext();
                     con.ChangeTracker.AutoDetectChangesEnabled = false;
                     con.Files.RemoveRange(del);
                     await con.SaveChangesAsync().ConfigureAwait(false);
@@ -222,7 +215,6 @@ namespace BmsManager.Model
                 var upd = bmsFiles.Where(f => !childrenFiles.Any(e => e.MD5 == f.MD5));
                 if (upd.Any())
                 {
-                    using var con = new BmsManagerContext();
                     foreach (var file in upd)
                     {
                         file.FolderID = bmsFolder.ID;
