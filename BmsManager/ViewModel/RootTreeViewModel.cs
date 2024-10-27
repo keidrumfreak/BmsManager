@@ -28,14 +28,14 @@ namespace BmsManager
             set => SetProperty(ref targetDirectory, value);
         }
 
-        public ObservableCollection<RootDirectory> RootTree
+        public ObservableCollection<RootDirectoryModel> RootTree
         {
             get => model.RootTree;
             set => model.RootTree = value;
         }
 
-        RootDirectory selectedRoot;
-        public RootDirectory SelectedRoot
+        RootDirectoryModel selectedRoot;
+        public RootDirectoryModel SelectedRoot
         {
             get => selectedRoot;
             set => SetProperty(ref selectedRoot, value);
@@ -66,9 +66,9 @@ namespace BmsManager
             AddRoot = new AsyncRelayCommand(async () => await model.AddRootAsync(TargetDirectory));
             LoadRootTree = new AsyncRelayCommand(model.LoadRootTreeAsync);
             SelectFolder = new RelayCommand(selectFolder);
-            LoadFromFileSystem = new AsyncRelayCommand<RootDirectory>(model.LoadFromFileSystemAsync);
-            LoadFromDB = new RelayCommand<RootDirectory>(loadFromDB);
-            Remove = new RelayCommand<RootDirectory>(remove);
+            LoadFromFileSystem = new AsyncRelayCommand<RootDirectoryModel>(model.LoadFromFileSystemAsync);
+            LoadFromDB = new RelayCommand<RootDirectoryModel>(loadFromDB);
+            Remove = new RelayCommand<RootDirectoryModel>(remove);
         }
 
         private void selectFolder()
@@ -80,12 +80,12 @@ namespace BmsManager
             }
         }
 
-        private void loadFromDB(RootDirectory root)
+        private void loadFromDB(RootDirectoryModel root)
         {
-            root.LoadFromDB();
+            root.Root.LoadFromDB();
         }
 
-        private void remove(RootDirectory root)
+        private void remove(RootDirectoryModel root)
         {
             using (var con = new BmsManagerContext())
             {
@@ -112,13 +112,13 @@ namespace BmsManager
                 }
                 con.SaveChanges();
             }
-            if (root.Parent == null)
+            if (root.Root.Parent == null)
             {
                 RootTree.Remove(root);
             }
             else
             {
-                RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Path == root.Parent.Path)?.LoadFromDB();
+                RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
             }
         }
     }

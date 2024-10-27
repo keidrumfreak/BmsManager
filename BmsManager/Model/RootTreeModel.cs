@@ -15,8 +15,8 @@ namespace BmsManager.Model
 {
     internal class RootTreeModel : ObservableObject
     {
-        ObservableCollection<RootDirectory> rootTree;
-        public ObservableCollection<RootDirectory> RootTree
+        ObservableCollection<RootDirectoryModel> rootTree;
+        public ObservableCollection<RootDirectoryModel> RootTree
         {
             get => rootTree;
             set => SetProperty(ref rootTree, value);
@@ -33,20 +33,26 @@ namespace BmsManager.Model
 
         public async Task LoadRootTreeAsync()
         {
-            RootTree = new ObservableCollection<RootDirectory> { new RootDirectory { Path = "loading..." } };
+            RootTree = new ObservableCollection<RootDirectoryModel> { new RootDirectoryModel("loading...") };
 
             var con = new BmsManagerContext();
 
-            var roots = await con.RootDirectories
+            var roots = await con.RootDirectories.Where(r => r.ParentRootID == null)
+                .Include(r => r.Children)
                 .Include(r => r.Folders)
-                .ThenInclude(f => f.Files)
+                .ThenInclude(r => r.Files)
                 .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
-            foreach (var parent in roots)
+            //foreach (var parent in roots)
+            //{
+            //    parent.Children = roots.Where(r => r.ParentRootID == parent.ID).ToList();
+            //}
+            RootTree = new ObservableCollection<RootDirectoryModel>(roots.Select(r => new RootDirectoryModel(r)).ToArray());
+
+            foreach (var root in RootTree)
             {
-                parent.Children = roots.Where(r => r.ParentRootID == parent.ID).ToList();
+                await root.LoadChildAsync().ConfigureAwait(false);
             }
-            RootTree = new ObservableCollection<RootDirectory>(roots.Where(r => r.ParentRootID == null).ToArray());
         }
 
         public async Task AddRootAsync(string targetDirectory)
@@ -75,6 +81,11 @@ namespace BmsManager.Model
             con.RootDirectories.Add(root);
             await con.SaveChangesAsync().ConfigureAwait(false);
             await LoadRootTreeAsync().ConfigureAwait(false);
+        }
+
+        public async Task LoadFromFileSystemAsync(RootDirectoryModel root)
+        {
+            await LoadFromFileSystemAsync(root.Root).ConfigureAwait(false);
         }
 
         public async Task LoadFromFileSystemAsync(RootDirectory root)

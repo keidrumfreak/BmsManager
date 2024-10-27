@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
+using BmsManager.Model;
 using CommonLib.Wpf;
 
 namespace BmsManager
 {
     class BmsFileSearcherViewModel : ViewModelBase
     {
-        RootDirectory root;
-        public RootDirectory RootDirectory
+        RootDirectoryModel root;
+        public RootDirectoryModel RootDirectory
         {
             get { return root; }
             set
@@ -94,7 +95,7 @@ namespace BmsManager
 
             FileList.Folders = new ObservableCollection<BmsFolder>(inner(root).ToArray());
 
-            IEnumerable<BmsFolder> inner(RootDirectory root)
+            IEnumerable<BmsFolder> inner(RootDirectoryModel root)
             {
                 if (root.DescendantFolders != null)
                 {
@@ -175,7 +176,7 @@ namespace BmsManager
 
         private void register(object input)
         {
-            RootDirectory?.Register();
+            RootDirectory?.Root.Register();
 
             MessageBox.Show("登録完了しました");
         }
