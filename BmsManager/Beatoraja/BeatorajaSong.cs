@@ -100,7 +100,7 @@ namespace BmsManager.Beatoraja
         public string ChartHash { get; set; }
 
         [Column("length")]
-        public int? Length { get; set; }
+        public long? Length { get; set; }
 
         public BeatorajaSong() { }
 
