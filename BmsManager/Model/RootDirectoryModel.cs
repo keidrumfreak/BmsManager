@@ -13,11 +13,18 @@ namespace BmsManager.Model
 {
     internal class RootDirectoryModel : ObservableObject
     {
-        string text;
         public string Text
         {
-            get => text;
-            set => SetProperty(ref text, value);
+            get => $"{(entity == null ? string.Empty
+                : entity.ParentRootID == null ? entity.Path
+                : Path.GetFileName(entity.Path))}{(isLoading ? " (loading...)" : string.Empty)}";
+        }
+
+        bool isLoading = false;
+        public bool IsLoading
+        {
+            get => isLoading;
+            set => SetProperty(ref isLoading, value, nameof(Text));
         }
 
         ObservableCollection<BmsFolder> folders;
@@ -42,15 +49,12 @@ namespace BmsManager.Model
 
         RootDirectory entity;
 
-        public RootDirectoryModel(string message)
-        {
-            Text = message;
-        }
+        public RootDirectoryModel() : this(new RootDirectory(), true) { }
 
-        public RootDirectoryModel(RootDirectory entity)
+        public RootDirectoryModel(RootDirectory entity, bool isLoading)
         {
             this.entity = entity;
-            Text = entity.ParentRootID == null ? entity.Path : Path.GetFileName(entity.Path);
+            IsLoading = isLoading;
         }
 
         public async Task LoadChildAsync()
@@ -61,19 +65,26 @@ namespace BmsManager.Model
                 var childrenEntity = await con.RootDirectories.Where(r => r.ParentRootID == entity.ID)
                     .Include(r => r.Children)
                     .Include(r => r.Folders)
-                    .ThenInclude(r => r.Files)
                     .ToArrayAsync().ConfigureAwait(false);
-                Children = new ObservableCollection<RootDirectoryModel>(childrenEntity.Select(e => new RootDirectoryModel(e)).ToArray());
+
+                Folders = new ObservableCollection<BmsFolder>();
+                Children = new ObservableCollection<RootDirectoryModel>(childrenEntity.Select(e => new RootDirectoryModel(e, true)).ToArray());
 
                 foreach (var child in children)
                 {
                     await child.LoadChildAsync().ConfigureAwait(false);
                 }
+
             }
-            else if (entity.Folders.Any())
+            if (entity.Folders.Any())
             {
-                Folders = new ObservableCollection<BmsFolder>(entity.Folders);
+                var folderEntity = await con.BmsFolders.Where(r => r.RootID == entity.ID)
+                    .Include(f => f.Files)
+                    .ToArrayAsync().ConfigureAwait(false);
+                Folders = new ObservableCollection<BmsFolder>(folderEntity);
             }
+
+            IsLoading = false;
         }
 
         public IEnumerable<RootDirectoryModel> Descendants()

@@ -33,7 +33,7 @@ namespace BmsManager.Model
 
         public async Task LoadRootTreeAsync()
         {
-            RootTree = new ObservableCollection<RootDirectoryModel> { new RootDirectoryModel("loading...") };
+            RootTree = new ObservableCollection<RootDirectoryModel> { new RootDirectoryModel() };
 
             var con = new BmsManagerContext();
 
@@ -47,7 +47,7 @@ namespace BmsManager.Model
             //{
             //    parent.Children = roots.Where(r => r.ParentRootID == parent.ID).ToList();
             //}
-            RootTree = new ObservableCollection<RootDirectoryModel>(roots.Select(r => new RootDirectoryModel(r)).ToArray());
+            RootTree = new ObservableCollection<RootDirectoryModel>(roots.Select(r => new RootDirectoryModel(r, true)).ToArray());
 
             foreach (var root in RootTree)
             {
