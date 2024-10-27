@@ -43,10 +43,6 @@ namespace BmsManager.Model
                 .ThenInclude(r => r.Files)
                 .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
-            //foreach (var parent in roots)
-            //{
-            //    parent.Children = roots.Where(r => r.ParentRootID == parent.ID).ToList();
-            //}
             RootTree = new ObservableCollection<RootDirectoryModel>(roots.Select(r => new RootDirectoryModel(r, true)).ToArray());
 
             foreach (var root in RootTree)

@@ -65,7 +65,7 @@ namespace BmsManager.Model
                 var childrenEntity = await con.RootDirectories.Where(r => r.ParentRootID == entity.ID)
                     .Include(r => r.Children)
                     .Include(r => r.Folders)
-                    .ToArrayAsync().ConfigureAwait(false);
+                    .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
                 Folders = new ObservableCollection<BmsFolder>();
                 Children = new ObservableCollection<RootDirectoryModel>(childrenEntity.Select(e => new RootDirectoryModel(e, true)).ToArray());
@@ -80,7 +80,7 @@ namespace BmsManager.Model
             {
                 var folderEntity = await con.BmsFolders.Where(r => r.RootID == entity.ID)
                     .Include(f => f.Files)
-                    .ToArrayAsync().ConfigureAwait(false);
+                    .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
                 Folders = new ObservableCollection<BmsFolder>(folderEntity);
             }
 
