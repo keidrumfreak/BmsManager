@@ -89,7 +89,7 @@ namespace BmsManager
         {
             using (var con = new BmsManagerContext())
             {
-                inner(root.Path);
+                inner(root.Root.Path);
                 void inner(string path)
                 {
                     foreach (var root in con.RootDirectories.Include(r => r.Children).Include(r => r.Folders).ThenInclude(f => f.Files).Where(r => r.Path == path).ToArray())
@@ -118,7 +118,7 @@ namespace BmsManager
             }
             else
             {
-                RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
+                RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
             }
         }
     }

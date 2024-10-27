@@ -74,7 +74,7 @@ namespace BmsManager.Model
                 FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.New(targetDirectory).LastWriteTimeUtc
             };
 
-            var parent = rootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Path == Path.GetDirectoryName(targetDirectory));
+            var parent = rootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == Path.GetDirectoryName(targetDirectory));
             if (parent != default)
                 root.ParentRootID = parent.ID;
 

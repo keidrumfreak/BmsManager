@@ -34,7 +34,7 @@
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" ItemsSource="{Binding RootTree}" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="data:RootDirectory" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Path}" Tag="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=DataContext}">
+                    <TextBlock Text="{Binding Text}" Tag="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=DataContext}">
                         <TextBlock.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="フォルダ読み込み"

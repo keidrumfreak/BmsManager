@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,11 +13,11 @@ namespace BmsManager.Model
 {
     internal class RootDirectoryModel : ObservableObject
     {
-        string path;
-        public string Path
+        string text;
+        public string Text
         {
-            get => path;
-            set => SetProperty(ref path, value);
+            get => text;
+            set => SetProperty(ref text, value);
         }
 
         ObservableCollection<BmsFolder> folders;
@@ -43,13 +44,13 @@ namespace BmsManager.Model
 
         public RootDirectoryModel(string message)
         {
-            Path = message;
+            Text = message;
         }
 
         public RootDirectoryModel(RootDirectory entity)
         {
             this.entity = entity;
-            Path = entity.Path;
+            Text = entity.ParentRootID == null ? entity.Path : Path.GetFileName(entity.Path);
         }
 
         public async Task LoadChildAsync()
