@@ -47,7 +47,7 @@ namespace BmsManager.Model
 
             foreach (var root in RootTree)
             {
-                await root.LoadChildAsync().ConfigureAwait(false);
+                await root.LoadChildAsync(Task.CompletedTask).ConfigureAwait(false);
             }
         }
 
@@ -76,12 +76,13 @@ namespace BmsManager.Model
 
             con.RootDirectories.Add(root);
             await con.SaveChangesAsync().ConfigureAwait(false);
-            await LoadRootTreeAsync().ConfigureAwait(false);
+            Application.Current.Dispatcher.Invoke(() => (parent?.Children ?? RootTree).Add(new RootDirectoryModel(root)));
         }
 
         public async Task LoadFromFileSystemAsync(RootDirectoryModel root)
         {
-            await LoadFromFileSystemAsync(root.Root).ConfigureAwait(false);
+            await root.LoadFromFileSystemAsync(this).ConfigureAwait(false);
+            //await LoadFromFileSystemAsync(root.Root).ConfigureAwait(false);
         }
 
         public async Task LoadFromFileSystemAsync(RootDirectory root)
