@@ -4,6 +4,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommonLib.Logging;
 
 namespace BmsManager
 {
@@ -19,9 +20,14 @@ namespace BmsManager
         IFileSystem fileSystem;
         public static IFileSystem FileSystem => Instance.fileSystem;
 
+        ILogger logger;
+
+        public static ILogger Logger => Instance.logger;
+
         public SystemProvider(IFileSystem fileSystem)
         {
             this.fileSystem = fileSystem;
+            logger = new TextLogger(Settings.Default.LogFolder);
         }
     }
 }

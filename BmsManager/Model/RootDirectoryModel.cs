@@ -30,7 +30,7 @@ namespace BmsManager.Model
                 // 下位フォルダのロード状況を優先する
                 if (Children.Any() && Children.Any(c => c.Descendants().Any(c => c.IsLoading)) != value)
                     return;
-                SetProperty(ref isLoading, value, nameof(Text));
+                SetProperty(ref isLoading, value);
                 if (parent != null && parent.IsLoading)
                 {
                     parent.IsLoading = value;
@@ -47,7 +47,7 @@ namespace BmsManager.Model
                 // 下位フォルダのエラー状況を優先する
                 if (Children.Any() && Children.Any(c => c.Descendants().Any(c => c.IsError)) != value)
                     return;
-                SetProperty(ref isError, value, nameof(Text));
+                SetProperty(ref isError, value);
                 if (parent != null && parent.IsError)
                 {
                     parent.IsError = value;
@@ -131,6 +131,8 @@ namespace BmsManager.Model
             }
             catch (Exception e)
             {
+                SystemProvider.Logger.TraceExceptionLog(e);
+                IsError = true;
                 IsLoading = false;
             }
         }

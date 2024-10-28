@@ -58,6 +58,7 @@
                             </TextBlock.ContextMenu>
                         </TextBlock>
                         <TextBlock Grid.Column="1" Text=" (loading...)" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}" />
+                        <TextBlock Grid.Column="2" Text=" (error)" Visibility="{Binding IsError, Converter={StaticResource BoolToVisibility}}" />
                     </Grid>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>

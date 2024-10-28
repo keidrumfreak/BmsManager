@@ -15,8 +15,6 @@ namespace BmsManager
     /// </summary>
     public partial class App : Application
     {
-        ILogger logger = new TextLogger(Settings.Default.LogFolder);
-
         public App()
         {
             // 未処理例外の処理
@@ -79,7 +77,7 @@ namespace BmsManager
         {
             var message = $"予期せぬエラーが発生しました。続けて発生する場合は開発者に報告してください。\nプログラムの実行を継続しますか？";
             if (e != null) message += $"\n({e.Message} @ {e.TargetSite.Name})";
-            logger.TraceExceptionLog(e);
+            SystemProvider.Logger.TraceExceptionLog(e);
             var result = MessageBox.Show(message, $"未処理例外 ({sourceName})", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             return result == MessageBoxResult.Yes;
         }
@@ -94,7 +92,7 @@ namespace BmsManager
             var exception = e.ExceptionObject as Exception;
             var message = $"予期せぬエラーが発生しました。続けて発生する場合は開発者に報告してください。";
             if (exception != null) message += $"\n({exception.Message} @ {exception.TargetSite.Name})";
-            logger.TraceExceptionLog(exception);
+            SystemProvider.Logger.TraceExceptionLog(exception);
             MessageBox.Show(message, "未処理例外", MessageBoxButton.OK, MessageBoxImage.Stop);
             Environment.Exit(1);
         }
