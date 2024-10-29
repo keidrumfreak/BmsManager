@@ -55,7 +55,7 @@ namespace BmsManager.Data
 
         public double MaxBpm { get; set; }
 
-        public long Length { get; set; }
+        public int Length { get; set; }
 
         public int Notes { get; set; }
 
@@ -109,7 +109,7 @@ namespace BmsManager.Data
             Subtitle = model.Subtitle;
             Genre = model.Genre;
             Artist = model.Artist;
-            SubArtist = model.SubArtist;
+            SubArtist = model.Subartist;
             MD5 = model.MD5;
             Sha256 = model.Sha256;
             Banner = model.Banner;
@@ -122,9 +122,9 @@ namespace BmsManager.Data
             MinBpm = model.MinBpm;
             MaxBpm = model.MaxBpm;
             Features feature = 0;
-            foreach (var tl in model.TimeLines)
+            foreach (var tl in model.Timelines)
             {
-                if (tl.StopTime > 0)
+                if (tl.MicroStop > 0)
                 {
                     feature |= Features.StopSequence;
                 }
@@ -171,7 +171,7 @@ namespace BmsManager.Data
             var pos = 0;
             var border = (int)(model.GetTotalNotes() * (1.0 - 100.0 / model.Total));
             var borderpos = 0;
-            foreach (var tl in model.TimeLines)
+            foreach (var tl in model.Timelines)
             {
                 if (tl.Time / 1000 != pos)
                 {
@@ -259,12 +259,12 @@ namespace BmsManager.Data
             Dictionary<double, int> bpmNoteCountMap = new();
             double nowSpeed = model.Bpm;
             speedList.Add(new double[] { nowSpeed, 0.0 });
-            foreach (var tl in model.TimeLines)
+            foreach (var tl in model.Timelines)
             {
                 int notecount = bpmNoteCountMap.TryGetValue(tl.Bpm, out var cnt) ? cnt : 0;
                 bpmNoteCountMap[tl.Bpm] = notecount + tl.GetTotalNotes();
 
-                if (tl.StopTime > 0)
+                if (tl.MicroStop > 0)
                 {
                     if (nowSpeed != 0)
                     {
@@ -288,9 +288,9 @@ namespace BmsManager.Data
                     MainBpm = bpm;
                 }
             }
-            if (speedList[speedList.Count - 1][1] != model.TimeLines[model.TimeLines.Length - 1].Time)
+            if (speedList[speedList.Count - 1][1] != model.Timelines[model.Timelines.Length - 1].Time)
             {
-                speedList.Add(new double[] { nowSpeed, model.TimeLines[model.TimeLines.Length - 1].Time });
+                speedList.Add(new double[] { nowSpeed, model.Timelines[model.Timelines.Length - 1].Time });
             }
 
             var speedChange = new StringBuilder();

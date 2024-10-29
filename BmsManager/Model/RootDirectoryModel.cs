@@ -55,6 +55,8 @@ namespace BmsManager.Model
             }
         }
 
+        public string FullPath => entity.Path;
+
         ObservableCollection<BmsFolder> folders = new ObservableCollection<BmsFolder>();
         public ObservableCollection<BmsFolder> Folders
         {
@@ -190,7 +192,7 @@ namespace BmsManager.Model
                 }
                 else
                 {
-                    await loadRootDirectoryAsync(folder, root).ConfigureAwait(false);
+                    await loadRootDirectoryAsync(folder, root, tree).ConfigureAwait(false);
                 }
             }
 
@@ -199,7 +201,7 @@ namespace BmsManager.Model
                 tree.LoadingPath = "読込完了";
         }
 
-        private async Task loadRootDirectoryAsync(string path, RootDirectoryModel parent)
+        private async Task loadRootDirectoryAsync(string path, RootDirectoryModel parent, RootTreeModel tree)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -230,9 +232,13 @@ namespace BmsManager.Model
                     }
                 }
             }
-            var model = new RootDirectoryModel(root);
-            Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
-            await LoadFromFileSystemAsync(model).ConfigureAwait(false);
+            var model = parent.Children.FirstOrDefault(c => c.FullPath == root.Path);
+            if (model == default)
+            {
+                model = new RootDirectoryModel(root);
+                Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
+            }
+            await model.LoadFromFileSystemAsync(tree).ConfigureAwait(false);
         }
 
         private async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryModel parent, RootTreeModel tree = null)

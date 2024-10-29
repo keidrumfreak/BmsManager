@@ -100,7 +100,7 @@ namespace BmsManager.Beatoraja
         public string ChartHash { get; set; }
 
         [Column("length")]
-        public long? Length { get; set; }
+        public int? Length { get; set; }
 
         public BeatorajaSong() { }
 
@@ -127,7 +127,7 @@ namespace BmsManager.Beatoraja
             Judge = file.Judge;
             MinBpm = (int)file.MinBpm;
             MaxBpm = (int)file.MaxBpm;
-            Length = (int?)file.Length;
+            Length = (int)file.Length;
             Notes = file.Notes;
             Feature = file.Feature;
             var content = file.Folder.HasText ? Contents.Text : 0;

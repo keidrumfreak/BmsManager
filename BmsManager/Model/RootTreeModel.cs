@@ -82,7 +82,6 @@ namespace BmsManager.Model
         public async Task LoadFromFileSystemAsync(RootDirectoryModel root)
         {
             await root.LoadFromFileSystemAsync(this).ConfigureAwait(false);
-            //await LoadFromFileSystemAsync(root.Root).ConfigureAwait(false);
         }
 
         public async Task LoadFromFileSystemAsync(RootDirectory root)
