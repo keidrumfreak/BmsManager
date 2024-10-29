@@ -31,7 +31,7 @@ namespace BmsManager.Model
                 if (Children.Any() && Children.Any(c => c.Descendants().Any(c => c.IsLoading)) != value)
                     return;
                 SetProperty(ref isLoading, value);
-                if (parent != null && parent.IsLoading)
+                if (parent != null && parent.IsLoading != value)
                 {
                     parent.IsLoading = value;
                 }
@@ -48,7 +48,7 @@ namespace BmsManager.Model
                 if (Children.Any() && Children.Any(c => c.Descendants().Any(c => c.IsError)) != value)
                     return;
                 SetProperty(ref isError, value);
-                if (parent != null && parent.IsError)
+                if (parent != null && parent.IsError != value)
                 {
                     parent.IsError = value;
                 }
