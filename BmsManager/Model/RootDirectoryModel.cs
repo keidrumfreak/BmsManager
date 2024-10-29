@@ -235,7 +235,7 @@ namespace BmsManager.Model
             var model = parent.Children.FirstOrDefault(c => c.FullPath == root.Path);
             if (model == default)
             {
-                model = new RootDirectoryModel(root);
+                model = new RootDirectoryModel(root, true, parent);
                 Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
             }
             else
