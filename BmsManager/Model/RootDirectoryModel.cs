@@ -238,6 +238,10 @@ namespace BmsManager.Model
                 model = new RootDirectoryModel(root);
                 Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
             }
+            else
+            {
+                model.Folders = [];
+            }
             await model.LoadFromFileSystemAsync(tree).ConfigureAwait(false);
         }
 
