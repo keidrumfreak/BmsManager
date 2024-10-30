@@ -57,7 +57,7 @@ namespace BmsManager.Data
                     dbFolders = con.BmsFolders.AsNoTracking().ToArray();
                     dbFiles = con.Files.AsNoTracking().ToArray();
                 }
-                allTasks = new List<Task>();
+                allTasks = [];
             }
 
             var childrenRoots = dbRoots.Where(r => r.ParentRootID == ID);
@@ -65,8 +65,8 @@ namespace BmsManager.Data
 
             var previewExt = new[] { "wav", "ogg", "mp3", "flac" };
             var extentions = Settings.Default.Extentions;
-            Folders = new List<BmsFolder>();
-            Children = new List<RootDirectory>();
+            Folders = [];
+            Children = [];
             FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.New(Path).LastWriteTimeUtc;
             var folders = SystemProvider.FileSystem.Directory.EnumerateDirectories(Path).ToArray();
 
@@ -97,8 +97,8 @@ namespace BmsManager.Data
                 var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(folder).LastWriteTimeUtc;
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
                     .Where(f =>
-                    extentions.Concat(new[] { "txt" }).Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())
-                    || f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
+                    extentions.Concat(["txt"]).Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant())
+                    || f.StartsWith("preview", StringComparison.CurrentCultureIgnoreCase) && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
 
                 var bmsFileDatas = files.Where(f => extentions.Contains(ClsPath.GetExtension(f).TrimStart('.').ToLowerInvariant()))
                     .Select(file => (file, SystemProvider.FileSystem.File.ReadAllBytes(file)));
@@ -109,20 +109,20 @@ namespace BmsManager.Data
                     {
                         // 読込済データの解析なので並列化
                         var bmsFiles = bmsFileDatas.AsParallel().Select(d => new BmsFile(d.file, d.Item2)).Where(f => !string.IsNullOrEmpty(f.Path)).ToArray();
-                        if (!bmsFiles.Any())
+                        if (bmsFiles.Length == 0)
                             return;
 
                         var bmsFolder = dbFolders.FirstOrDefault(f => f.Path == folder);
-                        var meta = bmsFiles.GetMetaFromFiles();
+                        var (title, artist) = bmsFiles.GetMetaFromFiles();
                         var hasText = files.Any(f => f.ToLower().EndsWith("txt"));
-                        var preview = files.FirstOrDefault(f => f.ToLower().StartsWith("preview") && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
+                        var preview = files.FirstOrDefault(f => f.StartsWith("preview", StringComparison.CurrentCultureIgnoreCase) && previewExt.Contains(ClsPath.GetExtension(f).Trim('.').ToLowerInvariant()));
                         if (bmsFolder == default)
                         {
                             bmsFolder = new BmsFolder
                             {
                                 Path = folder,
-                                Title = meta.Title,
-                                Artist = meta.Artist,
+                                Title = title,
+                                Artist = artist,
                                 FolderUpdateDate = updateDate,
                                 HasText = hasText,
                                 Preview = preview,
@@ -138,13 +138,13 @@ namespace BmsManager.Data
                                 //con.ChangeTracker.AutoDetectChangesEnabled = false;
                                 //con.BmsFolders.Add(bmsFolder);
                                 //con.SaveChanges();
-                                bmsFolder.RegisterAsync();
+                                await bmsFolder.RegisterAsync();
                             });
                         }
                         else
                         {
                             // 既存Folder
-                            if (bmsFolder.Title != meta.Title || bmsFolder.Artist != meta.Artist || bmsFolder.HasText != hasText || bmsFolder.Preview != preview
+                            if (bmsFolder.Title != title || bmsFolder.Artist != artist || bmsFolder.HasText != hasText || bmsFolder.Preview != preview
                                 || (bmsFolder.FolderUpdateDate.Date != updateDate.Date
                                 && bmsFolder.FolderUpdateDate.Hour != updateDate.Hour
                                 && bmsFolder.FolderUpdateDate.Minute != updateDate.Minute
@@ -154,8 +154,8 @@ namespace BmsManager.Data
                                 {
                                     using var con = new BmsManagerContext();
                                     var entity = con.BmsFolders.Find(bmsFolder.ID);
-                                    entity.Title = meta.Title;
-                                    entity.Artist = meta.Artist;
+                                    entity.Title = title;
+                                    entity.Artist = artist;
                                     entity.FolderUpdateDate = updateDate;
                                     entity.HasText = hasText;
                                     entity.Preview = preview;
@@ -267,47 +267,10 @@ namespace BmsManager.Data
             if (root == null)
             {
                 LoadingPath = "DB登録中...";
-                Task.WhenAll(allTasks.ToArray()).ConfigureAwait(false).GetAwaiter().GetResult();
+                Task.WhenAll([.. allTasks]).ConfigureAwait(false).GetAwaiter().GetResult();
                 LoadFromDB();
             }
             LoadingPath = string.Empty;
-        }
-
-        public static async Task<IEnumerable<RootDirectory>> LoadTopRootAsync()
-        {
-            using (var con = new BmsManagerContext())
-            {
-                // TODO: 検索処理の改善 (EntityFrameworkの改善待ち)
-                var roots = await con.RootDirectories
-                    .Include(r => r.Folders)
-                    .ThenInclude(f => f.Files)
-                    .AsNoTracking().ToArrayAsync();
-                //var folders = con.BmsFolders
-                //    .Include(f => f.Files)
-                //    .AsNoTracking().ToArray();
-
-                //var allRoots = con.RootDirectories
-                //    .AsNoTracking().ToArray();
-
-                //foreach (var folder in folders.GroupBy(f => f.RootID))
-                //{
-                //    var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
-                //    if (parent == null)
-                //        continue;
-                //    parent.Folders = folder.ToList();
-                //    foreach (var fol in folder)
-                //    {
-                //        fol.Root = parent;
-                //    }
-                //}
-
-                foreach (var parent in roots)
-                {
-                    parent.Children = roots.Where(r => r.ParentRootID == parent.ID).ToList();
-                }
-
-                return roots.Where(r => r.ParentRootID == null).ToArray();
-            }
         }
 
         public void LoadFromDB()
@@ -326,7 +289,7 @@ namespace BmsManager.Data
                 foreach (var folder in folders.GroupBy(f => f.RootID))
                 {
                     var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
-                    parent.Folders = folder.ToList();
+                    parent.Folders = [.. folder];
                     foreach (var fol in folder)
                     {
                         fol.Root = parent;
@@ -383,19 +346,18 @@ namespace BmsManager.Data
                         foreach (var child in dir.Children)
                         {
                             registerRoot(child);
-                            if (root.Children == null)
-                                root.Children = new List<RootDirectory>();
+                            root.Children ??= [];
                             if (!root.Children.Any(c => c.Path == child.Path))
                                 root.Children.Add(child);
                         }
                     }
 
-                    if (dir.Folders == null || !dir.Folders.Any())
+                    if (dir.Folders == null || dir.Folders.Count == 0)
                     {
                         // フォルダも子も存在しない場合削除する
                         if (!hasChild)
                         {
-                            if (root.Folders.Any())
+                            if (root.Folders.Count != 0)
                             {
                                 foreach (var folder in root.Folders)
                                 {
@@ -413,7 +375,7 @@ namespace BmsManager.Data
                     }
 
 
-                    if (!root.Folders.Any())
+                    if (root.Folders.Count == 0)
                     {
                         // フォルダ未登録の場合そのまま登録
                         root.Folders = dir.Folders.ToArray();
@@ -485,7 +447,7 @@ namespace BmsManager.Data
         public IEnumerable<RootDirectory> Descendants()
         {
             yield return this;
-            if (Children == null || !Children.Any())
+            if (Children == null || Children.Count == 0)
                 yield break;
             foreach (var child in Children.SelectMany(c => c.Descendants()))
                 yield return child;

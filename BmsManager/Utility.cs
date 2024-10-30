@@ -48,7 +48,7 @@ namespace BmsManager
                         else
                             break;
                     }
-                    if (ret.Any())
+                    if (ret.Count != 0)
                     {
                         if (ret.Count(c => c == '(' || c == '（') != ret.Count(c => c == ')' || c == '）'))
                         {
@@ -98,26 +98,26 @@ namespace BmsManager
             {
                 return title.Split("  ")[0];
             }
-            else if (title.EndsWith("-") || title.EndsWith("～") || title.EndsWith("\""))
+            else if (title.EndsWith('-') || title.EndsWith('～') || title.EndsWith('"'))
             {
                 var delimiter = title.Last();
-                var trim = title.Substring(0, title.Length - 1);
+                var trim = title[..^1];
                 index = trim.LastIndexOf(delimiter);
             }
-            else if (title.EndsWith(")"))
+            else if (title.EndsWith(')'))
             {
-                index = title.LastIndexOf("(");
+                index = title.LastIndexOf('(');
             }
-            else if (title.EndsWith("]"))
+            else if (title.EndsWith(']'))
             {
-                index = title.LastIndexOf("[");
+                index = title.LastIndexOf('[');
             }
-            else if (title.EndsWith(">"))
+            else if (title.EndsWith('>'))
             {
-                index = title.LastIndexOf("<");
+                index = title.LastIndexOf('<');
             }
 
-            return index == -1 ? title : title.Substring(0, index);
+            return index == -1 ? title : title[..index];
         }
 
         public static string GetArtist(IEnumerable<string> artists)
@@ -146,10 +146,10 @@ namespace BmsManager
 
             string remove(string target, string str)
             {
-                var index = name.ToLower().IndexOf(str);
+                var index = name.IndexOf(str, StringComparison.CurrentCultureIgnoreCase);
                 if (index == -1)
                     return target;
-                return target.Substring(0, index);
+                return target[..index];
             }
 
             var ret = remove(name, "obj");

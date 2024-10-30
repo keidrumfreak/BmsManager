@@ -57,14 +57,14 @@ namespace BmsManager.Model
 
         public string FullPath => entity.Path;
 
-        ObservableCollection<BmsFolder> folders = new ObservableCollection<BmsFolder>();
+        ObservableCollection<BmsFolder> folders = [];
         public ObservableCollection<BmsFolder> Folders
         {
             get => folders;
             set => SetProperty(ref folders, value);
         }
 
-        ObservableCollection<RootDirectoryModel> children = new ObservableCollection<RootDirectoryModel>();
+        ObservableCollection<RootDirectoryModel> children = [];
         public ObservableCollection<RootDirectoryModel> Children
         {
             get => children;
@@ -77,11 +77,11 @@ namespace BmsManager.Model
 
         public RootDirectory Root => entity;
 
-        RootDirectory entity;
+        readonly RootDirectory entity;
 
-        RootDirectoryModel parent;
+        readonly RootDirectoryModel parent;
 
-        static object lockObj = new object();
+        static readonly object lockObj = new();
 
         static readonly string[] previewExt = ["wav", "ogg", "mp3", "flac"];
 
@@ -98,7 +98,7 @@ namespace BmsManager.Model
         {
             try
             {
-                if (entity.Children.Any())
+                if (entity.Children.Count != 0)
                 {
                     using var con = new BmsManagerContext();
                     {
@@ -106,7 +106,7 @@ namespace BmsManager.Model
                             .Include(r => r.Children)
                             .Include(r => r.Folders)
                             .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
-                        Folders = new ObservableCollection<BmsFolder>();
+                        Folders = [];
                         Children = new ObservableCollection<RootDirectoryModel>(childrenEntity.Select(e => new RootDirectoryModel(e, true, this)).ToArray());
                     }
 
@@ -117,7 +117,7 @@ namespace BmsManager.Model
 
                 }
                 await loadRootTask.ConfigureAwait(false);
-                if (entity.Folders.Any())
+                if (entity.Folders.Count != 0)
                 {
                     lock (lockObj)
                     {
@@ -155,14 +155,14 @@ namespace BmsManager.Model
             using (var con = new BmsManagerContext())
             {
                 var delRoot = await con.RootDirectories.Where(c => c.ParentRootID == entity.ID && !folders.Contains(c.Path)).ToArrayAsync().ConfigureAwait(false);
-                if (delRoot.Any())
+                if (delRoot.Length != 0)
                 {
                     con.ChangeTracker.AutoDetectChangesEnabled = false;
                     con.RootDirectories.RemoveRange(delRoot);
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
                 var delFol = await con.BmsFolders.Where(c => c.RootID == entity.ParentRootID && !folders.Contains(c.Path)).ToArrayAsync().ConfigureAwait(false);
-                if (delFol.Any())
+                if (delFol.Length != 0)
                 {
                     con.ChangeTracker.AutoDetectChangesEnabled = false;
                     con.BmsFolders.RemoveRange(delFol);
@@ -181,7 +181,7 @@ namespace BmsManager.Model
                 var files = SystemProvider.FileSystem.Directory.EnumerateFiles(folder)
                     .Where(f =>
                     extentions.Concat(["txt"]).Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant())
-                    || f.ToLower().StartsWith("preview") && previewExt.Contains(Path.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
+                    || f.StartsWith("preview", StringComparison.CurrentCultureIgnoreCase) && previewExt.Contains(Path.GetExtension(f).Trim('.').ToLowerInvariant())).ToArray();
 
                 var bmsFileDatas = files.Where(f => extentions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant()))
                     .Select(file => (file, SystemProvider.FileSystem.File.ReadAllBytes(file)));
@@ -201,7 +201,7 @@ namespace BmsManager.Model
                 tree.LoadingPath = "読込完了";
         }
 
-        private async Task loadRootDirectoryAsync(string path, RootDirectoryModel parent, RootTreeModel tree)
+        private static async Task loadRootDirectoryAsync(string path, RootDirectoryModel parent, RootTreeModel tree)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -245,7 +245,7 @@ namespace BmsManager.Model
             await model.LoadFromFileSystemAsync(tree).ConfigureAwait(false);
         }
 
-        private async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryModel parent, RootTreeModel tree = null)
+        private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryModel parent, RootTreeModel tree = null)
         {
             if (tree != null)
                 tree.LoadingPath = path;
@@ -255,7 +255,7 @@ namespace BmsManager.Model
 
             // 読込済データの解析なので並列化
             var bmsFiles = bmsFileDatas.AsParallel().Select(d => new BmsFile(d.file, d.data)).Where(f => !string.IsNullOrEmpty(f.Path)).ToArray();
-            if (!bmsFiles.Any())
+            if (bmsFiles.Length == 0)
             {
                 if (bmsFolder != default)
                 {
@@ -266,17 +266,17 @@ namespace BmsManager.Model
 
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
 
-            var meta = bmsFiles.GetMetaFromFiles();
+            var (title, artist) = bmsFiles.GetMetaFromFiles();
             var hasText = files.Any(f => f.ToLower().EndsWith("txt"));
-            var preview = files.FirstOrDefault(f => f.ToLower().StartsWith("preview") && previewExt.Contains(Path.GetExtension(f).Trim('.').ToLowerInvariant()));
+            var preview = files.FirstOrDefault(f => f.StartsWith("preview", StringComparison.CurrentCultureIgnoreCase) && previewExt.Contains(Path.GetExtension(f).Trim('.').ToLowerInvariant()));
             if (bmsFolder == default)
             {
                 // 新規Folder
                 bmsFolder = new BmsFolder
                 {
                     Path = path,
-                    Title = meta.Title,
-                    Artist = meta.Artist,
+                    Title = title,
+                    Artist = artist,
                     FolderUpdateDate = updateDate,
                     HasText = hasText,
                     Preview = preview,

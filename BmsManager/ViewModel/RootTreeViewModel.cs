@@ -15,11 +15,11 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class RootTreeViewModel : ObservableObject
     {
-        RootTreeModel model;
+        readonly RootTreeModel model;
 
         string targetDirectory;
         public string TargetDirectory
@@ -75,9 +75,7 @@ namespace BmsManager
         {
             var dialog = new OpenFolderDialog() { Multiselect = false };
             if (dialog.ShowDialog() ?? false)
-            {
                 TargetDirectory = dialog.FolderName;
-            }
         }
 
         private void loadFromDB(RootDirectoryModel root)
@@ -95,16 +93,12 @@ namespace BmsManager
                     foreach (var root in con.RootDirectories.Include(r => r.Children).Include(r => r.Folders).ThenInclude(f => f.Files).Where(r => r.Path == path).ToArray())
                     {
                         foreach (var child in root.Children)
-                        {
                             inner(child.Path);
-                        }
 
                         foreach (var folder in root.Folders)
                         {
                             foreach (var file in folder.Files)
-                            {
                                 con.Files.Remove(file);
-                            }
                             con.BmsFolders.Remove(folder);
                         }
                         con.RootDirectories.Remove(root);
@@ -113,13 +107,9 @@ namespace BmsManager
                 con.SaveChanges();
             }
             if (root.Root.Parent == null)
-            {
                 RootTree.Remove(root);
-            }
             else
-            {
                 RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
-            }
         }
     }
 }

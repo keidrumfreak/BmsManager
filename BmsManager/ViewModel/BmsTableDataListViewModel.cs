@@ -9,7 +9,7 @@ using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.WindowsAPICodePack.Dialogs;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class BmsTableDataListViewModel : ViewModelBase
     {
@@ -47,23 +47,17 @@ namespace BmsManager
                 return;
 
             if (Narrowed)
-            {
                 using (var con = new BmsManagerContext())
                 {
                     var query = con.Files.Join(con.TableDatas,
                         f => f.MD5, d => d.MD5, (f, d) => d);
                     if (Table.IsTable)
-                    {
                         query = query.Where(d => d.Difficulty.BmsTableID == Table.ID);
-                    }
                     else
-                    {
                         query = query.Where(d => d.BmsTableDifficultyID == Table.ID);
-                    }
                     var existFile = query.AsNoTracking().ToArray();
                     TableDatas = TableDatas.Where(d => !existFile.Any(f => f.MD5 == d.MD5)).ToArray();
                 }
-            }
         }
 
         private async Task downloadAllAsync()
@@ -78,9 +72,7 @@ namespace BmsManager
             }
 
             foreach (var data in TableDatas)
-            {
                 await data.DownloadAsync(targetDir);
-            }
         }
     }
 }

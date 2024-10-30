@@ -11,7 +11,7 @@ using BmsManager.Data;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class BmsTableManagerViewModel : ViewModelBase
     {
@@ -28,9 +28,7 @@ namespace BmsManager
         private void BmsTableTree_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(BmsTableTreeViewModel.SelectedTreeItem))
-            {
                 TableDataList.Table = BmsTableTree.SelectedTreeItem;
-            }
         }
     }
 }

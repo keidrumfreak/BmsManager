@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using BmsManager.Data;
 using BmsManager.Model;
+using BmsManager.ViewModel;
 
 namespace BmsManager
 {

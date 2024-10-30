@@ -6,8 +6,9 @@
              xmlns:local="clr-namespace:BmsManager"
              xmlns:data="clr-namespace:BmsManager.Data"
              xmlns:model="clr-namespace:BmsManager.Model"
+             xmlns:vm="clr-namespace:BmsManager.ViewModel"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             d:DataContext="{d:DesignInstance Type=local:RootTreeViewModel}"
+             d:DataContext="{d:DesignInstance Type=vm:RootTreeViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <b:Interaction.Triggers>
@@ -16,7 +17,7 @@
         </b:EventTrigger>
     </b:Interaction.Triggers>
     <UserControl.Resources>
-        <DataTemplate DataType="{x:Type local:RootTreeViewModel}"/>
+        <DataTemplate DataType="{x:Type vm:RootTreeViewModel}"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </UserControl.Resources>
     <Grid>

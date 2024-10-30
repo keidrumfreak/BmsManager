@@ -53,7 +53,7 @@ namespace BmsManager.Data
         [NotMapped]
         public IEnumerable<BmsFolder> Duplicates
         {
-            get => duplicates ?? Array.Empty<BmsFolder>();
+            get => duplicates ?? [];
             set => SetProperty(ref duplicates, value);
         }
 
@@ -84,22 +84,20 @@ namespace BmsManager.Data
 
                 SetMetaFromName();
 
-                using (var con = new BmsManagerContext())
+                using var con = new BmsManagerContext();
+                var folder = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
+                if (folder != default)
                 {
-                    var folder = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
-                    if (folder != default)
+                    folder.Path = dst;
+                    Path = dst;
+                    SetMetaFromName();
+                    folder.Title = Title;
+                    folder.Artist = Artist;
+                    foreach (var file in folder.Files)
                     {
-                        folder.Path = dst;
-                        Path = dst;
-                        SetMetaFromName();
-                        folder.Title = Title;
-                        folder.Artist = Artist;
-                        foreach (var file in folder.Files)
-                        {
-                            file.Path = PathUtil.Combine(dst, SysPath.GetFileName(file.Path));
-                        }
-                        con.SaveChanges();
+                        file.Path = PathUtil.Combine(dst, SysPath.GetFileName(file.Path));
                     }
+                    con.SaveChanges();
                 }
             }
             catch (IOException)
@@ -113,11 +111,11 @@ namespace BmsManager.Data
         public void SetMetaFromName()
         {
             var name = SysPath.GetFileName(Path);
-            var index = name.IndexOf("]");
+            var index = name.IndexOf(']');
             if (index != -1)
             {
-                Artist = name.Substring(1, index - 1);
-                Title = name.Substring(index + 1);
+                Artist = name[1..index];
+                Title = name[(index + 1)..];
             }
         }
 
@@ -176,13 +174,11 @@ VALUES
             // TODO: .NET6 でChunkメソッドに変更する
             foreach (var files in Files.Select((file, i) => (file, i)).GroupBy(x => x.i / 50).Select(g => g.Select(x => x.file)))
             {
-                using (var context = new BmsManagerContext())
-                using (var con = context.Database.GetDbConnection())
-                {
-                    con.Open();
-                    using (var cmd = con.CreateCommand())
-                    {
-                        var sql = new StringBuilder(@"INSERT INTO BmsFile
+                using var context = new BmsManagerContext();
+                using var con = context.Database.GetDbConnection();
+                con.Open();
+                using var cmd = con.CreateCommand();
+                var sql = new StringBuilder(@"INSERT INTO BmsFile
     (FolderID
     ,Path
     ,Title
@@ -221,9 +217,9 @@ VALUES
     ,SpeedChange
     ,LaneNotes)
      VALUES");
-                        foreach (var (file, index) in files.Select((f, i) => (f, i)))
-                        {
-                            sql.AppendLine(@$"(@{nameof(BmsFile.FolderID)}{index}
+                foreach (var (file, index) in files.Select((f, i) => (f, i)))
+                {
+                    sql.AppendLine(@$"(@{nameof(BmsFile.FolderID)}{index}
     ,@{nameof(BmsFile.Path)}{index}
     ,@{nameof(BmsFile.Title)}{index}
     ,@{nameof(BmsFile.Subtitle)}{index}
@@ -260,49 +256,47 @@ VALUES
     ,@{nameof(BmsFile.MainBpm)}{index}
     ,@{nameof(BmsFile.SpeedChange)}{index}
     ,@{nameof(BmsFile.LaneNotes)}{index}),");
-                            cmd.AddParameter($"@{nameof(BmsFile.FolderID)}{index}", ID, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Path)}{index}", file.Path, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Title)}{index}", file.Title, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Subtitle)}{index}", file.Subtitle, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Genre)}{index}", file.Genre, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Artist)}{index}", file.Artist, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.SubArtist)}{index}", file.SubArtist, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5 ?? (object)DBNull.Value, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.Sha256, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner ?? (object)DBNull.Value, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile ?? (object)DBNull.Value, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp ?? (object)DBNull.Value, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Preview)}{index}", file.Preview ?? (object)DBNull.Value, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.PlayLevel)}{index}", file.PlayLevel, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.Mode)}{index}", file.Mode, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Difficulty)}{index}", file.Difficulty, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Judge)}{index}", file.Judge, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.MinBpm)}{index}", file.MinBpm, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.MaxBpm)}{index}", file.MaxBpm, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.Length)}{index}", file.Length, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Notes)}{index}", file.Notes, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Feature)}{index}", file.Feature, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.HasBga)}{index}", file.HasBga, DbType.Boolean);
-                            cmd.AddParameter($"@{nameof(BmsFile.IsNoKeySound)}{index}", file.IsNoKeySound, DbType.Boolean);
-                            cmd.AddParameter($"@{nameof(BmsFile.ChartHash)}{index}", file.ChartHash, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.N)}{index}", file.N, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.LN)}{index}", file.LN, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.S)}{index}", file.S, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.LS)}{index}", file.LS, DbType.Int32);
-                            cmd.AddParameter($"@{nameof(BmsFile.Total)}{index}", file.Total, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.Density)}{index}", file.Density, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.PeakDensity)}{index}", file.PeakDensity, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.EndDensity)}{index}", file.EndDensity, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.Distribution)}{index}", file.Distribution, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.MainBpm)}{index}", file.MainBpm, DbType.Double);
-                            cmd.AddParameter($"@{nameof(BmsFile.SpeedChange)}{index}", file.SpeedChange, DbType.String);
-                            cmd.AddParameter($"@{nameof(BmsFile.LaneNotes)}{index}", file.LaneNotes, DbType.String);
-                        }
-                        sql.Remove(sql.Length - 3, 3);
-                        cmd.CommandText = sql.ToString();
-                        await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
-                    }
+                    cmd.AddParameter($"@{nameof(BmsFile.FolderID)}{index}", ID, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.Path)}{index}", file.Path, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Title)}{index}", file.Title, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Subtitle)}{index}", file.Subtitle, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Genre)}{index}", file.Genre, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Artist)}{index}", file.Artist, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.SubArtist)}{index}", file.SubArtist, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.MD5)}{index}", file.MD5 ?? (object)DBNull.Value, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Sha256)}{index}", file.Sha256, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Banner)}{index}", file.Banner ?? (object)DBNull.Value, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.StageFile)}{index}", file.StageFile ?? (object)DBNull.Value, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.BackBmp)}{index}", file.BackBmp ?? (object)DBNull.Value, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Preview)}{index}", file.Preview ?? (object)DBNull.Value, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.PlayLevel)}{index}", file.PlayLevel, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.Mode)}{index}", file.Mode, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.Difficulty)}{index}", file.Difficulty, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.Judge)}{index}", file.Judge, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.MinBpm)}{index}", file.MinBpm, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.MaxBpm)}{index}", file.MaxBpm, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.Length)}{index}", file.Length, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.Notes)}{index}", file.Notes, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.Feature)}{index}", file.Feature, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.HasBga)}{index}", file.HasBga, DbType.Boolean);
+                    cmd.AddParameter($"@{nameof(BmsFile.IsNoKeySound)}{index}", file.IsNoKeySound, DbType.Boolean);
+                    cmd.AddParameter($"@{nameof(BmsFile.ChartHash)}{index}", file.ChartHash, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.N)}{index}", file.N, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.LN)}{index}", file.LN, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.S)}{index}", file.S, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.LS)}{index}", file.LS, DbType.Int32);
+                    cmd.AddParameter($"@{nameof(BmsFile.Total)}{index}", file.Total, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.Density)}{index}", file.Density, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.PeakDensity)}{index}", file.PeakDensity, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.EndDensity)}{index}", file.EndDensity, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.Distribution)}{index}", file.Distribution, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.MainBpm)}{index}", file.MainBpm, DbType.Double);
+                    cmd.AddParameter($"@{nameof(BmsFile.SpeedChange)}{index}", file.SpeedChange, DbType.String);
+                    cmd.AddParameter($"@{nameof(BmsFile.LaneNotes)}{index}", file.LaneNotes, DbType.String);
                 }
+                sql.Remove(sql.Length - 3, 3);
+                cmd.CommandText = sql.ToString();
+                await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
             }
         }
 
@@ -331,7 +325,7 @@ VALUES
                         {
                             var toPath = PathUtil.Combine(Path, SysPath.GetFileName(file));
                             var fileExt = SysPath.GetExtension(file); // 拡張子が存在しない場合もある
-                            if (fileExt.Length > 1 && ext.Contains(fileExt.Substring(1)))
+                            if (fileExt.Length > 1 && ext.Contains(fileExt[1..]))
                             {
                                 var i = 1;
                                 var dst = toPath;
@@ -398,13 +392,11 @@ VALUES
 
                 SystemProvider.FileSystem.File.Move(diffFile.Path, toPath);
 
-                using (var con = new BmsManagerContext())
-                {
-                    var fol = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
-                    var file = new BmsFile(toPath);
-                    fol.Files.Add(file);
-                    con.SaveChanges();
-                }
+                using var con = new BmsManagerContext();
+                var fol = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == Path);
+                var file = new BmsFile(toPath);
+                fol.Files.Add(file);
+                con.SaveChanges();
             }
             catch (Exception ex)
             {
