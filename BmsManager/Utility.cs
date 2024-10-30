@@ -17,7 +17,7 @@ namespace BmsManager
             // Javaのコードの実行結果と一致させるための実装。要調査
             var polynomial = 0xEDB88320u;
             var crc = ~0;
-            foreach (var b in Encoding.GetEncoding("shift-jis").GetBytes(path + "\\\0"))
+            foreach (var b in Encoding.UTF8.GetBytes(path + "\\\0"))
             {
                 crc ^= (sbyte)b; // sbyteにしない場合ここで差異が出ていると思われる
                 for (var i = 0; i < 8; i++)
@@ -86,16 +86,6 @@ namespace BmsManager
         public static int ToUnixMilliseconds(this DateTime dt)
         {
             return (int)((dt - new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds / 1000);
-        }
-
-        public static string GetMd5Hash(string path)
-        {
-            using (var file = SystemProvider.FileSystem.File.OpenRead(path))
-            {
-                var md5 = MD5.Create();
-                var arr = md5.ComputeHash(file);
-                return BitConverter.ToString(arr).ToLower().Replace("-", "");
-            }
         }
 
         public static string GetTitle(string title)
