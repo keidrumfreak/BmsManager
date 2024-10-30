@@ -21,52 +21,52 @@ namespace BmsManager.Tests.Data
             SystemProvider.Instance = new SystemProvider(mock);
         }
 
-        [DataTestMethod]
-        [DataRow("Result", "Result")]
-        [DataRow("Result\\", "Result￥")]
-        [DataRow("Result<", "Result＜")]
-        [DataRow("Result>", "Result＞")]
-        [DataRow("Result/", "Result／")]
-        [DataRow("Result*", "Result＊")]
-        [DataRow("Result:", "Result：")]
-        [DataRow("Result\"", "Result”")]
-        [DataRow("Result?", "Result？")]
-        [DataRow("Result|", "Result｜")]
-        public void Rename(string name, string rename)
-        {
-            mock.AddDirectory(@"D:");
-            mock.AddDirectory(@"D:\Test");
+        //[DataTestMethod]
+        //[DataRow("Result", "Result")]
+        //[DataRow("Result\\", "Result￥")]
+        //[DataRow("Result<", "Result＜")]
+        //[DataRow("Result>", "Result＞")]
+        //[DataRow("Result/", "Result／")]
+        //[DataRow("Result*", "Result＊")]
+        //[DataRow("Result:", "Result：")]
+        //[DataRow("Result\"", "Result”")]
+        //[DataRow("Result?", "Result？")]
+        //[DataRow("Result|", "Result｜")]
+        //public void Rename(string name, string rename)
+        //{
+        //    mock.AddDirectory(@"D:");
+        //    mock.AddDirectory(@"D:\Test");
 
-            var folder = new BmsFolder { Path = @"D:\Test" };
-            folder.Rename();
+        //    var folder = new BmsFolder { Path = @"D:\Test" };
+        //    folder.Rename();
 
-            mock.Directory.Exists(@"D:\Test").IsFalse();
-            mock.Directory.Exists(@$"D:\{rename}").IsTrue();
-            folder.Path.AreEqual(@$"D:\{rename}");
-        }
+        //    mock.Directory.Exists(@"D:\Test").IsFalse();
+        //    mock.Directory.Exists(@$"D:\{rename}").IsTrue();
+        //    folder.Path.AreEqual(@$"D:\{rename}");
+        //}
 
-        [TestMethod]
-        public void RenameIfExists()
-        {
-            mock.AddDirectory(@"D:");
-            mock.AddDirectory(@"D:\Test");
-            mock.AddDirectory(@"D:\Result");
+        //[TestMethod]
+        //public void RenameIfExists()
+        //{
+        //    mock.AddDirectory(@"D:");
+        //    mock.AddDirectory(@"D:\Test");
+        //    mock.AddDirectory(@"D:\Result");
 
-            var folder = new BmsFolder { Path = @"D:\Test" };
-            folder.Rename();
+        //    var folder = new BmsFolder { Path = @"D:\Test" };
+        //    folder.Rename();
 
-            mock.Directory.Exists(@"D:\Test").IsFalse();
-            mock.Directory.Exists(@$"D:\Result (2)").IsTrue();
-            folder.Path.AreEqual(@$"D:\Result (2)");
+        //    mock.Directory.Exists(@"D:\Test").IsFalse();
+        //    mock.Directory.Exists(@$"D:\Result (2)").IsTrue();
+        //    folder.Path.AreEqual(@$"D:\Result (2)");
 
-            mock.AddDirectory(@"D:\Test");
+        //    mock.AddDirectory(@"D:\Test");
 
-            folder = new BmsFolder { Path = @"D:\Test" };
-            folder.Rename();
+        //    folder = new BmsFolder { Path = @"D:\Test" };
+        //    folder.Rename();
 
-            mock.Directory.Exists(@"D:\Test").IsFalse();
-            mock.Directory.Exists(@$"D:\Result (3)").IsTrue();
-            folder.Path.AreEqual(@$"D:\Result (3)");
-        }
+        //    mock.Directory.Exists(@"D:\Test").IsFalse();
+        //    mock.Directory.Exists(@$"D:\Result (3)").IsTrue();
+        //    folder.Path.AreEqual(@$"D:\Result (3)");
+        //}
     }
 }

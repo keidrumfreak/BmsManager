@@ -14,7 +14,7 @@ namespace BmsManager.Beatoraja
 
         public virtual DbSet<BeatorajaSong> Songs { get; set; }
 
-        string path;
+        readonly string path;
 
         public BeatorajaSongdataContext(string path)
         {

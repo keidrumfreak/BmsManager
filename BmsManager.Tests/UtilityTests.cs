@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace BmsManager.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class UtilityTests
     {
         [DataTestMethod]
         [DataRow("main-sub-", "main")]
@@ -54,6 +54,22 @@ namespace BmsManager.Tests
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Utility.GetCrc32(path).AreEqual(crc);
+        }
+
+        [DataTestMethod]
+        [DataRow("Result", "Result")]
+        [DataRow("Result\\", "Result")]
+        [DataRow("Result<", "Resultƒ")]
+        [DataRow("Result>", "Result„")]
+        [DataRow("Result/", "Result^")]
+        [DataRow("Result*", "Result–")]
+        [DataRow("Result:", "ResultF")]
+        [DataRow("Result\"", "Resulth")]
+        [DataRow("Result?", "ResultH")]
+        [DataRow("Result|", "Resultb")]
+        public void Rename(string name, string rename)
+        {
+            Utility.ToFileNameString(name).AreEqual(rename);
         }
 
         //[TestMethod]
