@@ -10,11 +10,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
-using BmsManager.ViewModel;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class FolderRegisterViewModel : ViewModelBase
     {
@@ -33,9 +32,7 @@ namespace BmsManager
         private void RootTree_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(RootTreeViewModel.SelectedRoot))
-            {
                 FileSearcher.RootDirectory = RootTree.SelectedRoot;
-            }
         }
     }
 }

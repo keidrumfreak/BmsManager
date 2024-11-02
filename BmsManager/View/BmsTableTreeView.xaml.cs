@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using BmsManager.ViewModel;
 
-namespace BmsManager
+namespace BmsManager.View
 {
     /// <summary>
     /// BmsTableTreeView.xaml の相互作用ロジック

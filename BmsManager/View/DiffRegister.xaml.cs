@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace BmsManager
+namespace BmsManager.View
 {
     /// <summary>
     /// DiffRegister.xaml の相互作用ロジック

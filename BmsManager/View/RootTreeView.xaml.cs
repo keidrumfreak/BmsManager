@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 using BmsManager.Entity;
 using BmsManager.ViewModel;
 
-namespace BmsManager
+namespace BmsManager.View
 {
     /// <summary>
     /// RootRegister.xaml の相互作用ロジック

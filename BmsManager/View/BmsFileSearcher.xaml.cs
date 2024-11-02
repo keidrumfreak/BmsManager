@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace BmsManager
+namespace BmsManager.View
 {
     /// <summary>
     /// BmsFileList.xaml の相互作用ロジック

@@ -9,7 +9,7 @@ using BmsManager.Entity;
 using CommonLib.IO;
 using CommonLib.Wpf;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class ExporterViewModel : ViewModelBase
     {

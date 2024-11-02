@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
-using BmsManager.ViewModel;
 using BmsParser;
 using CommonLib.IO;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class DiffRegisterViewModel : ViewModelBase
     {
@@ -40,9 +39,7 @@ namespace BmsManager
                     selectedDiffFile.PropertyChanged -= DiffFile_PropertyChanged;
                 SetProperty(ref selectedDiffFile, value);
                 if (selectedDiffFile == null)
-                {
                     FileList.Folders = null;
-                }
                 else
                 {
                     if (selectedDiffFile.Folders != null)
@@ -83,9 +80,7 @@ namespace BmsManager
         private void estimateAll()
         {
             foreach (var file in DiffFiles)
-            {
                 file.GetEstimatedDestination();
-            }
         }
 
         private void installAll()
@@ -138,9 +133,7 @@ namespace BmsManager
         private void DiffFile_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(DiffFileViewModel.Folders))
-            {
                 FileList.Folders = new ObservableCollection<BmsFolder>(selectedDiffFile.Folders);
-            }
         }
 
         private void installByTable()

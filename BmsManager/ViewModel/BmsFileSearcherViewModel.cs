@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
-using BmsManager.ViewModel;
 using CommonLib.Wpf;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class BmsFileSearcherViewModel : ViewModelBase
     {
@@ -98,7 +97,6 @@ namespace BmsManager
             IEnumerable<BmsFolder> inner(RootDirectoryViewModel root)
             {
                 if (root.DescendantFolders != null)
-                {
                     foreach (var folder in root.DescendantFolders)
                     {
                         var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
@@ -107,28 +105,23 @@ namespace BmsManager
                         folder.Files = new ObservableCollection<BmsFile>(files.ToArray());
                         yield return folder;
                     }
-                }
             }
         }
 
         private void FileList_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(BmsFileListViewModel.SelectedBmsFolder))
-            {
                 if (FileList.SelectedBmsFolder != null)
                 {
                     Title = FileList.SelectedBmsFolder.Title;
                     Artist = FileList.SelectedBmsFolder.Artist;
                 }
-            }
             else if (e.PropertyName == nameof(BmsFileListViewModel.SelectedBmsFile))
-            {
                 if (FileList.SelectedBmsFile != null)
                 {
                     Title = Utility.GetTitle(FileList.SelectedBmsFile.Title);
                     Artist = FileList.SelectedBmsFile.Artist;
                 }
-            }
         }
 
         private void updateMeta()
@@ -144,7 +137,6 @@ namespace BmsManager
                 return;
 
             foreach (var folder in FileList.Folders)
-            {
                 try
                 {
                     folder.Rename();
@@ -153,7 +145,6 @@ namespace BmsManager
                 {
                     MessageBox.Show(ex.ToString());
                 }
-            }
 
             //RootDirectory.LoadFromFileSystem.Execute(null);
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
+using BmsManager.View;
 using CommonLib.Wpf;
 
 namespace BmsManager

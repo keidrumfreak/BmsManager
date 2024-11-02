@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using BmsManager.Entity;
 
-namespace BmsManager
+namespace BmsManager.View
 {
     /// <summary>
     /// FileRegister.xaml の相互作用ロジック
