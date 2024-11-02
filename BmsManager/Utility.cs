@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,17 @@ namespace BmsManager
 {
     static class Utility
     {
+        static HttpClient client;
+        public static HttpClient GetHttpClient()
+        {
+            if (client == null)
+            {
+                client = new HttpClient();
+                client.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "BmsManager");
+            }
+            return client;
+        }
+
         public static string GetCrc32(string path)
         {
             // Javaのコードの実行結果と一致させるための実装。要調査

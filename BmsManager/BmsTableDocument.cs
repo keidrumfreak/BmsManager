@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using BmsManager.Data;
 using CommonLib.Net;
 using CommonLib.Net.Http;
 
@@ -27,7 +29,14 @@ namespace BmsManager
             Home = uri.Substring(0, uri.LastIndexOf('/'));
         }
 
-        public async Task LoadHeaderAsync()
+        public override async Task LoadAsync(HttpClient client)
+        {
+            await base.LoadAsync(client);
+            await loadHeaderAsync();
+            await loadDatasAsync();
+        }
+
+        private async Task loadHeaderAsync()
         {
             var headerContent = Content.Descendants(Namespace + "meta")?
                 .FirstOrDefault(e => e.Attribute("name")?.Value == "bmstable")?
@@ -42,13 +51,45 @@ namespace BmsManager
             Header = JsonSerializer.Deserialize<BmsTalbeHeader>(json);
         }
 
-        public async Task LoadDatasAsync()
+        private async Task loadDatasAsync()
         {
             var dataUri = Header.DataUrl.StartsWith("http:")
                 ? Header.DataUrl
                 : $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
             var json = await HttpClientProvider.GetClient().GetStringAsync(dataUri);
             Datas = JsonSerializer.Deserialize<BmsTableData[]>(json);
+        }
+
+        public BmsTable ToEntity()
+        {
+            return new BmsTable
+            {
+                Name = Header.Name,
+                Url = Uri.AbsoluteUri,
+                Symbol = Header.Symbol,
+                Tag = Header.Tag,
+                Difficulties =Datas.GroupBy(d => d.Level).Select(d => new BmsTableDifficulty
+                {
+                    Difficulty = d.Key,
+                    DifficultyOrder = Header.LevelOrder?.Any() ?? false
+                        ? Array.IndexOf(Header.LevelOrder, d.Key) + 1
+                        : int.TryParse(d.Key, out var index) ? index : null,
+                    TableDatas = d.Select(d => new Data.BmsTableData
+                    {
+                        MD5 = d.MD5,
+                        LR2BmsID = d.LR2BmsID,
+                        Title = d.Title,
+                        Artist = d.Artist,
+                        Url = d.Url,
+                        DiffUrl = d.UrlDiff,
+                        DiffName = d.NameDiff,
+                        PackUrl = d.UrlPack,
+                        PackName = d.NamePack,
+                        Comment = d.Comment,
+                        OrgMD5 = d.OrgMD5
+                    }).ToList()
+                }).ToList()
+            };
         }
 
         public class BmsTalbeHeader

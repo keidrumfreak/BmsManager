@@ -3,10 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:BmsManager"
+             xmlns:local="clr-namespace:BmsManager" xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              d:DataContext="{d:DesignInstance Type=local:BmsTableTreeViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding LoadAllTables}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type local:BmsTableTreeViewModel}"/>
         <BooleanToVisibilityConverter x:Key="converter"/>

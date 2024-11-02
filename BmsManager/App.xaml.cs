@@ -73,7 +73,7 @@ namespace BmsManager
         /// <param name="e">例外オブジェクト</param>
         /// <param name="sourceName">発生したスレッドの種別を示す文字列</param>
         /// <returns>継続することが選択された場合は true, それ以外は false</returns>
-        bool ConfirmUnhandledException(Exception e, string sourceName)
+        static bool ConfirmUnhandledException(Exception e, string sourceName)
         {
             var message = $"予期せぬエラーが発生しました。続けて発生する場合は開発者に報告してください。\nプログラムの実行を継続しますか？";
             if (e != null) message += $"\n({e.Message} @ {e.TargetSite.Name})";

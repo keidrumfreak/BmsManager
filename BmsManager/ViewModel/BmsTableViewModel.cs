@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
+using BmsManager.Model;
 using CommonLib.Wpf;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BmsManager
 {
-    class BmsTableViewModel : ViewModelBase
+    class BmsTableViewModel : ObservableObject
     {
         public string Name { get; set; }
 
@@ -24,23 +27,22 @@ namespace BmsManager
 
         public bool IsTable => table != null;
 
-        BmsTable table;
+        BmsTableModel table;
         BmsTableDifficulty difficulty;
         BmsTableTreeViewModel parent;
 
-        public BmsTableViewModel(BmsTable table, BmsTableTreeViewModel parent)
+        public BmsTableViewModel(BmsTableModel table, BmsTableTreeViewModel parent)
         {
             this.parent = parent;
             Name = table.Name;
             this.table = table;
             Children = table.Difficulties.Select(d => new BmsTableViewModel(d));
-            Reload = CreateCommand(reload);
+            Reload = new AsyncRelayCommand(reloadAsync);
         }
 
-        private async Task reload()
+        private async Task reloadAsync()
         {
-            await table.Reload();
-            await table.Register();
+            await table.ReloadAsync();
             parent.Reload();
         }
 
