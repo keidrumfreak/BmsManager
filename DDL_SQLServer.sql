@@ -3,18 +3,6 @@ GO
 
 /****** Object:  Database [BmsManager]    Script Date: 2021/08/12 19:11:24 ******/
 CREATE DATABASE [BmsManager]
- CONTAINMENT = NONE
- ON  PRIMARY 
-( NAME = N'BmsManager', FILENAME = N'E:\.sys\Program Files\Microsoft SQL Server\MSSQL15.SQLEXPRESS\MSSQL\DATA\BmsManager.mdf' , SIZE = 73728KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
- LOG ON 
-( NAME = N'BmsManager_log', FILENAME = N'E:\.sys\Program Files\Microsoft SQL Server\MSSQL15.SQLEXPRESS\MSSQL\DATA\BmsManager_log.ldf' , SIZE = 73728KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
- WITH CATALOG_COLLATION = DATABASE_DEFAULT
-GO
-
-IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
-begin
-EXEC [BmsManager].[dbo].[sp_fulltext_database] @action = 'enable'
-end
 GO
 
 ALTER DATABASE [BmsManager] SET ANSI_NULL_DEFAULT OFF 
