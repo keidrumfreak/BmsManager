@@ -49,22 +49,10 @@ namespace BmsManager.ViewModel
         private async Task loadAllTablesAsync()
         {
             using var con = new BmsManagerContext();
-            // TODO: 検索処理の改善 (EntityFrameworkの改善待ち)
-            var difficulties = await con.Difficulties
-                .Include(d => d.TableDatas)
-                .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
-
             var tables = await con.Tables
+                .Include(t => t.Difficulties)
+                .ThenInclude(d => d.TableDatas)
                 .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
-
-            foreach (var diff in difficulties.GroupBy(d => d.BmsTableID))
-            {
-                var parent = tables.FirstOrDefault(t => t.ID == diff.Key);
-                parent.Difficulties = [.. diff];
-                foreach (var d in diff)
-                    d.Table = parent;
-            }
-
             BmsTables = new ObservableCollection<BmsTableViewModel>(tables.Select(t => new BmsTableViewModel(new BmsTableModel(t), this)).ToList());
         }
 
