@@ -41,7 +41,7 @@ namespace BmsManager
 
         public BmsTableTreeViewModel()
         {
-            BmsTables = [new BmsTableViewModel()];
+            BmsTables = [new BmsTableViewModel(this)];
             LoadFromUrl = new AsyncRelayCommand(loadFromUrlAsync);
             LoadAllTables = new AsyncRelayCommand(loadAllTablesAsync);
         }
@@ -74,25 +74,24 @@ namespace BmsManager
         {
             using (var con = new BmsManagerContext())
             {
-                if (con.Tables.Any(t => t.Url == Url))
+                if (await con.Tables.AnyAsync(t => t.Url == Url).ConfigureAwait(false))
                 {
                     MessageBox.Show("登録済です");
                     return;
                 }
             }
 
-            var doc = new BmsTableDocument(Url);
-            await doc.LoadAsync(Utility.GetHttpClient()).ConfigureAwait(false);
-
-            var table = doc.ToEntity();
-
-            using (var con = new BmsManagerContext())
+            var model = new BmsTableViewModel(this);
+            try
             {
-                con.Tables.Add(table);
-                await con.SaveChangesAsync().ConfigureAwait(false);
+                Application.Current.Dispatcher.Invoke(() => BmsTables.Add(model));
+                await model.LoadFromUrlAsync(Url).ConfigureAwait(false);
             }
-
-            Application.Current.Dispatcher.Invoke(() => BmsTables.Add(new BmsTableViewModel(new BmsTableModel(table), this)));
+            catch
+            {
+                Application.Current.Dispatcher.Invoke(() => BmsTables.Remove(model));
+                throw;
+            }
         }
 
         public void Reload()
