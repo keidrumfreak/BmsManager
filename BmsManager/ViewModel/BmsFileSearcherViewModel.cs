@@ -164,12 +164,5 @@ namespace BmsManager.ViewModel
 
             search();
         }
-
-        private void register(object input)
-        {
-            RootDirectory?.Root.Register();
-
-            MessageBox.Show("登録完了しました");
-        }
     }
 }

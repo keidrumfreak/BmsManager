@@ -71,15 +71,13 @@ namespace BmsManager.ViewModel
 
         public BmsFolder[] DescendantFolders => Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
 
+        public int ID => entity.ID;
+
         public ICommand LoadFromFileSystem { get; }
 
         public ICommand LoadFromDB { get; }
 
         public ICommand Remove { get; }
-
-        public int ID => entity.ID;
-
-        public RootDirectory Root => entity;
 
         readonly RootDirectory entity;
 
@@ -168,25 +166,25 @@ namespace BmsManager.ViewModel
                 }
                 await con.SaveChangesAsync().ConfigureAwait(false);
             }
-            if (entity.Parent == null)
-                tree.RootTree.Remove(this);
+            if (parent == null)
+                Application.Current.Dispatcher.Invoke(() => tree.RootTree.Remove(this));
             else
-                tree.RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.FullPath == entity.Parent.Path)?.Root.LoadFromDB();
+                Application.Current.Dispatcher.Invoke(() => parent.Children.Remove(this));
         }
 
         private async Task loadFromDB()
         {
-            await Task.Run(() => entity.LoadFromDB()).ConfigureAwait(false);
+            await Task.Run(entity.LoadFromDB).ConfigureAwait(false);
         }
 
         private async Task loadFromFileSystemAsync()
         {
-            await loadFromFileSystemAsync(this, tree).ConfigureAwait(false);
+            await loadFromFileSystemAsync(tree).ConfigureAwait(false);
         }
 
-        private async Task loadFromFileSystemAsync(RootDirectoryViewModel root, RootTreeViewModel tree)
+        private async Task loadFromFileSystemAsync(RootTreeViewModel tree)
         {
-            root.IsLoading = true;
+            IsLoading = true;
             if (tree != null)
                 tree.LoadingPath = entity.Path;
 
@@ -227,17 +225,17 @@ namespace BmsManager.ViewModel
                     .Select(file => (file, SystemProvider.FileSystem.File.ReadAllBytes(file)));
 
                 if (bmsFileDatas.Any())
-                    await loadBmsFolderAsync(folder, files, bmsFileDatas, root).ConfigureAwait(false);
+                    await loadBmsFolderAsync(folder, files, bmsFileDatas).ConfigureAwait(false);
                 else
-                    await loadRootDirectoryAsync(folder, root, tree).ConfigureAwait(false);
+                    await loadRootDirectoryAsync(folder, tree).ConfigureAwait(false);
             }
 
-            root.IsLoading = false;
+            IsLoading = false;
             if (tree != null)
                 tree.LoadingPath = "読込完了";
         }
 
-        private async Task loadRootDirectoryAsync(string path, RootDirectoryViewModel parent, RootTreeViewModel tree)
+        private async Task loadRootDirectoryAsync(string path, RootTreeViewModel tree)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -250,7 +248,7 @@ namespace BmsManager.ViewModel
                     {
                         Path = path,
                         FolderUpdateDate = updateDate,
-                        ParentRootID = parent.ID,
+                        ParentRootID = entity.ID,
                     };
                     con.RootDirectories.Add(root);
                     await con.SaveChangesAsync().ConfigureAwait(false);
@@ -266,18 +264,18 @@ namespace BmsManager.ViewModel
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
-            var model = parent.Children.FirstOrDefault(c => c.FullPath == root.Path);
+            var model = Children.FirstOrDefault(c => c.FullPath == root.Path);
             if (model == default)
             {
-                model = new RootDirectoryViewModel(tree, root, true, parent);
-                Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
+                model = new RootDirectoryViewModel(tree, root, true, this);
+                Application.Current.Dispatcher.Invoke(() => Children.Add(model));
             }
             else
                 model.Folders = [];
-            await model.loadFromFileSystemAsync(this, tree).ConfigureAwait(false);
+            await model.loadFromFileSystemAsync().ConfigureAwait(false);
         }
 
-        private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryViewModel parent, RootTreeViewModel tree = null)
+        private async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootTreeViewModel tree = null)
         {
             if (tree != null)
                 tree.LoadingPath = path;
@@ -311,7 +309,7 @@ namespace BmsManager.ViewModel
                     HasText = hasText,
                     Preview = preview,
                     Files = bmsFiles,
-                    RootID = parent.ID
+                    RootID = entity.ID
                 };
                 await bmsFolder.RegisterAsync().ConfigureAwait(false);
             }
@@ -336,7 +334,7 @@ namespace BmsManager.ViewModel
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
-            parent.Folders.Add(bmsFolder);
+            Folders.Add(bmsFolder);
         }
 
         public IEnumerable<RootDirectoryViewModel> Descendants()

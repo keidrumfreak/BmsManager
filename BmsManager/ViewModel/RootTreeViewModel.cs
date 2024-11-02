@@ -93,7 +93,7 @@ namespace BmsManager.ViewModel
                 FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.New(TargetDirectory).LastWriteTimeUtc
             };
 
-            var parent = rootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == System.IO.Path.GetDirectoryName(TargetDirectory));
+            var parent =  rootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.FullPath == System.IO.Path.GetDirectoryName(TargetDirectory));
             if (parent != default)
                 root.ParentRootID = parent.ID;
 
@@ -107,35 +107,6 @@ namespace BmsManager.ViewModel
             var dialog = new OpenFolderDialog() { Multiselect = false };
             if (dialog.ShowDialog() ?? false)
                 TargetDirectory = dialog.FolderName;
-        }
-
-        private void remove(RootDirectoryViewModel root)
-        {
-            using (var con = new BmsManagerContext())
-            {
-                inner(root.Root.Path);
-                void inner(string path)
-                {
-                    foreach (var root in con.RootDirectories.Include(r => r.Children).Include(r => r.Folders).ThenInclude(f => f.Files).Where(r => r.Path == path).ToArray())
-                    {
-                        foreach (var child in root.Children)
-                            inner(child.Path);
-
-                        foreach (var folder in root.Folders)
-                        {
-                            foreach (var file in folder.Files)
-                                con.Files.Remove(file);
-                            con.BmsFolders.Remove(folder);
-                        }
-                        con.RootDirectories.Remove(root);
-                    }
-                }
-                con.SaveChanges();
-            }
-            if (root.Root.Parent == null)
-                RootTree.Remove(root);
-            else
-                RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
         }
     }
 }
