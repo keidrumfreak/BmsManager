@@ -11,7 +11,7 @@ using BmsManager.Entity;
 using CommonLib.Net;
 using CommonLib.Net.Http;
 
-namespace BmsManager
+namespace BmsManager.Data
 {
     /// <summary>
     ///  難易度表
@@ -38,7 +38,7 @@ namespace BmsManager
                 .Attribute("content").Value
                 .TrimStart('.', '/'); // "./"から始まっている場合がある
 
-            var headerUri = (headerContent.StartsWith("http:") || headerContent.StartsWith("https:"))
+            var headerUri = headerContent.StartsWith("http:") || headerContent.StartsWith("https:")
                 ? headerContent
                 : $"{Home}/{headerContent}";
 
@@ -48,7 +48,7 @@ namespace BmsManager
 
         private async Task loadDatasAsync()
         {
-            var dataUri = (Header.DataUrl.StartsWith("http:") || Header.DataUrl.StartsWith("https:"))
+            var dataUri = Header.DataUrl.StartsWith("http:") || Header.DataUrl.StartsWith("https:")
                 ? Header.DataUrl
                 : $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
             var json = await Utility.GetHttpClient().GetStringAsync(dataUri).ConfigureAwait(false);
@@ -63,10 +63,10 @@ namespace BmsManager
                 Url = Uri.AbsoluteUri,
                 Symbol = Header.Symbol,
                 Tag = Header.Tag,
-                Difficulties =Datas.GroupBy(d => d.Level).Select(d => new BmsTableDifficulty
+                Difficulties = Datas.GroupBy(d => d.Level).Select(d => new BmsTableDifficulty
                 {
                     Difficulty = d.Key,
-                    DifficultyOrder = ((Header.LevelOrder?.Length ?? 0) == 0)
+                    DifficultyOrder = (Header.LevelOrder?.Length ?? 0) == 0
                         ? Array.IndexOf(Header.LevelOrder, d.Key) + 1
                         : int.TryParse(d.Key, out var index) ? index : null,
                     TableDatas = d.Select(d => new Entity.BmsTableData
