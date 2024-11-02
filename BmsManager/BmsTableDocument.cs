@@ -43,20 +43,20 @@ namespace BmsManager
                 .Attribute("content").Value
                 .TrimStart('.', '/'); // "./"から始まっている場合がある
 
-            var headerUri = headerContent.StartsWith("http:")
+            var headerUri = (headerContent.StartsWith("http:") || headerContent.StartsWith("https:"))
                 ? headerContent
                 : $"{Home}/{headerContent}";
 
-            var json = await HttpClientProvider.GetClient().GetStringAsync(headerUri);
+            var json = await Utility.GetHttpClient().GetStringAsync(headerUri);
             Header = JsonSerializer.Deserialize<BmsTalbeHeader>(json);
         }
 
         private async Task loadDatasAsync()
         {
-            var dataUri = Header.DataUrl.StartsWith("http:")
+            var dataUri = (Header.DataUrl.StartsWith("http:") || Header.DataUrl.StartsWith("https:"))
                 ? Header.DataUrl
                 : $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
-            var json = await HttpClientProvider.GetClient().GetStringAsync(dataUri);
+            var json = await Utility.GetHttpClient().GetStringAsync(dataUri);
             Datas = JsonSerializer.Deserialize<BmsTableData[]>(json);
         }
 
