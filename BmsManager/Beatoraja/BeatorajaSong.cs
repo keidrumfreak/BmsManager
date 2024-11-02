@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BmsManager.Data;
+using BmsManager.Entity;
 using BmsParser;
 using CrSha256 = System.Security.Cryptography.SHA256;
 using SysPath = System.IO.Path;

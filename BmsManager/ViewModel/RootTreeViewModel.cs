@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using BmsManager.Data;
+using BmsManager.Entity;
 using BmsManager.Model;
 using CommonLib.Wpf;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -28,14 +28,14 @@ namespace BmsManager.ViewModel
             set => SetProperty(ref targetDirectory, value);
         }
 
-        public ObservableCollection<RootDirectoryModel> RootTree
+        public ObservableCollection<RootDirectoryViewModel> RootTree
         {
             get => model.RootTree;
             set => model.RootTree = value;
         }
 
-        RootDirectoryModel selectedRoot;
-        public RootDirectoryModel SelectedRoot
+        RootDirectoryViewModel selectedRoot;
+        public RootDirectoryViewModel SelectedRoot
         {
             get => selectedRoot;
             set => SetProperty(ref selectedRoot, value);
@@ -66,9 +66,9 @@ namespace BmsManager.ViewModel
             AddRoot = new AsyncRelayCommand(async () => await model.AddRootAsync(TargetDirectory));
             LoadRootTree = new AsyncRelayCommand(model.LoadRootTreeAsync);
             SelectFolder = new RelayCommand(selectFolder);
-            LoadFromFileSystem = new AsyncRelayCommand<RootDirectoryModel>(model.LoadFromFileSystemAsync);
-            LoadFromDB = new RelayCommand<RootDirectoryModel>(loadFromDB);
-            Remove = new RelayCommand<RootDirectoryModel>(remove);
+            LoadFromFileSystem = new AsyncRelayCommand<RootDirectoryViewModel>(model.LoadFromFileSystemAsync);
+            LoadFromDB = new RelayCommand<RootDirectoryViewModel>(loadFromDB);
+            Remove = new RelayCommand<RootDirectoryViewModel>(remove);
         }
 
         private void selectFolder()
@@ -78,12 +78,12 @@ namespace BmsManager.ViewModel
                 TargetDirectory = dialog.FolderName;
         }
 
-        private void loadFromDB(RootDirectoryModel root)
+        private void loadFromDB(RootDirectoryViewModel root)
         {
             root.Root.LoadFromDB();
         }
 
-        private void remove(RootDirectoryModel root)
+        private void remove(RootDirectoryViewModel root)
         {
             using (var con = new BmsManagerContext())
             {

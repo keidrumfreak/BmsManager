@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using BmsManager.Data;
+using BmsManager.Entity;
 using CommonLib.Net;
 using CommonLib.Net.Http;
 
@@ -69,7 +69,7 @@ namespace BmsManager
                     DifficultyOrder = ((Header.LevelOrder?.Length ?? 0) == 0)
                         ? Array.IndexOf(Header.LevelOrder, d.Key) + 1
                         : int.TryParse(d.Key, out var index) ? index : null,
-                    TableDatas = d.Select(d => new Data.BmsTableData
+                    TableDatas = d.Select(d => new Entity.BmsTableData
                     {
                         MD5 = d.MD5,
                         LR2BmsID = d.LR2BmsID,

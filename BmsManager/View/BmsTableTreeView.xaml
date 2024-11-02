@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:BmsManager.ViewModel" xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             d:DataContext="{d:DesignInstance Type=local:BmsTableTreeViewModel}"
+             xmlns:vm="clr-namespace:BmsManager.ViewModel" xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             d:DataContext="{d:DesignInstance Type=vm:BmsTableTreeViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <b:Interaction.Triggers>
@@ -13,7 +13,7 @@
         </b:EventTrigger>
     </b:Interaction.Triggers>
     <UserControl.Resources>
-        <DataTemplate DataType="{x:Type local:BmsTableTreeViewModel}"/>
+        <DataTemplate DataType="{x:Type vm:BmsTableTreeViewModel}"/>
         <BooleanToVisibilityConverter x:Key="converter"/>
     </UserControl.Resources>
     <Grid>
@@ -29,7 +29,7 @@
         <Button Grid.Row="0" Grid.Column="1" Margin="5" Content="新規読み込み" Command="{Binding LoadFromUrl}"/>
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding BmsTables}" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="local:BmsTableViewModel" ItemsSource="{Binding Children}">
+                <HierarchicalDataTemplate DataType="vm:BmsTableViewModel" ItemsSource="{Binding Children}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

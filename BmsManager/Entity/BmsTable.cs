@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.EntityFrameworkCore;
 
-namespace BmsManager.Data
+namespace BmsManager.Entity
 {
     [Table("BmsTable")]
     class BmsTable

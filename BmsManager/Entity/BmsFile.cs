@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using BmsParser;
 using CrSha256 = System.Security.Cryptography.SHA256;
 
-namespace BmsManager.Data
+namespace BmsManager.Entity
 {
     [Table("BmsFile")]
     class BmsFile

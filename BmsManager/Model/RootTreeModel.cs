@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using BmsManager.Data;
+using BmsManager.Entity;
+using BmsManager.ViewModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +16,8 @@ namespace BmsManager.Model
 {
     internal class RootTreeModel : ObservableObject
     {
-        ObservableCollection<RootDirectoryModel> rootTree;
-        public ObservableCollection<RootDirectoryModel> RootTree
+        ObservableCollection<RootDirectoryViewModel> rootTree;
+        public ObservableCollection<RootDirectoryViewModel> RootTree
         {
             get => rootTree;
             set => SetProperty(ref rootTree, value);
@@ -33,7 +34,7 @@ namespace BmsManager.Model
 
         public async Task LoadRootTreeAsync()
         {
-            RootTree = [new RootDirectoryModel()];
+            RootTree = [new RootDirectoryViewModel()];
 
             var con = new BmsManagerContext();
 
@@ -43,7 +44,7 @@ namespace BmsManager.Model
                 .ThenInclude(r => r.Files)
                 .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
-            RootTree = new ObservableCollection<RootDirectoryModel>(roots.Select(r => new RootDirectoryModel(r, true)).ToArray());
+            RootTree = new ObservableCollection<RootDirectoryViewModel>(roots.Select(r => new RootDirectoryViewModel(r, true)).ToArray());
 
             foreach (var root in RootTree)
             {
@@ -76,10 +77,10 @@ namespace BmsManager.Model
 
             con.RootDirectories.Add(root);
             await con.SaveChangesAsync().ConfigureAwait(false);
-            Application.Current.Dispatcher.Invoke(() => (parent?.Children ?? RootTree).Add(new RootDirectoryModel(root)));
+            Application.Current.Dispatcher.Invoke(() => (parent?.Children ?? RootTree).Add(new RootDirectoryViewModel(root)));
         }
 
-        public async Task LoadFromFileSystemAsync(RootDirectoryModel root)
+        public async Task LoadFromFileSystemAsync(RootDirectoryViewModel root)
         {
             await root.LoadFromFileSystemAsync(this).ConfigureAwait(false);
         }

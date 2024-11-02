@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using BmsManager.Data;
+using BmsManager.Entity;
+using BmsManager.Model;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 
-namespace BmsManager.Model
+namespace BmsManager.ViewModel
 {
-    internal class RootDirectoryModel : ObservableObject
+    internal class RootDirectoryViewModel : ObservableObject
     {
         public string Text
         {
@@ -32,9 +32,7 @@ namespace BmsManager.Model
                     return;
                 SetProperty(ref isLoading, value);
                 if (parent != null && parent.IsLoading != value)
-                {
                     parent.IsLoading = value;
-                }
             }
         }
 
@@ -49,9 +47,7 @@ namespace BmsManager.Model
                     return;
                 SetProperty(ref isError, value);
                 if (parent != null && parent.IsError != value)
-                {
                     parent.IsError = value;
-                }
             }
         }
 
@@ -64,8 +60,8 @@ namespace BmsManager.Model
             set => SetProperty(ref folders, value);
         }
 
-        ObservableCollection<RootDirectoryModel> children = [];
-        public ObservableCollection<RootDirectoryModel> Children
+        ObservableCollection<RootDirectoryViewModel> children = [];
+        public ObservableCollection<RootDirectoryViewModel> Children
         {
             get => children;
             set => SetProperty(ref children, value);
@@ -79,15 +75,15 @@ namespace BmsManager.Model
 
         readonly RootDirectory entity;
 
-        readonly RootDirectoryModel parent;
+        readonly RootDirectoryViewModel parent;
 
         static readonly object lockObj = new();
 
         static readonly string[] previewExt = ["wav", "ogg", "mp3", "flac"];
 
-        public RootDirectoryModel() : this(new RootDirectory(), true) { }
+        public RootDirectoryViewModel() : this(new RootDirectory(), true) { }
 
-        public RootDirectoryModel(RootDirectory entity, bool isLoading = false, RootDirectoryModel parent = null)
+        public RootDirectoryViewModel(RootDirectory entity, bool isLoading = false, RootDirectoryViewModel parent = null)
         {
             this.entity = entity;
             IsLoading = isLoading;
@@ -107,18 +103,15 @@ namespace BmsManager.Model
                             .Include(r => r.Folders)
                             .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
                         Folders = [];
-                        Children = new ObservableCollection<RootDirectoryModel>(childrenEntity.Select(e => new RootDirectoryModel(e, true, this)).ToArray());
+                        Children = new ObservableCollection<RootDirectoryViewModel>(childrenEntity.Select(e => new RootDirectoryViewModel(e, true, this)).ToArray());
                     }
 
                     foreach (var child in children)
-                    {
                         loadRootTask = loadRootTask.ContinueWith((t) => child.LoadChildAsync(loadRootTask));
-                    }
 
                 }
                 await loadRootTask.ConfigureAwait(false);
                 if (entity.Folders.Count != 0)
-                {
                     lock (lockObj)
                     {
                         using var con = new BmsManagerContext();
@@ -127,7 +120,6 @@ namespace BmsManager.Model
                             .AsNoTracking().ToArray();
                         Folders = new ObservableCollection<BmsFolder>(folderEntity);
                     }
-                }
 
                 IsLoading = false;
             }
@@ -144,7 +136,7 @@ namespace BmsManager.Model
             await LoadFromFileSystemAsync(this, tree).ConfigureAwait(false);
         }
 
-        public async Task LoadFromFileSystemAsync(RootDirectoryModel root, RootTreeModel tree = null)
+        public async Task LoadFromFileSystemAsync(RootDirectoryViewModel root, RootTreeModel tree = null)
         {
             root.IsLoading = true;
             if (tree != null)
@@ -187,13 +179,9 @@ namespace BmsManager.Model
                     .Select(file => (file, SystemProvider.FileSystem.File.ReadAllBytes(file)));
 
                 if (bmsFileDatas.Any())
-                {
                     await loadBmsFolderAsync(folder, files, bmsFileDatas, root).ConfigureAwait(false);
-                }
                 else
-                {
                     await loadRootDirectoryAsync(folder, root, tree).ConfigureAwait(false);
-                }
             }
 
             root.IsLoading = false;
@@ -201,7 +189,7 @@ namespace BmsManager.Model
                 tree.LoadingPath = "読込完了";
         }
 
-        private static async Task loadRootDirectoryAsync(string path, RootDirectoryModel parent, RootTreeModel tree)
+        private static async Task loadRootDirectoryAsync(string path, RootDirectoryViewModel parent, RootTreeModel tree)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -220,32 +208,28 @@ namespace BmsManager.Model
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
                 else
-                {
                     // 既存Root
                     if (root.FolderUpdateDate.Date != updateDate.Date
                         && root.FolderUpdateDate.Hour != updateDate.Hour
                         && root.FolderUpdateDate.Minute != updateDate.Minute
                         && root.FolderUpdateDate.Second != updateDate.Second) // 何故かミリ秒がずれるのでミリ秒以外で比較
-                    {
-                        con.RootDirectories.Find(root.ID).FolderUpdateDate = updateDate;
-                        await con.SaveChangesAsync().ConfigureAwait(false);
-                    }
+                {
+                    con.RootDirectories.Find(root.ID).FolderUpdateDate = updateDate;
+                    await con.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
             var model = parent.Children.FirstOrDefault(c => c.FullPath == root.Path);
             if (model == default)
             {
-                model = new RootDirectoryModel(root, true, parent);
+                model = new RootDirectoryViewModel(root, true, parent);
                 Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
             }
             else
-            {
                 model.Folders = [];
-            }
             await model.LoadFromFileSystemAsync(tree).ConfigureAwait(false);
         }
 
-        private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryModel parent, RootTreeModel tree = null)
+        private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryViewModel parent, RootTreeModel tree = null)
         {
             if (tree != null)
                 tree.LoadingPath = path;
@@ -258,9 +242,7 @@ namespace BmsManager.Model
             if (bmsFiles.Length == 0)
             {
                 if (bmsFolder != default)
-                {
                     con.BmsFolders.Remove(bmsFolder);
-                }
                 return;
             }
 
@@ -309,7 +291,7 @@ namespace BmsManager.Model
             parent.Folders.Add(bmsFolder);
         }
 
-        public IEnumerable<RootDirectoryModel> Descendants()
+        public IEnumerable<RootDirectoryViewModel> Descendants()
         {
             yield return this;
             if (Children == null || !Children.Any())

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BmsManager.Data
+namespace BmsManager.Entity
 {
     [Table("BmsTableDifficulty")]
     class BmsTableDifficulty

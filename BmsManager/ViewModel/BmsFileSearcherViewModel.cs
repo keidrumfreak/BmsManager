@@ -7,8 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using BmsManager.Data;
-using BmsManager.Model;
+using BmsManager.Entity;
 using BmsManager.ViewModel;
 using CommonLib.Wpf;
 
@@ -16,8 +15,8 @@ namespace BmsManager
 {
     class BmsFileSearcherViewModel : ViewModelBase
     {
-        RootDirectoryModel root;
-        public RootDirectoryModel RootDirectory
+        RootDirectoryViewModel root;
+        public RootDirectoryViewModel RootDirectory
         {
             get { return root; }
             set
@@ -96,7 +95,7 @@ namespace BmsManager
 
             FileList.Folders = new ObservableCollection<BmsFolder>(inner(root).ToArray());
 
-            IEnumerable<BmsFolder> inner(RootDirectoryModel root)
+            IEnumerable<BmsFolder> inner(RootDirectoryViewModel root)
             {
                 if (root.DescendantFolders != null)
                 {

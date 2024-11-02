@@ -18,7 +18,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SysPath = System.IO.Path;
 
-namespace BmsManager.Data
+namespace BmsManager.Entity
 {
     [Table("BmsFolder")]
     class BmsFolder : BindableBase

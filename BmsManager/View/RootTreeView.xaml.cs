@@ -12,8 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using BmsManager.Data;
-using BmsManager.Model;
+using BmsManager.Entity;
 using BmsManager.ViewModel;
 
 namespace BmsManager
@@ -30,7 +29,7 @@ namespace BmsManager
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            ((RootTreeViewModel)DataContext).SelectedRoot = (RootDirectoryModel)e.NewValue;
+            ((RootTreeViewModel)DataContext).SelectedRoot = (RootDirectoryViewModel)e.NewValue;
         }
     }
 }

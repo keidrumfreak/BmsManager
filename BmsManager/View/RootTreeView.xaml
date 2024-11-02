@@ -4,8 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BmsManager"
-             xmlns:data="clr-namespace:BmsManager.Data"
-             xmlns:model="clr-namespace:BmsManager.Model"
              xmlns:vm="clr-namespace:BmsManager.ViewModel"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              d:DataContext="{d:DesignInstance Type=vm:RootTreeViewModel}"
@@ -36,7 +34,7 @@
         <Button Grid.Row="0" Grid.Column ="2" Margin="5" Content="ルートフォルダ登録" Command="{Binding AddRoot}"/>
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" ItemsSource="{Binding RootTree}" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="model:RootDirectoryModel" ItemsSource="{Binding Children}">
+                <HierarchicalDataTemplate DataType="vm:RootDirectoryViewModel" ItemsSource="{Binding Children}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

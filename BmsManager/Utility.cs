@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using BmsManager.Data;
+using BmsManager.Entity;
 
 namespace BmsManager
 {

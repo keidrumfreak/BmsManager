@@ -2,7 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BmsManager;
 using CommonLib.TestHelper.UnitTesting;
 using System.Text;
-using BmsManager.Data;
+using BmsManager.Entity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Collections;

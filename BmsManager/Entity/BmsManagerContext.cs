@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BmsManager.Beatoraja;
+using BmsManager.Entity;
 using BmsParser;
 using CommonLib.IO;
 using Microsoft.Data.Sqlite;
@@ -13,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 
-namespace BmsManager.Data
+namespace BmsManager.Entity
 {
     class BmsManagerContext : DbContext
     {

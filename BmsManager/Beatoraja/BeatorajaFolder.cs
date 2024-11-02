@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BmsManager.Data;
+using BmsManager.Entity;
 using SysPath = System.IO.Path;
 
 namespace BmsManager.Beatoraja

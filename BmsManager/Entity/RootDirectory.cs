@@ -10,7 +10,7 @@ using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 using ClsPath = System.IO.Path;
 
-namespace BmsManager.Data
+namespace BmsManager.Entity
 {
     [Table("RootDirectory")]
     class RootDirectory : BindableBase

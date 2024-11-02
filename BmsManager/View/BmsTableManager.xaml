@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BmsManager"
-        xmlns:data="clr-namespace:BmsManager.Data"
         xmlns:vm="clr-namespace:BmsManager.ViewModel"
         mc:Ignorable="d"
         Title="TableManager" Height="450" Width="800">
