@@ -20,12 +20,12 @@ namespace BmsManager
     {
         public RootTreeViewModel RootTree { get; set; }
 
-        public BmsFileSearcherViewModel FileList { get; set; }
+        public BmsFileSearcherViewModel FileSearcher { get; set; }
 
         public FolderRegisterViewModel()
         {
             RootTree = new RootTreeViewModel();
-            FileList = new BmsFileSearcherViewModel();
+            FileSearcher = new BmsFileSearcherViewModel();
 
             RootTree.PropertyChanged += RootTree_PropertyChanged;
         }
@@ -34,7 +34,7 @@ namespace BmsManager
         {
             if (e.PropertyName == nameof(RootTreeViewModel.SelectedRoot))
             {
-                FileList.RootDirectory = RootTree.SelectedRoot;
+                FileSearcher.RootDirectory = RootTree.SelectedRoot;
             }
         }
     }

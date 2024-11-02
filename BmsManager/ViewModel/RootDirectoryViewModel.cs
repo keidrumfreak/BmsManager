@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using BmsManager.Entity;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager.ViewModel
@@ -68,6 +71,12 @@ namespace BmsManager.ViewModel
 
         public BmsFolder[] DescendantFolders => Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
 
+        public ICommand LoadFromFileSystem { get; }
+
+        public ICommand LoadFromDB { get; }
+
+        public ICommand Remove { get; }
+
         public int ID => entity.ID;
 
         public RootDirectory Root => entity;
@@ -76,17 +85,23 @@ namespace BmsManager.ViewModel
 
         readonly RootDirectoryViewModel parent;
 
+        readonly RootTreeViewModel tree;
+
         static readonly object lockObj = new();
 
         static readonly string[] previewExt = ["wav", "ogg", "mp3", "flac"];
 
-        public RootDirectoryViewModel() : this(new RootDirectory(), true) { }
+        public RootDirectoryViewModel(RootTreeViewModel tree) : this(tree, new RootDirectory(), true) { }
 
-        public RootDirectoryViewModel(RootDirectory entity, bool isLoading = false, RootDirectoryViewModel parent = null)
+        public RootDirectoryViewModel(RootTreeViewModel tree, RootDirectory entity, bool isLoading = false, RootDirectoryViewModel parent = null)
         {
+            this.tree = tree;
             this.entity = entity;
-            IsLoading = isLoading;
             this.parent = parent;
+            LoadFromFileSystem = new AsyncRelayCommand(loadFromFileSystemAsync);
+            Remove = new AsyncRelayCommand(removeAsync);
+            LoadFromDB = new AsyncRelayCommand(loadFromDB);
+            IsLoading = isLoading;
         }
 
         public async Task LoadChildAsync(Task loadRootTask)
@@ -102,7 +117,7 @@ namespace BmsManager.ViewModel
                             .Include(r => r.Folders)
                             .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
                         Folders = [];
-                        Children = new ObservableCollection<RootDirectoryViewModel>(childrenEntity.Select(e => new RootDirectoryViewModel(e, true, this)).ToArray());
+                        Children = new ObservableCollection<RootDirectoryViewModel>(childrenEntity.Select(e => new RootDirectoryViewModel(tree, e, true, this)).ToArray());
                     }
 
                     foreach (var child in children)
@@ -130,12 +145,46 @@ namespace BmsManager.ViewModel
             }
         }
 
-        public async Task LoadFromFileSystemAsync(RootTreeViewModel tree = null)
+        private async Task removeAsync()
         {
-            await LoadFromFileSystemAsync(this, tree).ConfigureAwait(false);
+            using (var con = new BmsManagerContext())
+            {
+                inner(FullPath);
+                void inner(string path)
+                {
+                    foreach (var root in con.RootDirectories.Include(r => r.Children).Include(r => r.Folders).ThenInclude(f => f.Files).Where(r => r.Path == path).ToArray())
+                    {
+                        foreach (var child in root.Children)
+                            inner(child.Path);
+
+                        foreach (var folder in root.Folders)
+                        {
+                            foreach (var file in folder.Files)
+                                con.Files.Remove(file);
+                            con.BmsFolders.Remove(folder);
+                        }
+                        con.RootDirectories.Remove(root);
+                    }
+                }
+                await con.SaveChangesAsync().ConfigureAwait(false);
+            }
+            if (entity.Parent == null)
+                tree.RootTree.Remove(this);
+            else
+                tree.RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.FullPath == entity.Parent.Path)?.Root.LoadFromDB();
         }
 
-        public async Task LoadFromFileSystemAsync(RootDirectoryViewModel root, RootTreeViewModel tree = null)
+        private async Task loadFromDB()
+        {
+            await Task.Run(() => entity.LoadFromDB()).ConfigureAwait(false);
+        }
+
+        private async Task loadFromFileSystemAsync()
+        {
+            await loadFromFileSystemAsync(this, tree).ConfigureAwait(false);
+        }
+
+        private async Task loadFromFileSystemAsync(RootDirectoryViewModel root, RootTreeViewModel tree)
         {
             root.IsLoading = true;
             if (tree != null)
@@ -188,7 +237,7 @@ namespace BmsManager.ViewModel
                 tree.LoadingPath = "読込完了";
         }
 
-        private static async Task loadRootDirectoryAsync(string path, RootDirectoryViewModel parent, RootTreeViewModel tree)
+        private async Task loadRootDirectoryAsync(string path, RootDirectoryViewModel parent, RootTreeViewModel tree)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -220,12 +269,12 @@ namespace BmsManager.ViewModel
             var model = parent.Children.FirstOrDefault(c => c.FullPath == root.Path);
             if (model == default)
             {
-                model = new RootDirectoryViewModel(root, true, parent);
+                model = new RootDirectoryViewModel(tree, root, true, parent);
                 Application.Current.Dispatcher.Invoke(() => parent.Children.Add(model));
             }
             else
                 model.Folders = [];
-            await model.LoadFromFileSystemAsync(tree).ConfigureAwait(false);
+            await model.loadFromFileSystemAsync(this, tree).ConfigureAwait(false);
         }
 
         private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryViewModel parent, RootTreeViewModel tree = null)

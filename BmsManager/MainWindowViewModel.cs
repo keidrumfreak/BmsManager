@@ -25,7 +25,7 @@ namespace BmsManager
 
         public MainWindowViewModel()
         {
-            ShowFileRegister = CreateCommand(() => new FolderRegister().Show());
+            ShowFileRegister = CreateCommand(() => new FolderRegisterer().Show());
             ShowTableManager = CreateCommand(() => new BmsTableManager().Show());
             ShowDuplicateChecker = CreateCommand(() => new DuplicateBmsChecker().Show());
             ShowDiffRegister = CreateCommand(() => new DiffRegister().Show());

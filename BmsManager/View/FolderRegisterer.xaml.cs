@@ -18,9 +18,9 @@ namespace BmsManager
     /// <summary>
     /// FileRegister.xaml の相互作用ロジック
     /// </summary>
-    public partial class FolderRegister : Window
+    public partial class FolderRegisterer : Window
     {
-        public FolderRegister()
+        public FolderRegisterer()
         {
             InitializeComponent();
         }

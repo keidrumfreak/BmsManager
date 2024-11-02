@@ -43,12 +43,6 @@ namespace BmsManager.ViewModel
 
         public IAsyncRelayCommand AddRoot { get; set; }
 
-        public IAsyncRelayCommand LoadFromFileSystem { get; set; }
-
-        public ICommand LoadFromDB { get; set; }
-
-        public ICommand Remove { get; set; }
-
         public ICommand SelectFolder { get; }
 
         public IAsyncRelayCommand LoadRootTree { get; }
@@ -58,14 +52,11 @@ namespace BmsManager.ViewModel
             AddRoot = new AsyncRelayCommand(addRootAsync);
             LoadRootTree = new AsyncRelayCommand(loadRootTreeAsync);
             SelectFolder = new RelayCommand(selectFolder);
-            LoadFromFileSystem = new AsyncRelayCommand<RootDirectoryViewModel>(loadFromFileSystemAsync);
-            LoadFromDB = new RelayCommand<RootDirectoryViewModel>(loadFromDB);
-            Remove = new RelayCommand<RootDirectoryViewModel>(remove);
         }
 
         private async Task loadRootTreeAsync()
         {
-            RootTree = [new RootDirectoryViewModel()];
+            RootTree = [new RootDirectoryViewModel(this)];
 
             var con = new BmsManagerContext();
 
@@ -75,7 +66,7 @@ namespace BmsManager.ViewModel
                 .ThenInclude(r => r.Files)
                 .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
-            RootTree = new ObservableCollection<RootDirectoryViewModel>(roots.Select(r => new RootDirectoryViewModel(r, true)).ToArray());
+            RootTree = new ObservableCollection<RootDirectoryViewModel>(roots.Select(r => new RootDirectoryViewModel(this, r, true)).ToArray());
 
             foreach (var root in RootTree)
             {
@@ -83,7 +74,7 @@ namespace BmsManager.ViewModel
             }
         }
 
-        public async Task addRootAsync()
+        private async Task addRootAsync()
         {
             if (string.IsNullOrWhiteSpace(TargetDirectory))
                 return;
@@ -108,7 +99,7 @@ namespace BmsManager.ViewModel
 
             con.RootDirectories.Add(root);
             await con.SaveChangesAsync().ConfigureAwait(false);
-            Application.Current.Dispatcher.Invoke(() => (parent?.Children ?? RootTree).Add(new RootDirectoryViewModel(root)));
+            Application.Current.Dispatcher.Invoke(() => (parent?.Children ?? RootTree).Add(new RootDirectoryViewModel(this, root)));
         }
 
         private void selectFolder()
@@ -116,11 +107,6 @@ namespace BmsManager.ViewModel
             var dialog = new OpenFolderDialog() { Multiselect = false };
             if (dialog.ShowDialog() ?? false)
                 TargetDirectory = dialog.FolderName;
-        }
-
-        private void loadFromDB(RootDirectoryViewModel root)
-        {
-            root.Root.LoadFromDB();
         }
 
         private void remove(RootDirectoryViewModel root)
@@ -150,11 +136,6 @@ namespace BmsManager.ViewModel
                 RootTree.Remove(root);
             else
                 RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
-        }
-
-        public async Task loadFromFileSystemAsync(RootDirectoryViewModel root)
-        {
-            await root.LoadFromFileSystemAsync(this).ConfigureAwait(false);
         }
     }
 }

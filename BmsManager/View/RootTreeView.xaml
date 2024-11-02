@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:BmsManager"
              xmlns:vm="clr-namespace:BmsManager.ViewModel"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              d:DataContext="{d:DesignInstance Type=vm:RootTreeViewModel}"
@@ -44,15 +43,9 @@
                         <TextBlock Grid.Column="0" Text="{Binding Text}" Tag="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=DataContext}">
                             <TextBlock.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="フォルダ読み込み"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.LoadFromFileSystem}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                    <MenuItem Header="DB読み込み"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.LoadFromDB}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                    <MenuItem Header="登録解除"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.Remove}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                    <MenuItem Header="フォルダ読み込み" Command="{Binding LoadFromFileSystem}" />
+                                    <MenuItem Header="DB読み込み" Command="{Binding LoadFromDB}" />
+                                    <MenuItem Header="登録解除" Command="{Binding Remove}" />
                                 </ContextMenu>
                             </TextBlock.ContextMenu>
                         </TextBlock>
