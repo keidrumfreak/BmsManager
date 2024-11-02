@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
-using BmsManager.Model;
-using CommonLib.Wpf;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +13,6 @@ namespace BmsManager.ViewModel
 {
     class RootTreeViewModel : ObservableObject
     {
-        readonly RootTreeModel model;
-
         string targetDirectory;
         public string TargetDirectory
         {
@@ -28,10 +20,11 @@ namespace BmsManager.ViewModel
             set => SetProperty(ref targetDirectory, value);
         }
 
+        ObservableCollection<RootDirectoryViewModel> rootTree;
         public ObservableCollection<RootDirectoryViewModel> RootTree
         {
-            get => model.RootTree;
-            set => model.RootTree = value;
+            get => rootTree;
+            set => SetProperty(ref rootTree, value);
         }
 
         RootDirectoryViewModel selectedRoot;
@@ -41,10 +34,11 @@ namespace BmsManager.ViewModel
             set => SetProperty(ref selectedRoot, value);
         }
 
+        string loadingPath;
         public string LoadingPath
         {
-            get => model.LoadingPath;
-            set => model.LoadingPath = value;
+            get => loadingPath;
+            set => SetProperty(ref loadingPath, value);
         }
 
         public IAsyncRelayCommand AddRoot { get; set; }
@@ -61,14 +55,60 @@ namespace BmsManager.ViewModel
 
         public RootTreeViewModel()
         {
-            model = new RootTreeModel();
-            model.PropertyChanged += (sender, e) => OnPropertyChanged(e.PropertyName);
-            AddRoot = new AsyncRelayCommand(async () => await model.AddRootAsync(TargetDirectory));
-            LoadRootTree = new AsyncRelayCommand(model.LoadRootTreeAsync);
+            AddRoot = new AsyncRelayCommand(addRootAsync);
+            LoadRootTree = new AsyncRelayCommand(loadRootTreeAsync);
             SelectFolder = new RelayCommand(selectFolder);
-            LoadFromFileSystem = new AsyncRelayCommand<RootDirectoryViewModel>(model.LoadFromFileSystemAsync);
+            LoadFromFileSystem = new AsyncRelayCommand<RootDirectoryViewModel>(loadFromFileSystemAsync);
             LoadFromDB = new RelayCommand<RootDirectoryViewModel>(loadFromDB);
             Remove = new RelayCommand<RootDirectoryViewModel>(remove);
+        }
+
+        private async Task loadRootTreeAsync()
+        {
+            RootTree = [new RootDirectoryViewModel()];
+
+            var con = new BmsManagerContext();
+
+            var roots = await con.RootDirectories.Where(r => r.ParentRootID == null)
+                .Include(r => r.Children)
+                .Include(r => r.Folders)
+                .ThenInclude(r => r.Files)
+                .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
+
+            RootTree = new ObservableCollection<RootDirectoryViewModel>(roots.Select(r => new RootDirectoryViewModel(r, true)).ToArray());
+
+            foreach (var root in RootTree)
+            {
+                await root.LoadChildAsync(Task.CompletedTask).ConfigureAwait(false);
+            }
+        }
+
+        public async Task addRootAsync()
+        {
+            if (string.IsNullOrWhiteSpace(TargetDirectory))
+                return;
+
+            using var con = new BmsManagerContext();
+
+            if (con.RootDirectories.Any(f => f.Path == TargetDirectory))
+            {
+                MessageBox.Show("既に登録済のフォルダは登録できません。");
+                return;
+            }
+
+            var root = new RootDirectory
+            {
+                Path = TargetDirectory,
+                FolderUpdateDate = SystemProvider.FileSystem.DirectoryInfo.New(TargetDirectory).LastWriteTimeUtc
+            };
+
+            var parent = rootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == System.IO.Path.GetDirectoryName(TargetDirectory));
+            if (parent != default)
+                root.ParentRootID = parent.ID;
+
+            con.RootDirectories.Add(root);
+            await con.SaveChangesAsync().ConfigureAwait(false);
+            Application.Current.Dispatcher.Invoke(() => (parent?.Children ?? RootTree).Add(new RootDirectoryViewModel(root)));
         }
 
         private void selectFolder()
@@ -110,6 +150,11 @@ namespace BmsManager.ViewModel
                 RootTree.Remove(root);
             else
                 RootTree.SelectMany(r => r.Descendants()).FirstOrDefault(r => r.Root.Path == root.Root.Parent.Path)?.Root.LoadFromDB();
+        }
+
+        public async Task loadFromFileSystemAsync(RootDirectoryViewModel root)
+        {
+            await root.LoadFromFileSystemAsync(this).ConfigureAwait(false);
         }
     }
 }

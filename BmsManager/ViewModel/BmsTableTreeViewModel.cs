@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
-using BmsManager.Model;
-using CommonLib.Wpf;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +46,7 @@ namespace BmsManager.ViewModel
                 .Include(t => t.Difficulties)
                 .ThenInclude(d => d.TableDatas)
                 .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
-            BmsTables = new ObservableCollection<BmsTableViewModel>(tables.Select(t => new BmsTableViewModel(new BmsTableModel(t), this)).ToList());
+            BmsTables = new ObservableCollection<BmsTableViewModel>(tables.Select(t => new BmsTableViewModel(t, this)).ToList());
         }
 
         private async Task loadFromUrlAsync()

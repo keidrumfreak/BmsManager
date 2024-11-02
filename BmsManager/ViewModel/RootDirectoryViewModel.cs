@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using BmsManager.Entity;
-using BmsManager.Model;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 
@@ -131,12 +130,12 @@ namespace BmsManager.ViewModel
             }
         }
 
-        public async Task LoadFromFileSystemAsync(RootTreeModel tree = null)
+        public async Task LoadFromFileSystemAsync(RootTreeViewModel tree = null)
         {
             await LoadFromFileSystemAsync(this, tree).ConfigureAwait(false);
         }
 
-        public async Task LoadFromFileSystemAsync(RootDirectoryViewModel root, RootTreeModel tree = null)
+        public async Task LoadFromFileSystemAsync(RootDirectoryViewModel root, RootTreeViewModel tree = null)
         {
             root.IsLoading = true;
             if (tree != null)
@@ -189,7 +188,7 @@ namespace BmsManager.ViewModel
                 tree.LoadingPath = "読込完了";
         }
 
-        private static async Task loadRootDirectoryAsync(string path, RootDirectoryViewModel parent, RootTreeModel tree)
+        private static async Task loadRootDirectoryAsync(string path, RootDirectoryViewModel parent, RootTreeViewModel tree)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -229,7 +228,7 @@ namespace BmsManager.ViewModel
             await model.LoadFromFileSystemAsync(tree).ConfigureAwait(false);
         }
 
-        private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryViewModel parent, RootTreeModel tree = null)
+        private static async Task loadBmsFolderAsync(string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, RootDirectoryViewModel parent, RootTreeViewModel tree = null)
         {
             if (tree != null)
                 tree.LoadingPath = path;

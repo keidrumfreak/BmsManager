@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
 using BmsManager.Entity;
-using BmsManager.Model;
-using CommonLib.Wpf;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -46,7 +40,7 @@ namespace BmsManager.ViewModel
 
         public bool IsTable => table != null;
 
-        BmsTableModel table;
+        BmsTable table;
         readonly BmsTableDifficulty difficulty;
         readonly BmsTableTreeViewModel parent;
 
@@ -56,7 +50,7 @@ namespace BmsManager.ViewModel
             IsLoading = true;
         }
 
-        public BmsTableViewModel(BmsTableModel table, BmsTableTreeViewModel parent)
+        public BmsTableViewModel(BmsTable table, BmsTableTreeViewModel parent)
         {
             this.parent = parent;
             this.table = table;
@@ -73,7 +67,12 @@ namespace BmsManager.ViewModel
 
         private async Task reloadAsync()
         {
-            await table.ReloadAsync();
+            var doc = new BmsTableDocument(table.Url);
+            await doc.LoadAsync(Utility.GetHttpClient());
+            table = doc.ToEntity();
+            await table.RegisterAsync();
+            Name = table.Name;
+            Children = table.Difficulties.Select(d => new BmsTableViewModel(d));
             parent.Reload();
         }
 
@@ -82,12 +81,11 @@ namespace BmsManager.ViewModel
             var doc = new BmsTableDocument(url);
             await doc.LoadAsync(Utility.GetHttpClient()).ConfigureAwait(false);
 
-            var entity = doc.ToEntity();
-            table = new BmsTableModel(entity);
+            table= doc.ToEntity();
             Name = table.Name;
 
             using var con = new BmsManagerContext();
-            con.Tables.Add(entity);
+            con.Tables.Add(table);
             await con.SaveChangesAsync().ConfigureAwait(false);
             Children = table.Difficulties.Select(d => new BmsTableViewModel(d));
 
