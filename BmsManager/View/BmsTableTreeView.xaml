@@ -30,13 +30,20 @@
         <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" ItemsSource="{Binding BmsTables}" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="local:BmsTableViewModel" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Name}">
-                        <TextBlock.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="更新" Command="{Binding Reload}" Visibility="{Binding IsTable, Converter={StaticResource converter}}"/>
-                            </ContextMenu>
-                        </TextBlock.ContextMenu>
-                    </TextBlock>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Name}">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="更新" Command="{Binding Reload}" Visibility="{Binding IsTable, Converter={StaticResource converter}}"/>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                        <TextBlock Grid.Column="1" Text=" (loading...)" Visibility="{Binding IsLoading, Converter={StaticResource converter}}" />
+                    </Grid>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>

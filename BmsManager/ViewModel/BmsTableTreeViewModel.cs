@@ -41,6 +41,7 @@ namespace BmsManager
 
         public BmsTableTreeViewModel()
         {
+            BmsTables = [new BmsTableViewModel()];
             LoadFromUrl = new AsyncRelayCommand(loadFromUrlAsync);
             LoadAllTables = new AsyncRelayCommand(loadAllTablesAsync);
         }
@@ -51,10 +52,10 @@ namespace BmsManager
             // TODO: 検索処理の改善 (EntityFrameworkの改善待ち)
             var difficulties = await con.Difficulties
                 .Include(d => d.TableDatas)
-                .AsNoTracking().ToArrayAsync();
+                .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
             var tables = await con.Tables
-                .AsNoTracking().ToArrayAsync();
+                .AsNoTracking().ToArrayAsync().ConfigureAwait(false);
 
             foreach (var diff in difficulties.GroupBy(d => d.BmsTableID))
             {
@@ -81,17 +82,17 @@ namespace BmsManager
             }
 
             var doc = new BmsTableDocument(Url);
-            await doc.LoadAsync(Utility.GetHttpClient());
+            await doc.LoadAsync(Utility.GetHttpClient()).ConfigureAwait(false);
 
             var table = doc.ToEntity();
 
             using (var con = new BmsManagerContext())
             {
                 con.Tables.Add(table);
-                con.SaveChanges();
+                await con.SaveChangesAsync().ConfigureAwait(false);
             }
 
-            BmsTables.Add(new BmsTableViewModel(new BmsTableModel(table), this));
+            Application.Current.Dispatcher.Invoke(() => BmsTables.Add(new BmsTableViewModel(new BmsTableModel(table), this)));
         }
 
         public void Reload()

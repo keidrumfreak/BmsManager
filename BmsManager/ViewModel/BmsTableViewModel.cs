@@ -23,6 +23,9 @@ namespace BmsManager
 
         public int ID => table?.ID ?? difficulty.ID;
 
+        bool isLoading = false;
+        public bool IsLoading { get => isLoading; set => SetProperty(ref isLoading, value); }
+
         public ICommand Reload { get; set; }
 
         public bool IsTable => table != null;
@@ -30,6 +33,11 @@ namespace BmsManager
         BmsTableModel table;
         BmsTableDifficulty difficulty;
         BmsTableTreeViewModel parent;
+
+        public BmsTableViewModel()
+        {
+            IsLoading = true;
+        }
 
         public BmsTableViewModel(BmsTableModel table, BmsTableTreeViewModel parent)
         {

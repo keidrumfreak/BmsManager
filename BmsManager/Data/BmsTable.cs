@@ -30,70 +30,68 @@ namespace BmsManager.Data
 
         public async Task RegisterAsync()
         {
-            using (var con = new BmsManagerContext())
+            using var con = new BmsManagerContext();
+            var table = await con.Tables.Include(t => t.Difficulties).FirstOrDefaultAsync(t => t.Url == Url).ConfigureAwait(false);
+            if (table == default)
             {
-                var table = con.Tables.Include(t => t.Difficulties).FirstOrDefault(t => t.Url == Url);
-                if (table == default)
+                // 未登録の場合は追加するだけ
+                con.Tables.Add(this);
+                await con.SaveChangesAsync().ConfigureAwait(false);
+                return;
+            }
+
+            table.Name = Name;
+            table.Symbol = Symbol;
+            table.Tag = Tag;
+
+            foreach (var diff in table.Difficulties.Where(db => !Difficulties.Any(doc => doc.Difficulty == db.Difficulty)).ToArray())
+            {
+                // 難易度削除(多分無い)
+                table.Difficulties.Remove(diff);
+            }
+
+            foreach (var difficulty in Difficulties)
+            {
+                var dbDiff = table.Difficulties.FirstOrDefault(d => d.Difficulty == difficulty.Difficulty);
+                if (dbDiff == default)
                 {
-                    // 未登録の場合は追加するだけ
-                    con.Tables.Add(this);
-                    await con.SaveChangesAsync();
-                    return;
+                    table.Difficulties.Add(difficulty);
+                    continue;
                 }
 
-                table.Name = Name;
-                table.Symbol = Symbol;
-                table.Tag = Tag;
+                dbDiff.DifficultyOrder = difficulty.DifficultyOrder;
 
-                foreach (var diff in table.Difficulties.Where(db => !Difficulties.Any(doc => doc.Difficulty == db.Difficulty)).ToArray())
+                // TODO: 本来最初に読んでおくべきだが、現状ThenIncludeに難があるためここで読み込み
+                await con.Entry(dbDiff).Collection(d => d.TableDatas).LoadAsync().ConfigureAwait(false);
+
+                foreach (var data in dbDiff.TableDatas.Where(db => !difficulty.TableDatas.Any(doc => doc.MD5 == db.MD5)).ToArray())
                 {
-                    // 難易度削除(多分無い)
-                    table.Difficulties.Remove(diff);
+                    // 曲削除
+                    difficulty.TableDatas.Remove(data);
                 }
 
-                foreach (var difficulty in Difficulties)
+                foreach (var data in difficulty.TableDatas)
                 {
-                    var dbDiff = table.Difficulties.FirstOrDefault(d => d.Difficulty == difficulty.Difficulty);
-                    if (dbDiff == default)
+                    var dbData = dbDiff.TableDatas.FirstOrDefault(d => d.MD5 == data.MD5);
+                    if (dbData == default)
                     {
-                        table.Difficulties.Add(difficulty);
+                        dbDiff.TableDatas.Add(data);
                         continue;
                     }
-
-                    dbDiff.DifficultyOrder = difficulty.DifficultyOrder;
-
-                    // TODO: 本来最初に読んでおくべきだが、現状ThenIncludeに難があるためここで読み込み
-                    await con.Entry(dbDiff).Collection(d => d.TableDatas).LoadAsync();
-
-                    foreach (var data in dbDiff.TableDatas.Where(db => !difficulty.TableDatas.Any(doc => doc.MD5 == db.MD5)).ToArray())
-                    {
-                        // 曲削除
-                        difficulty.TableDatas.Remove(data);
-                    }
-
-                    foreach (var data in difficulty.TableDatas)
-                    {
-                        var dbData = dbDiff.TableDatas.FirstOrDefault(d => d.MD5 == data.MD5);
-                        if (dbData == default)
-                        {
-                            dbDiff.TableDatas.Add(data);
-                            continue;
-                        }
-                        dbData.MD5 = data.MD5;
-                        dbData.LR2BmsID = data.LR2BmsID;
-                        dbData.Title = data.Title;
-                        dbData.Artist = data.Artist;
-                        dbData.Url = data.Url;
-                        dbData.DiffUrl = data.DiffUrl;
-                        dbData.DiffName = data.DiffName;
-                        dbData.PackUrl = data.PackUrl;
-                        dbData.PackName = data.PackName;
-                        dbData.Comment = data.Comment;
-                        dbData.OrgMD5 = data.OrgMD5;
-                    }
+                    dbData.MD5 = data.MD5;
+                    dbData.LR2BmsID = data.LR2BmsID;
+                    dbData.Title = data.Title;
+                    dbData.Artist = data.Artist;
+                    dbData.Url = data.Url;
+                    dbData.DiffUrl = data.DiffUrl;
+                    dbData.DiffName = data.DiffName;
+                    dbData.PackUrl = data.PackUrl;
+                    dbData.PackName = data.PackName;
+                    dbData.Comment = data.Comment;
+                    dbData.OrgMD5 = data.OrgMD5;
                 }
-                await con.SaveChangesAsync();
             }
+            await con.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

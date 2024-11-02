@@ -31,9 +31,9 @@ namespace BmsManager
 
         public override async Task LoadAsync(HttpClient client)
         {
-            await base.LoadAsync(client);
-            await loadHeaderAsync();
-            await loadDatasAsync();
+            await base.LoadAsync(client).ConfigureAwait(false);
+            await loadHeaderAsync().ConfigureAwait(false);
+            await loadDatasAsync().ConfigureAwait(false);
         }
 
         private async Task loadHeaderAsync()
@@ -47,7 +47,7 @@ namespace BmsManager
                 ? headerContent
                 : $"{Home}/{headerContent}";
 
-            var json = await Utility.GetHttpClient().GetStringAsync(headerUri);
+            var json = await Utility.GetHttpClient().GetStringAsync(headerUri).ConfigureAwait(false);
             Header = JsonSerializer.Deserialize<BmsTalbeHeader>(json);
         }
 
@@ -56,7 +56,7 @@ namespace BmsManager
             var dataUri = (Header.DataUrl.StartsWith("http:") || Header.DataUrl.StartsWith("https:"))
                 ? Header.DataUrl
                 : $"{Home}/{Header.DataUrl.TrimStart('.', '/')}";
-            var json = await Utility.GetHttpClient().GetStringAsync(dataUri);
+            var json = await Utility.GetHttpClient().GetStringAsync(dataUri).ConfigureAwait(false);
             Datas = JsonSerializer.Deserialize<BmsTableData[]>(json);
         }
 
