@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using BmsManager.Data;
+using BmsManager.ViewModel;
 using CommonLib.Linq;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;

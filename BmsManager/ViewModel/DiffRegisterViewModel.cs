@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
+using BmsManager.ViewModel;
 using BmsParser;
 using CommonLib.IO;
 using CommonLib.Wpf;

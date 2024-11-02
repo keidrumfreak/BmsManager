@@ -9,20 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager.Model
 {
-    internal class BmsTableModel : ObservableObject
+    internal class BmsTableModel(BmsTable entity) : ObservableObject
     {
         public int ID => entity.ID;
 
         public string Name => entity.Name;
 
         public IEnumerable<BmsTableDifficulty> Difficulties => entity.Difficulties;
-
-        BmsTable entity;
-
-        public BmsTableModel(BmsTable entity)
-        {
-            this.entity = entity;
-        }
 
         public async Task ReloadAsync()
         {

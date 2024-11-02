@@ -300,7 +300,7 @@ VALUES
             }
         }
 
-        public void Merge()
+        public async Task Merge()
         {
             var roots = Duplicates.Select(d => d.Root).ToArray();
             var ext = Settings.Default.Extentions;
@@ -361,10 +361,10 @@ VALUES
 
             foreach (var root in roots)
             {
-                root.LoadFromFileSystem();
+                await root.LoadFromFileSystem();
                 root.Register();
             }
-            Root.LoadFromFileSystem();
+            await Root.LoadFromFileSystem();
             Root.Register();
 
             //Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(this));

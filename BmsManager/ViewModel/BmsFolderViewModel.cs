@@ -14,7 +14,7 @@ using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
 using SysPath = System.IO.Path;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     interface IBmsFolderParentViewModel
     {
@@ -54,9 +54,9 @@ namespace BmsManager
 
         public IEnumerable<DiffFileViewModel> DiffFiles { get; set; }
 
-        BmsFolder folder;
-        IBmsFolderParentViewModel parent;
-        DiffFileViewModel diffFile;
+        readonly BmsFolder folder;
+        readonly IBmsFolderParentViewModel parent;
+        readonly DiffFileViewModel diffFile;
 
         public BmsFolderViewModel(BmsFolder folder, IBmsFolderParentViewModel parent, DiffFileViewModel diffFile = null)
         {
@@ -90,7 +90,7 @@ namespace BmsManager
             Process.Start(new ProcessStartInfo { FileName = Path, UseShellExecute = true, Verb = "open" });
         }
 
-        public void merge()
+        private async Task merge()
         {
             var roots = Duplicates.Select(d => d.Root).ToArray();
             var ext = Settings.Default.Extentions;
@@ -98,24 +98,18 @@ namespace BmsManager
             foreach (var fol in Duplicates)
             {
                 foreach (var file in fol.Files)
-                {
                     // 重複BMSファイルは先に削除しておく
                     if (folder.Files.Any(f => f.MD5 == file.MD5))
-                    {
                         if (SystemProvider.FileSystem.File.Exists(file.Path))
                             SystemProvider.FileSystem.File.Delete(file.Path);
-                    }
-                }
 
                 if (SystemProvider.FileSystem.Directory.Exists(fol.Path))
-                {
                     foreach (var file in SystemProvider.FileSystem.Directory.EnumerateFiles(fol.Path, "*.*", SearchOption.AllDirectories))
-                    {
                         try
                         {
                             var toPath = PathUtil.Combine(Path, SysPath.GetFileName(file));
                             var fileExt = SysPath.GetExtension(file); // 拡張子が存在しない場合もある
-                            if (fileExt.Length > 1 && ext.Contains(fileExt.Substring(1)))
+                            if (fileExt.Length > 1 && ext.Contains(fileExt[1..]))
                             {
                                 var i = 1;
                                 var dst = toPath;
@@ -135,8 +129,6 @@ namespace BmsManager
                             MessageBox.Show(ex.ToString());
                             return;
                         }
-                    }
-                }
 
                 Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(parent.Folders.FirstOrDefault(f => f.Path == fol.Path)));
 
@@ -153,10 +145,10 @@ namespace BmsManager
 
             foreach (var root in roots)
             {
-                root.LoadFromFileSystem();
+                await root.LoadFromFileSystem();
                 root.Register();
             }
-            folder.Root.LoadFromFileSystem();
+            await folder.Root.LoadFromFileSystem();
             folder.Root.Register();
 
             Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(this));

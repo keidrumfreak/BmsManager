@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using BmsManager.Data;
 using BmsManager.Model;
+using BmsManager.ViewModel;
 using CommonLib.Wpf;
 
 namespace BmsManager

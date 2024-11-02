@@ -15,7 +15,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.EntityFrameworkCore;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class BmsTableTreeViewModel : ObservableObject
     {
@@ -60,11 +60,9 @@ namespace BmsManager
             foreach (var diff in difficulties.GroupBy(d => d.BmsTableID))
             {
                 var parent = tables.FirstOrDefault(t => t.ID == diff.Key);
-                parent.Difficulties = diff.ToList();
+                parent.Difficulties = [.. diff];
                 foreach (var d in diff)
-                {
                     d.Table = parent;
-                }
             }
 
             BmsTables = new ObservableCollection<BmsTableViewModel>(tables.Select(t => new BmsTableViewModel(new BmsTableModel(t), this)).ToList());
@@ -73,13 +71,11 @@ namespace BmsManager
         private async Task loadFromUrlAsync()
         {
             using (var con = new BmsManagerContext())
-            {
                 if (await con.Tables.AnyAsync(t => t.Url == Url).ConfigureAwait(false))
                 {
                     MessageBox.Show("登録済です");
                     return;
                 }
-            }
 
             var model = new BmsTableViewModel(this);
             try

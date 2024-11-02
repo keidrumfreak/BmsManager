@@ -12,13 +12,13 @@ using CommonLib.Wpf;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class BmsTableViewModel : ObservableObject
     {
         string name;
         public string Name
-        { 
+        {
             get => name;
             set => SetProperty(ref name, value);
         }
@@ -30,7 +30,7 @@ namespace BmsManager
             set => SetProperty(ref children, value);
         }
 
-        public IEnumerable<BmsTableData> TableDatas => Children?.SelectMany(d => d.TableDatas).ToArray() ?? difficulty.TableDatas.ToArray();
+        public IEnumerable<BmsTableData> TableDatas => Children?.SelectMany(d => d.TableDatas).ToArray() ?? [.. difficulty.TableDatas];
 
         public int ID => table?.ID ?? difficulty.ID;
 
@@ -46,8 +46,8 @@ namespace BmsManager
         public bool IsTable => table != null;
 
         BmsTableModel table;
-        BmsTableDifficulty difficulty;
-        BmsTableTreeViewModel parent;
+        readonly BmsTableDifficulty difficulty;
+        readonly BmsTableTreeViewModel parent;
 
         public BmsTableViewModel(BmsTableTreeViewModel parent)
         {

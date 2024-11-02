@@ -12,7 +12,7 @@ using BmsManager.Data;
 using BmsParser;
 using CommonLib.Wpf;
 
-namespace BmsManager
+namespace BmsManager.ViewModel
 {
     class BmsFileListViewModel : ViewModelBase
     {
@@ -21,17 +21,11 @@ namespace BmsManager
             get
             {
                 if (Folders == null)
-                {
                     return null;
-                }
                 else if (Narrowed && SelectedBmsFolder != null)
-                {
                     return new ObservableCollection<BmsFile>(SelectedBmsFolder.Files);
-                }
                 else
-                {
                     return new ObservableCollection<BmsFile>(Folders.SelectMany(f => f.Files).ToArray());
-                }
             }
         }
 
@@ -86,9 +80,9 @@ namespace BmsManager
         {
             Process.Start(new ProcessStartInfo { FileName = folder.Path, UseShellExecute = true, Verb = "open" });
         }
-        public void merge(BmsFolder folder)
+        private async Task merge(BmsFolder folder)
         {
-            folder.Merge();
+            await folder.Merge();
         }
 
     }

@@ -42,9 +42,9 @@ namespace BmsManager.Data
         }
 
         [NotMapped]
-        public BmsFolder[] DescendantFolders => Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
+        public BmsFolder[] DescendantFolders => Descendants().Where(r => (r.Folders?.Count ?? 0) == 0).SelectMany(r => r.Folders).ToArray();
 
-        public void LoadFromFileSystem(RootDirectory root = null, IEnumerable<RootDirectory> cacheRoots = null, IEnumerable<BmsFolder> cacheFolders = null, IEnumerable<BmsFile> cacheFiles = null, Task parentRegister = null, List<Task> allTasks = null)
+        public async Task LoadFromFileSystem(RootDirectory root = null, IEnumerable<RootDirectory> cacheRoots = null, IEnumerable<BmsFolder> cacheFolders = null, IEnumerable<BmsFile> cacheFiles = null, Task parentRegister = null, List<Task> allTasks = null)
         {
             IEnumerable<RootDirectory> dbRoots = cacheRoots;
             IEnumerable<BmsFolder> dbFolders = cacheFolders;
@@ -53,9 +53,9 @@ namespace BmsManager.Data
             {
                 using (var con = new BmsManagerContext())
                 {
-                    dbRoots = con.RootDirectories.AsNoTracking().ToArray();
-                    dbFolders = con.BmsFolders.AsNoTracking().ToArray();
-                    dbFiles = con.Files.AsNoTracking().ToArray();
+                    dbRoots = await con.RootDirectories.AsNoTracking().ToArrayAsync();
+                    dbFolders = await con.BmsFolders.AsNoTracking().ToArrayAsync();
+                    dbFiles = await con.Files.AsNoTracking().ToArrayAsync();
                 }
                 allTasks = [];
             }
@@ -259,7 +259,7 @@ namespace BmsManager.Data
                             }));
                         }
                     }
-                    child.LoadFromFileSystem(root ?? this, dbRoots, dbFolders, dbFiles, rootRegisterer, allTasks);
+                    await child.LoadFromFileSystem(root ?? this, dbRoots, dbFolders, dbFiles, rootRegisterer, allTasks);
                     //if (child.Children.Any() || child.Folders.Any())
                     //    Children.Add(child);
                 }
@@ -339,7 +339,7 @@ namespace BmsManager.Data
                         return;
                     }
 
-                    var hasChild = dir.Children?.Any() ?? false;
+                    var hasChild = (dir.Children?.Count ?? 0) == 0;
                     if (hasChild)
                     {
                         // 子が存在する場合それぞれ登録
@@ -378,7 +378,7 @@ namespace BmsManager.Data
                     if (root.Folders.Count == 0)
                     {
                         // フォルダ未登録の場合そのまま登録
-                        root.Folders = dir.Folders.ToArray();
+                        root.Folders = [.. dir.Folders];
                         return;
                     }
 

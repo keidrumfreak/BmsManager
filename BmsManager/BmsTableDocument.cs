@@ -16,18 +16,13 @@ namespace BmsManager
     /// <summary>
     ///  難易度表
     /// </summary>
-    class BmsTableDocument : HtmlDocument
+    class BmsTableDocument(string uri) : HtmlDocument(uri)
     {
         public BmsTalbeHeader Header { get; private set; }
 
         public IEnumerable<BmsTableData> Datas { get; private set; }
 
-        public string Home { get; }
-
-        public BmsTableDocument(string uri) : base(uri)
-        {
-            Home = uri.Substring(0, uri.LastIndexOf('/'));
-        }
+        public string Home { get; } = uri[..uri.LastIndexOf('/')];
 
         public override async Task LoadAsync(HttpClient client)
         {
@@ -71,7 +66,7 @@ namespace BmsManager
                 Difficulties =Datas.GroupBy(d => d.Level).Select(d => new BmsTableDifficulty
                 {
                     Difficulty = d.Key,
-                    DifficultyOrder = Header.LevelOrder?.Any() ?? false
+                    DifficultyOrder = ((Header.LevelOrder?.Length ?? 0) == 0)
                         ? Array.IndexOf(Header.LevelOrder, d.Key) + 1
                         : int.TryParse(d.Key, out var index) ? index : null,
                     TableDatas = d.Select(d => new Data.BmsTableData
@@ -120,14 +115,7 @@ namespace BmsManager
 
             string level;
             [JsonIgnore]
-            public string Level
-            {
-                get
-                {
-                    return level != null ? level
-                        : (level = LevelValue.ValueKind == JsonValueKind.String ? LevelValue.GetString() : LevelValue.GetInt32().ToString());
-                }
-            }
+            public string Level => level ??= LevelValue.ValueKind == JsonValueKind.String ? LevelValue.GetString() : LevelValue.GetInt32().ToString();
 
             [JsonPropertyName("lr2_bmsid")]
             public JsonElement? LR2BmsIDValue { get; set; }
