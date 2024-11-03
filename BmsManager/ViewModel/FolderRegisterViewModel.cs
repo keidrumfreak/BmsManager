@@ -29,7 +29,7 @@ namespace BmsManager.ViewModel
             RootTree.PropertyChanged += RootTree_PropertyChanged;
         }
 
-        private void RootTree_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void RootTree_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(RootTreeViewModel.SelectedRoot))
                 FileSearcher.RootDirectory = RootTree.SelectedRoot;

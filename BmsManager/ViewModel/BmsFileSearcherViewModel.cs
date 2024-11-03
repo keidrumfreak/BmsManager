@@ -14,8 +14,8 @@ namespace BmsManager.ViewModel
 {
     class BmsFileSearcherViewModel : ViewModelBase
     {
-        RootDirectoryViewModel root;
-        public RootDirectoryViewModel RootDirectory
+        RootDirectoryViewModel? root;
+        public RootDirectoryViewModel? RootDirectory
         {
             get { return root; }
             set
@@ -30,7 +30,7 @@ namespace BmsManager.ViewModel
             }
         }
 
-        private void Root_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Root_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(RootDirectory.Folders))
                 search();

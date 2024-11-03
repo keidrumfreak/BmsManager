@@ -82,7 +82,7 @@ namespace BmsManager.ViewModel
 
         readonly RootDirectory entity;
 
-        readonly RootDirectoryViewModel parent;
+        readonly RootDirectoryViewModel? parent;
 
         readonly RootTreeViewModel tree;
 
@@ -90,7 +90,7 @@ namespace BmsManager.ViewModel
 
         public RootDirectoryViewModel(RootTreeViewModel tree) : this(tree, new RootDirectory(), true) { }
 
-        public RootDirectoryViewModel(RootTreeViewModel tree, RootDirectory entity, bool isLoading = false, RootDirectoryViewModel parent = null)
+        public RootDirectoryViewModel(RootTreeViewModel tree, RootDirectory entity, bool isLoading = false, RootDirectoryViewModel? parent = null)
         {
             this.tree = tree;
             this.entity = entity;
@@ -187,7 +187,7 @@ namespace BmsManager.ViewModel
 
             foreach (var folder in folders.GroupBy(f => f.RootID))
             {
-                var parent = allRoots.FirstOrDefault(r => r.ID == folder.Key);
+                var parent = allRoots.First(r => r.ID == folder.Key);
                 parent.Folders = [.. folder];
                 foreach (var fol in folder)
                 {
@@ -225,10 +225,10 @@ namespace BmsManager.ViewModel
             tree.LoadingPath = "読込完了";
         }
 
-        private void Loader_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Loader_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FolderLoader.LoadingPath))
-                tree.LoadingPath = ((FolderLoader)sender).LoadingPath;
+                tree.LoadingPath = ((FolderLoader?)sender)?.LoadingPath ?? string.Empty;
         }
 
         private async Task loadFromFileSystemAsync(FolderLoader loader)

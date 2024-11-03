@@ -13,28 +13,28 @@ namespace BmsManager.ViewModel
 {
     class RootTreeViewModel : ObservableObject
     {
-        string targetDirectory;
+        string targetDirectory = string.Empty;
         public string TargetDirectory
         {
             get => targetDirectory;
             set => SetProperty(ref targetDirectory, value);
         }
 
-        ObservableCollection<RootDirectoryViewModel> rootTree;
+        ObservableCollection<RootDirectoryViewModel> rootTree = [];
         public ObservableCollection<RootDirectoryViewModel> RootTree
         {
             get => rootTree;
             set => SetProperty(ref rootTree, value);
         }
 
-        RootDirectoryViewModel selectedRoot;
-        public RootDirectoryViewModel SelectedRoot
+        RootDirectoryViewModel? selectedRoot;
+        public RootDirectoryViewModel? SelectedRoot
         {
             get => selectedRoot;
             set => SetProperty(ref selectedRoot, value);
         }
 
-        string loadingPath;
+        string loadingPath = string.Empty;
         public string LoadingPath
         {
             get => loadingPath;
