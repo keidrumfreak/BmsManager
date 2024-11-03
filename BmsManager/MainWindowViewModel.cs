@@ -29,7 +29,7 @@ namespace BmsManager
             ShowFileRegister = CreateCommand(() => new FolderRegisterer().Show());
             ShowTableManager = CreateCommand(() => new BmsTableManager().Show());
             ShowDuplicateChecker = CreateCommand(() => new DuplicateBmsChecker().Show());
-            ShowDiffRegister = CreateCommand(() => new DiffRegister().Show());
+            ShowDiffRegister = CreateCommand(() => new DiffRegisterer().Show());
             ShowExporter = CreateCommand(() => new Exporter().Show());
         }
     }

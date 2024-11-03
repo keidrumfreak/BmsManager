@@ -17,9 +17,9 @@ namespace BmsManager.View
     /// <summary>
     /// DiffRegister.xaml の相互作用ロジック
     /// </summary>
-    public partial class DiffRegister : Window
+    public partial class DiffRegisterer : Window
     {
-        public DiffRegister()
+        public DiffRegisterer()
         {
             InitializeComponent();
         }

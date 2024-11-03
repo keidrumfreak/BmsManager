@@ -34,9 +34,7 @@ namespace BmsManager.Entity
             }
         }
 
-        public static readonly LoggerFactory LoggerFactory = new LoggerFactory(new[] {
-            new DebugLoggerProvider()
-        });
+        public static readonly LoggerFactory LoggerFactory = new([new DebugLoggerProvider()]);
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -72,7 +70,7 @@ namespace BmsManager.Entity
                 var delFolTask = Task.Run(() =>
                 {
                     var delFol = boFol.AsParallel().Where(bo => !mnFol.Any(mn => mn.Path == bo.Path)).ToArray();
-                    if (delFol.Any())
+                    if (delFol.Length != 0)
                         con.Folders.RemoveRange(delFol);
                 });
 
@@ -100,7 +98,7 @@ namespace BmsManager.Entity
                 var delSongTask = Task.Run(() =>
                 {
                     var delSong = songs.AsParallel().Where(s => !files.Any(f => f.Path == s.Path)).ToArray();
-                    if (delSong.Any())
+                    if (delSong.Length != 0)
                         con.Songs.RemoveRange(delSong);
                 });
 
