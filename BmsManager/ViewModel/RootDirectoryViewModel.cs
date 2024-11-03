@@ -88,8 +88,6 @@ namespace BmsManager.ViewModel
 
         static readonly object lockObj = new();
 
-        static readonly string[] previewExt = ["wav", "ogg", "mp3", "flac"];
-
         public RootDirectoryViewModel(RootTreeViewModel tree) : this(tree, new RootDirectory(), true) { }
 
         public RootDirectoryViewModel(RootTreeViewModel tree, RootDirectory entity, bool isLoading = false, RootDirectoryViewModel parent = null)

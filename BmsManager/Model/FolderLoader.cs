@@ -83,7 +83,7 @@ namespace BmsManager.Model
             }
         }
 
-        private async Task<RootDirectory> loadRootDirectoryAsync(int rootID, string path)
+        private static async Task<RootDirectory> loadRootDirectoryAsync(int rootID, string path)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
             RootDirectory root;
@@ -115,7 +115,7 @@ namespace BmsManager.Model
             return root;
         }
 
-        private async Task loadBmsFolderAsync(int rootID, string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, Action<BmsFolder> folderAction)
+        private static async Task loadBmsFolderAsync(int rootID, string path, IEnumerable<string> files, IEnumerable<(string file, byte[] data)> bmsFileDatas, Action<BmsFolder> folderAction)
         {
             using var con = new BmsManagerContext();
             var bmsFolder = con.BmsFolders.FirstOrDefault(f => f.Path == path);
