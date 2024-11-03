@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Common;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using BmsParser;
-using CrSha256 = System.Security.Cryptography.SHA256;
 
 namespace BmsManager.Entity
 {
@@ -155,8 +154,7 @@ namespace BmsManager.Entity
             HasBga = (model.BgaList?.Count() ?? 0) > 0;
             IsNoKeySound = Length >= 30000 && (model.WavList?.Count() ?? 0) <= (Length / (50 * 1000)) + 3;
             Feature = (int)feature;
-            var sha256 = CrSha256.Create();
-            var arr = sha256.ComputeHash(Encoding.GetEncoding("shift-jis").GetBytes(model.ToChartString()));
+            var arr = SHA256.HashData(Encoding.UTF8.GetBytes(model.ToChartString()));
             ChartHash = BitConverter.ToString(arr).ToLower().Replace("-", "");
             N = model.GetTotalNotes(BmsModel.NoteType.Key);
             LN = model.GetTotalNotes(BmsModel.NoteType.LongKey);
@@ -227,6 +225,7 @@ namespace BmsManager.Entity
                     count++;
                 }
             }
+            Density /= count;
 
             var d = Math.Min(5, data.Length - borderpos - 1);
             EndDensity = 0;

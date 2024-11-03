@@ -25,7 +25,7 @@ namespace BmsManager.ViewModel
                 else if (Narrowed && SelectedBmsFolder != null)
                     return new ObservableCollection<BmsFile>(SelectedBmsFolder.Files);
                 else
-                    return new ObservableCollection<BmsFile>(Folders.SelectMany(f => f.Files).ToArray());
+                    return new ObservableCollection<BmsFile>(Folders.SelectMany(f => f.Files ?? []).ToArray());
             }
         }
 
