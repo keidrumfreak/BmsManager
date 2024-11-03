@@ -105,27 +105,6 @@ GO
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[BmsExtension]    Script Date: 2021/08/12 19:10:41 ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE TABLE [dbo].[BmsExtension](
-	[ID] [int] IDENTITY(1,1) NOT NULL,
-	[Extension] [nvarchar](max) NULL,
- CONSTRAINT [PK_Extension] PRIMARY KEY CLUSTERED 
-(
-	[ID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-
-
-USE [BmsManager]
-GO
-
 /****** Object:  Table [dbo].[RootDirectory]    Script Date: 2021/08/12 19:11:55 ******/
 SET ANSI_NULLS ON
 GO
