@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using CommonLib.Logging;
 
 namespace BmsManager
 {
@@ -54,10 +49,10 @@ namespace BmsManager
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             var exception = e.Exception.InnerException;
-            if (ConfirmUnhandledException(exception, "バックグラウンドタスク"))
+            if (exception != null && ConfirmUnhandledException(exception, "バックグラウンドタスク"))
             {
                 e.SetObserved();
             }
@@ -76,7 +71,7 @@ namespace BmsManager
         static bool ConfirmUnhandledException(Exception e, string sourceName)
         {
             var message = $"予期せぬエラーが発生しました。続けて発生する場合は開発者に報告してください。\nプログラムの実行を継続しますか？";
-            if (e != null) message += $"\n({e.Message} @ {e.TargetSite.Name})";
+            if (e != null) message += $"\n({e.Message} @ {e.TargetSite?.Name})";
             SystemProvider.Logger.TraceExceptionLog(e);
             var result = MessageBox.Show(message, $"未処理例外 ({sourceName})", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             return result == MessageBoxResult.Yes;
@@ -91,7 +86,7 @@ namespace BmsManager
         {
             var exception = e.ExceptionObject as Exception;
             var message = $"予期せぬエラーが発生しました。続けて発生する場合は開発者に報告してください。";
-            if (exception != null) message += $"\n({exception.Message} @ {exception.TargetSite.Name})";
+            if (exception != null) message += $"\n({exception.Message} @ {exception.TargetSite?.Name})";
             SystemProvider.Logger.TraceExceptionLog(exception);
             MessageBox.Show(message, "未処理例外", MessageBoxButton.OK, MessageBoxImage.Stop);
             Environment.Exit(1);

@@ -14,7 +14,7 @@ namespace BmsManager
 {
     static class Utility
     {
-        static HttpClient client;
+        static HttpClient? client;
         public static HttpClient GetHttpClient()
         {
             if (client == null)

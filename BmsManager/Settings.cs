@@ -11,31 +11,26 @@ namespace BmsManager
 {
     class Settings
     {
-        static Settings instance;
-        public static Setting Default => (instance ?? (instance = new Settings())).settings;
+        static Settings? instance;
+        public static Setting Default => (instance ??= new Settings()).settings;
 
-        //public string BmsManagerConnectionStrings => settings["bmsManagerConnectionStrings"];
-
-        //public string DatabaseKind => settings["databaseKind"];
-
-        Setting settings;
+        readonly Setting settings;
 
         private Settings()
         {
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName))
+                .SetBasePath(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? throw new Exception())
                 .AddJsonFile("appsettings.json", true, true)
                 .Build();
-            settings = configuration.GetSection("settings").Get<Setting>();
+            settings = configuration.GetSection("settings").Get<Setting>() ?? throw new Exception();
         }
 
         public class Setting
         {
-            public string BmsManagerConnectionStrings { get; set; }
-            public string DatabaseKind { get; set; }
-            public string[] Extentions { get; set; }
-
-            public string LogFolder { get; set; }
+            public required string BmsManagerConnectionStrings { get; set; }
+            public required string DatabaseKind { get; set; }
+            public required string[] Extentions { get; set; }
+            public required string LogFolder { get; set; }
         }
     }
 }

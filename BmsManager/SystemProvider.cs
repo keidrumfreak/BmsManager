@@ -8,26 +8,20 @@ using CommonLib.Logging;
 
 namespace BmsManager
 {
-    class SystemProvider
+    class SystemProvider(IFileSystem fileSystem)
     {
-        static SystemProvider instance;
+        static SystemProvider? instance;
         public static SystemProvider Instance
         {
-            get { return instance ?? (instance = new SystemProvider(new FileSystem())); }
+            get { return instance ??= new SystemProvider(new FileSystem()); }
             set { instance = value; }
         }
 
-        IFileSystem fileSystem;
+        readonly IFileSystem fileSystem = fileSystem;
         public static IFileSystem FileSystem => Instance.fileSystem;
 
-        ILogger logger;
+        readonly ILogger logger = new TextLogger(Settings.Default.LogFolder);
 
         public static ILogger Logger => Instance.logger;
-
-        public SystemProvider(IFileSystem fileSystem)
-        {
-            this.fileSystem = fileSystem;
-            logger = new TextLogger(Settings.Default.LogFolder);
-        }
     }
 }
