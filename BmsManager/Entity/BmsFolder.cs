@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using BmsManager.Model;
 using BmsParser;
 using CommonLib.IO;
 using CommonLib.Linq;
@@ -359,12 +360,13 @@ VALUES
                 }
             }
 
+            var loader = new FolderLoader();
             foreach (var root in roots)
             {
-                await root.LoadFromFileSystem();
+                await loader.LoadAsync(root);
                 root.Register();
             }
-            await Root.LoadFromFileSystem();
+            await loader.LoadAsync(Root);
             Root.Register();
 
             //Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(this));
