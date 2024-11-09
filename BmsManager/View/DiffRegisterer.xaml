@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="DiffRegister" Height="450" Width="800">
     <Window.DataContext>
-        <vm:DiffRegisterViewModel/>
+        <vm:DiffRegistererViewModel/>
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>

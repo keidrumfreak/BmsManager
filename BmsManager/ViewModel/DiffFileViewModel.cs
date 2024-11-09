@@ -21,8 +21,8 @@ namespace BmsManager
         public string MD5 { get; set; }
         public string Path { get; set; }
 
-        IEnumerable<BmsFolder> folders;
-        public IEnumerable<BmsFolder> Folders
+        IEnumerable<BmsFolderViewModel> folders;
+        public IEnumerable<BmsFolderViewModel> Folders
         {
             get { return folders; }
             set { SetProperty(ref folders, value); }
@@ -31,9 +31,9 @@ namespace BmsManager
         public ICommand EstimateDestination { get; set; }
 
         BmsModel bms;
-        DiffRegisterViewModel vm;
+        DiffRegistererViewModel vm;
 
-        public DiffFileViewModel(BmsModel bms, DiffRegisterViewModel vm)
+        public DiffFileViewModel(BmsModel bms, DiffRegistererViewModel vm)
         {
             this.vm = vm;
             this.bms = bms;
@@ -56,7 +56,7 @@ namespace BmsManager
                 if (!string.IsNullOrEmpty(bms.Artist) && bms.Artist.Length > 2)
                     query = query.Where(f => f.Artist.Length > 1);
                 query = query.Where(f => bms.Title.Contains(f.Title) && bms.Artist.Contains(f.Artist));
-                Folders = query.ToArray();
+                Folders = query.ToArray().Select(f => new BmsFolderViewModel(f));
             }
         }
 

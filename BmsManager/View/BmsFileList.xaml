@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:BmsManager.ViewModel"
+             xmlns:local="clr-namespace:BmsManager.View"
              d:DataContext="{d:DesignInstance Type=vm:BmsFileListViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -19,19 +20,11 @@
         <DataGrid Margin="5" Grid.Row="0" ItemsSource="{Binding Folders}" SelectedItem="{Binding SelectedBmsFolder}" IsReadOnly="True" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
-                    <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=DataContext}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
-                                <MenuItem Header="エクスプローラで開く"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.OpenFolder}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                <MenuItem Header="このフォルダに統合する"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.Merge}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
-                                <MenuItem Header="このフォルダにインストール"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.Install}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                <MenuItem Header="エクスプローラで開く" Command="{Binding OpenFolder}" />
+                                <MenuItem Header="このフォルダに統合する" Command="{Binding Merge}" />
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
@@ -40,20 +33,20 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}" Width="100"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}" Width="100"/>
-                <DataGridTextColumn Header="フォルダパス" Binding="{Binding Path}" Width="*"/>
+                <DataGridTextColumn Header="フォルダパス" Binding="{Binding FullPath}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
         <CheckBox Margin="5" Grid.Row="1" Content="BMSファイルを絞り込み表示する" IsChecked="{Binding Narrowed}" Command="{Binding ChangeNarrowing}"/>
         <DataGrid Margin="5" Grid.Row="2" ItemsSource="{Binding BmsFiles}" IsReadOnly="True" SelectedItem="{Binding SelectedBmsFile}" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
-                    <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=DataContext}"/>
+                    <Setter Property="Tag" Value="{Binding RelativeSource={RelativeSource AncestorType=DataGrid}, Path=ItemsSource}"/>
                     <Setter Property="ContextMenu">
                         <Setter.Value>
                             <ContextMenu>
                                 <MenuItem Header="削除する"
-                                          Command="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag.DeleteFile}"
-                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.DataContext}"/>
+                                          Command="{Binding Delete}"
+                                          CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=PlacementTarget.Tag}"/>
                             </ContextMenu>
                         </Setter.Value>
                     </Setter>
@@ -63,7 +56,7 @@
                 <DataGridTextColumn Header="タイトル" Binding="{Binding Title}" Width="100"/>
                 <DataGridTextColumn Header="アーティスト" Binding="{Binding Artist}" Width="100"/>
                 <DataGridTextColumn Header="MD5" Binding="{Binding MD5}" Width="300"/>
-                <DataGridTextColumn Header="ファイルパス" Binding="{Binding Path}" Width="*"/>
+                <DataGridTextColumn Header="ファイルパス" Binding="{Binding FullPath}" Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

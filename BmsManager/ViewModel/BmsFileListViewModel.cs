@@ -16,35 +16,35 @@ namespace BmsManager.ViewModel
 {
     class BmsFileListViewModel : ViewModelBase
     {
-        public ObservableCollection<BmsFile> BmsFiles
+        public ObservableCollection<BmsFileViewModel> BmsFiles
         {
             get
             {
                 if (Folders == null)
-                    return null;
+                    return [];
                 else if (Narrowed && SelectedBmsFolder != null)
-                    return new ObservableCollection<BmsFile>(SelectedBmsFolder.Files);
+                    return SelectedBmsFolder.Files;
                 else
-                    return new ObservableCollection<BmsFile>(Folders.SelectMany(f => f.Files ?? []).ToArray());
+                    return new ObservableCollection<BmsFileViewModel>(Folders.SelectMany(f => f.Files ?? []).ToArray());
             }
         }
 
-        ObservableCollection<BmsFolder> folders;
-        public ObservableCollection<BmsFolder> Folders
+        ObservableCollection<BmsFolderViewModel> folders;
+        public ObservableCollection<BmsFolderViewModel> Folders
         {
             get { return folders; }
             set { SetProperty(ref folders, value); OnPropertyChanged(nameof(BmsFiles)); }
         }
 
-        BmsFolder selectedBmsFolder;
-        public BmsFolder SelectedBmsFolder
+        BmsFolderViewModel selectedBmsFolder;
+        public BmsFolderViewModel SelectedBmsFolder
         {
             get { return selectedBmsFolder; }
             set { SetProperty(ref selectedBmsFolder, value); OnPropertyChanged(nameof(BmsFiles)); }
         }
 
-        BmsFile selectedBmsFile;
-        public BmsFile SelectedBmsFile
+        BmsFileViewModel selectedBmsFile;
+        public BmsFileViewModel SelectedBmsFile
         {
             get { return selectedBmsFile; }
             set { SetProperty(ref selectedBmsFile, value); }
@@ -58,32 +58,16 @@ namespace BmsManager.ViewModel
 
         public ICommand DeleteFile { get; set; }
 
-        public ICommand OpenFolder { get; set; }
-
-        public ICommand Merge { get; set; }
-
         public BmsFileListViewModel()
         {
             ChangeNarrowing = CreateCommand(() => OnPropertyChanged(nameof(BmsFiles)));
-            DeleteFile = CreateCommand<BmsFile>(deleteFileAsync);
-            OpenFolder = CreateCommand<BmsFolder>(openFolder);
-            Merge = CreateCommand<BmsFolder>(merge);
+            //DeleteFile = CreateCommand<BmsFile>(deleteFileAsync);
         }
 
-        private async Task deleteFileAsync(BmsFile file)
-        {
-            await file.DeleteAsync();
-            BmsFiles.Remove(file);
-        }
-
-        private void openFolder(BmsFolder folder)
-        {
-            Process.Start(new ProcessStartInfo { FileName = folder.Path, UseShellExecute = true, Verb = "open" });
-        }
-        private async Task merge(BmsFolder folder)
-        {
-            await folder.Merge();
-        }
-
+        //private async Task deleteFileAsync(BmsFile file)
+        //{
+        //    await file.DeleteAsync();
+        //    BmsFiles.Remove(file);
+        //}
     }
 }

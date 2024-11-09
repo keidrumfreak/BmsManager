@@ -11,7 +11,7 @@ namespace BmsManager.Model
 {
     class FolderLoader : ObservableObject
     {
-        string loadingPath;
+        string loadingPath = string.Empty;
         public string LoadingPath
         {
             get => loadingPath;
@@ -82,7 +82,7 @@ namespace BmsManager.Model
         private static async Task<RootDirectory> loadRootDirectoryAsync(int rootID, string path)
         {
             var updateDate = SystemProvider.FileSystem.DirectoryInfo.New(path).LastWriteTimeUtc;
-            RootDirectory root;
+            RootDirectory? root;
             using (var con = new BmsManagerContext())
             {
                 root = await con.RootDirectories.FirstOrDefaultAsync(c => c.Path == path).ConfigureAwait(false);
@@ -97,9 +97,8 @@ namespace BmsManager.Model
                     con.RootDirectories.Add(root);
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
-                else
-                    // 既存Root
-                    if (root.FolderUpdateDate.Date != updateDate.Date
+                // 既存Root
+                else if (root.FolderUpdateDate.Date != updateDate.Date
                         && root.FolderUpdateDate.Hour != updateDate.Hour
                         && root.FolderUpdateDate.Minute != updateDate.Minute
                         && root.FolderUpdateDate.Second != updateDate.Second) // 何故かミリ秒がずれるのでミリ秒以外で比較

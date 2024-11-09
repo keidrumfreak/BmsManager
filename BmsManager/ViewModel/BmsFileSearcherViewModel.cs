@@ -88,13 +88,13 @@ namespace BmsManager.ViewModel
 
             if (string.IsNullOrEmpty(SearchText))
             {
-                FileList.Folders = new ObservableCollection<BmsFolder>(root.DescendantFolders);
+                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(root.DescendantFolders.Select(f => new BmsFolderViewModel(f)));
                 return;
             }
 
-            FileList.Folders = new ObservableCollection<BmsFolder>(inner(root).ToArray());
+            FileList.Folders = new ObservableCollection<BmsFolderViewModel>(inner(root).ToArray());
 
-            IEnumerable<BmsFolder> inner(RootDirectoryViewModel root)
+            IEnumerable<BmsFolderViewModel> inner(RootDirectoryViewModel root)
             {
                 if (root.DescendantFolders != null)
                     foreach (var folder in root.DescendantFolders)
@@ -102,8 +102,8 @@ namespace BmsManager.ViewModel
                         var files = folder.Files.Where(f => (f.Artist?.Contains(SearchText) ?? false) || (f.Title?.Contains(SearchText) ?? false));
                         if (!files.Any()) continue;
                         //var vm = new BmsFolderViewModel(folder, FileList);
-                        folder.Files = new ObservableCollection<BmsFile>(files.ToArray());
-                        yield return folder;
+                        folder.Files = files.ToArray();
+                        yield return new BmsFolderViewModel(folder);
                     }
             }
         }
@@ -126,9 +126,7 @@ namespace BmsManager.ViewModel
 
         private void updateMeta()
         {
-            FileList.SelectedBmsFolder.Title = Title;
-            FileList.SelectedBmsFolder.Artist = Artist;
-            FileList.SelectedBmsFolder.UpdateMeta();
+            FileList.SelectedBmsFolder.UpdateMeta(Title, Artist);
         }
 
         private void renameAll()

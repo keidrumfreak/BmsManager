@@ -151,8 +151,8 @@ namespace BmsManager.Entity
             Length = model.LastTime;
             Notes = model.GetTotalNotes();
             feature |= (model.Random?.Length ?? 0) > 0 ? Features.Random : 0;
-            HasBga = (model.BgaList?.Count() ?? 0) > 0;
-            IsNoKeySound = Length >= 30000 && (model.WavList?.Count() ?? 0) <= (Length / (50 * 1000)) + 3;
+            HasBga = (model.BgaList?.Length ?? 0) > 0;
+            IsNoKeySound = Length >= 30000 && (model.WavList?.Length ?? 0) <= (Length / (50 * 1000)) + 3;
             Feature = (int)feature;
             var arr = SHA256.HashData(Encoding.UTF8.GetBytes(model.ToChartString()));
             ChartHash = BitConverter.ToString(arr).ToLower().Replace("-", "");

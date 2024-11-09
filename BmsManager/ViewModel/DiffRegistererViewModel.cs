@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BmsManager.ViewModel
 {
-    class DiffRegisterViewModel : ViewModelBase
+    class DiffRegistererViewModel : ViewModelBase
     {
         public BmsFileListViewModel FileList { get; set; }
 
@@ -43,7 +43,7 @@ namespace BmsManager.ViewModel
                 else
                 {
                     if (selectedDiffFile.Folders != null)
-                        FileList.Folders = new ObservableCollection<BmsFolder>(selectedDiffFile.Folders.ToArray());
+                        FileList.Folders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders.ToArray());
                     selectedDiffFile.PropertyChanged += DiffFile_PropertyChanged;
                 }
             }
@@ -57,7 +57,7 @@ namespace BmsManager.ViewModel
 
         public ICommand InstallAll { get; set; }
 
-        public DiffRegisterViewModel()
+        public DiffRegistererViewModel()
         {
             FileList = new BmsFileListViewModel();
             SearchDiff = CreateCommand(searchDiff);
@@ -91,49 +91,15 @@ namespace BmsManager.ViewModel
                     continue;
 
                 var folder = diffFile.Folders.First();
-                try
-                {
-                    if (folder.Files.Any(f => f.MD5 == diffFile.MD5))
-                    {
-                        // 重複する場合はインストールしない
-                        File.Delete(diffFile.Path);
-                        Application.Current.Dispatcher.Invoke(() => diffFile.Remove());
-                        continue;
-                    }
-
-
-                    var toPath = PathUtil.Combine(folder.Path, Path.GetFileName(diffFile.Path));
-                    var i = 1;
-                    var dst = toPath;
-                    while (SystemProvider.FileSystem.File.Exists(toPath))
-                    {
-                        i++;
-                        toPath = PathUtil.Combine(folder.Path, $"{Path.GetFileNameWithoutExtension(dst)} ({i}){Path.GetExtension(dst)}");
-                    }
-
-                    SystemProvider.FileSystem.File.Move(diffFile.Path, toPath);
-
-                    using (var con = new BmsManagerContext())
-                    {
-                        var fol = con.BmsFolders.Include(f => f.Files).FirstOrDefault(f => f.Path == folder.Path);
-                        var file = new BmsFile(toPath);
-                        fol.Files.Add(file);
-                        con.SaveChanges();
-                    }
-
-                    Application.Current.Dispatcher.Invoke(() => diffFile.Remove());
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
+                folder.Install(diffFile.Path, diffFile.MD5);
+                Application.Current.Dispatcher.Invoke(() => diffFile.Remove());
             }
         }
 
         private void DiffFile_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(DiffFileViewModel.Folders))
-                FileList.Folders = new ObservableCollection<BmsFolder>(selectedDiffFile.Folders);
+                FileList.Folders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders);
         }
 
         private void installByTable()
