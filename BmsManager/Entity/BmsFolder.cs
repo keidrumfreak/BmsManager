@@ -2,22 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
-using System.Data.Common;
-using System.IO;
-using System.IO.Abstractions;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using BmsManager.Model;
-using BmsParser;
-using CommonLib.IO;
-using CommonLib.Linq;
 using CommonLib.Wpf;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using SysPath = System.IO.Path;
 
 namespace BmsManager.Entity
 {
@@ -29,11 +14,11 @@ namespace BmsManager.Entity
 
         public int RootID { get; set; }
 
-        public string Path { get; set; }
+        public required string Path { get; set; }
 
-        public string Artist { get; set; }
+        public required string Artist { get; set; }
 
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         public bool HasText { get; set; }
 
@@ -42,9 +27,14 @@ namespace BmsManager.Entity
         public DateTime FolderUpdateDate { get; set; }
 
         [InverseProperty(nameof(BmsFile.Folder))]
-        public virtual ICollection<BmsFile> Files { get; set; }
+        public virtual ICollection<BmsFile> Files { get; set; } = [];
 
+        RootDirectory? root;
         [ForeignKey(nameof(RootID))]
-        public virtual RootDirectory Root { get; set; }
+        public virtual RootDirectory Root
+        {
+            get => root ?? throw new InvalidOperationException();
+            set => root = value;
+        }
     }
 }
