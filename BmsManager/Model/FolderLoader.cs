@@ -119,7 +119,7 @@ namespace BmsManager.Model
             var bmsFolder = con.BmsFolders.FirstOrDefault(f => f.Path == path);
 
             // 読込済データの解析なので並列化
-            var bmsFiles = bmsFileDatas.AsParallel().Select(d => new BmsFile(d.file, d.data)).Where(f => !string.IsNullOrEmpty(f.Path)).ToArray();
+            var bmsFiles = bmsFileDatas.AsParallel().Select(d => new BmsFileModel(d.file, d.data)).Where(f => f.IsLoaded && !string.IsNullOrEmpty(f.Path)).Select(f => f.ToEntity()).ToArray();
             if (bmsFiles.Length == 0)
             {
                 if (bmsFolder != default)

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using BmsManager.Entity;
+using BmsManager.Model;
 using BmsParser;
 using CommonLib.IO;
 using CommonLib.Wpf;
@@ -102,7 +103,7 @@ namespace BmsManager.ViewModel
                 FileList.Folders = new ObservableCollection<BmsFolderViewModel>(selectedDiffFile.Folders);
         }
 
-        private void installByTable()
+        private async void installByTable()
         {
             using var con = new BmsManagerContext();
             foreach (var file in DiffFiles)
@@ -125,7 +126,9 @@ namespace BmsManager.ViewModel
 
                 SystemProvider.FileSystem.File.Move(file.Path, toPath);
 
-                folder.Files.Add(new BmsFile(toPath));
+                var model = new BmsFileModel(toPath);
+                await model.LoadAsync().ConfigureAwait(false);
+                folder.Files.Add(model.ToEntity());
                 file.Remove();
             }
             con.SaveChanges();

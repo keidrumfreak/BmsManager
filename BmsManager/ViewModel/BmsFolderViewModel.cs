@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using BmsManager.Entity;
+using BmsManager.Model;
 using BmsParser;
 using CommonLib.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -109,7 +110,7 @@ namespace BmsManager.ViewModel
             }
         }
 
-        public void Install(string path, string md5)
+        public async void Install(string path, string md5)
         {
             try
             {
@@ -135,8 +136,9 @@ namespace BmsManager.ViewModel
                 using (var con = new BmsManagerContext())
                 {
                     var fol = con.BmsFolders.Include(f => f.Files).First(f => f.Path == entity.Path);
-                    var file = new BmsFile(toPath);
-                    fol.Files.Add(file);
+                    var file = new BmsFileModel(toPath);
+                    await file.LoadAsync().ConfigureAwait(false);
+                    fol.Files.Add(file.ToEntity());
                     con.SaveChanges();
                 }
             }

@@ -33,14 +33,14 @@ namespace BmsManager.ViewModel
 
         private async Task delete(ObservableCollection<BmsFileViewModel>? root)
         {
-            //SystemProvider.FileSystem.File.Delete(entity.Path);
-            //using var con = new BmsManagerContext();
-            //var file = con.Files.SingleOrDefault(f => f.Path == entity.Path);
-            //if (file != default)
-            //{
-            //    con.Files.Remove(file);
-            //    await con.SaveChangesAsync();
-            //}
+            SystemProvider.FileSystem.File.Delete(entity.Path);
+            using var con = new BmsManagerContext();
+            var model = con.Files.SingleOrDefault(f => f.Path == entity.Path);
+            if (model != default)
+            {
+                con.Files.Remove(model);
+                await con.SaveChangesAsync();
+            }
 
             if (root != null)
             {

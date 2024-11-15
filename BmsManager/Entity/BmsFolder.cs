@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using CommonLib.Wpf;
 
 namespace BmsManager.Entity
 {
     [Table("BmsFolder")]
-    class BmsFolder : BindableBase
+    class BmsFolder
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }

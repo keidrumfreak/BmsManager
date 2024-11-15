@@ -54,7 +54,7 @@ namespace BmsManager.ViewModel
             }
         }
 
-        public string FullPath => entity.Path;
+        public string FullPath => entity?.Path ?? string.Empty;
 
         ObservableCollection<BmsFolder> folders = [];
         public ObservableCollection<BmsFolder> Folders
@@ -72,7 +72,7 @@ namespace BmsManager.ViewModel
 
         public BmsFolder[] DescendantFolders => Descendants().Where(r => r.Folders?.Any() ?? false).SelectMany(r => r.Folders).ToArray();
 
-        public int ID => entity.ID;
+        public int ID => entity?.ID ?? 0;
 
         public ICommand LoadFromFileSystem { get; }
 
@@ -80,7 +80,7 @@ namespace BmsManager.ViewModel
 
         public ICommand Remove { get; }
 
-        readonly RootDirectory entity;
+        readonly RootDirectory? entity;
 
         readonly RootDirectoryViewModel? parent;
 
@@ -88,14 +88,14 @@ namespace BmsManager.ViewModel
 
         static readonly object lockObj = new();
 
-        public RootDirectoryViewModel(RootTreeViewModel tree) : this(tree, new RootDirectory(), true) { }
+        public RootDirectoryViewModel(RootTreeViewModel tree) : this(tree, null, true) { }
 
-        public RootDirectoryViewModel(RootTreeViewModel tree, RootDirectory entity, bool isLoading = false, RootDirectoryViewModel? parent = null)
+        public RootDirectoryViewModel(RootTreeViewModel tree, RootDirectory? entity, bool isLoading = false, RootDirectoryViewModel? parent = null)
         {
             this.tree = tree;
             this.entity = entity;
             this.parent = parent;
-            Folders = new ObservableCollection<BmsFolder>(entity.Folders ?? []);
+            Folders = new ObservableCollection<BmsFolder>(entity?.Folders ?? []);
             LoadFromFileSystem = new AsyncRelayCommand(loadFromFileSystemAsync);
             Remove = new AsyncRelayCommand(removeAsync);
             LoadFromDB = new AsyncRelayCommand(loadFromDBAsymc);
@@ -104,6 +104,9 @@ namespace BmsManager.ViewModel
 
         public async Task LoadChildAsync(Task loadRootTask)
         {
+            if (entity == default)
+                return;
+
             try
             {
                 if (entity.Children.Count != 0)
@@ -174,6 +177,9 @@ namespace BmsManager.ViewModel
 
         private async Task loadFromDBAsymc()
         {
+            if (entity == null)
+                return;
+
             IsLoading = true;
             using var con = new BmsManagerContext();
             // 親子構造の取得が難しいのでとりあえず全部引っ張る
@@ -233,6 +239,9 @@ namespace BmsManager.ViewModel
 
         private async Task loadFromFileSystemAsync(FolderLoader loader)
         {
+            if (entity == null)
+                return;
+
             IsLoading = true;
             await loader.LoadAsync(entity, inner, folder => Folders.Add(folder)).ConfigureAwait(false);
 
