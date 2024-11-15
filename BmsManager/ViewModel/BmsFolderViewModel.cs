@@ -54,8 +54,8 @@ namespace BmsManager.ViewModel
         {
             using var context = new BmsManagerContext();
             var folder = context.BmsFolders.First(f => f.ID == entity.ID);
-            folder.Title = Title;
-            folder.Artist = Artist;
+            folder.Title = title;
+            folder.Artist = artist;
             context.SaveChanges();
         }
 
@@ -136,7 +136,7 @@ namespace BmsManager.ViewModel
                 using (var con = new BmsManagerContext())
                 {
                     var fol = con.BmsFolders.Include(f => f.Files).First(f => f.Path == entity.Path);
-                    var file = BmsModel.Decode(toPath);
+                    var file = ChartDecoder.GetDecoder(toPath)?.Decode(toPath);
                     fol.Files.Add(file?.ToEntity() ?? throw new Exception());
                     con.SaveChanges();
                 }

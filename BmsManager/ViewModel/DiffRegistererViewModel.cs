@@ -75,7 +75,7 @@ namespace BmsManager.ViewModel
             var extentions = Settings.Default.Extentions;
             var files = SystemProvider.FileSystem.Directory.EnumerateFiles(TargetPath, "*.*", SearchOption.AllDirectories)
                 .Where(f => extentions.Contains(Path.GetExtension(f).TrimStart('.').ToLowerInvariant())).ToArray();
-            DiffFiles = new ObservableCollection<DiffFileViewModel>(files.Select(f => BmsModel.Decode(f)).Where(m => m != null).Select(m => new DiffFileViewModel(m, this)));
+            DiffFiles = new ObservableCollection<DiffFileViewModel>(files.Select(f => ChartDecoder.GetDecoder(f)?.Decode(f)).Where(m => m != null).Select(m => new DiffFileViewModel(m, this)));
         }
 
         private void estimateAll()
@@ -126,7 +126,7 @@ namespace BmsManager.ViewModel
 
                 SystemProvider.FileSystem.File.Move(file.Path, toPath);
 
-                var model = BmsModel.Decode(toPath);
+                var model = ChartDecoder.GetDecoder(toPath)?.Decode(toPath);
                 folder.Files.Add(model?.ToEntity() ?? throw new Exception());
                 file.Remove();
             }
