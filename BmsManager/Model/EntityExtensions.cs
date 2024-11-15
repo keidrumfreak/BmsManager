@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,31 +10,9 @@ using BmsParser;
 
 namespace BmsManager.Model
 {
-    internal class BmsFileModel
+    internal static class EntityExtensions
     {
-        public string Path { get; }
-
-        public bool IsLoaded => model != null;
-
-        BmsModel? model;
-
-        public BmsFileModel(string path)
-        {
-            Path = path;
-        }
-
-        public BmsFileModel(string path, byte[] bin) : this(path)
-        {
-            model = BmsModel.Decode(path, bin);
-        }
-
-        public async Task LoadAsync()
-        {
-            var bin = await SystemProvider.FileSystem.File.ReadAllBytesAsync(Path).ConfigureAwait(false);
-            model = BmsModel.Decode(Path, bin);
-        }
-
-        public BmsFile ToEntity()
+        public static BmsFile ToEntity(this BmsModel model)
         {
             if (model == null)
                 throw new InvalidOperationException();
@@ -86,7 +65,7 @@ namespace BmsManager.Model
                     var note = tl.GetNote(i);
                     if (note is LongNote ln && ln.IsEnd)
                     {
-                        for (int index = tl.Time / 1000; index <= ln.Pair.Time / 1000; index++)
+                        for (int index = tl.Time / 1000; index <= ln?.Pair?.Time / 1000; index++)
                         {
                             data[index][model.Mode.IsScratchKey(i) ? 1 : 4]++;
                         }

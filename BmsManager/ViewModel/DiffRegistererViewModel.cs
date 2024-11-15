@@ -126,9 +126,8 @@ namespace BmsManager.ViewModel
 
                 SystemProvider.FileSystem.File.Move(file.Path, toPath);
 
-                var model = new BmsFileModel(toPath);
-                await model.LoadAsync().ConfigureAwait(false);
-                folder.Files.Add(model.ToEntity());
+                var model = BmsModel.Decode(toPath);
+                folder.Files.Add(model?.ToEntity() ?? throw new Exception());
                 file.Remove();
             }
             con.SaveChanges();

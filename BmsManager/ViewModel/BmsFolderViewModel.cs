@@ -136,9 +136,8 @@ namespace BmsManager.ViewModel
                 using (var con = new BmsManagerContext())
                 {
                     var fol = con.BmsFolders.Include(f => f.Files).First(f => f.Path == entity.Path);
-                    var file = new BmsFileModel(toPath);
-                    await file.LoadAsync().ConfigureAwait(false);
-                    fol.Files.Add(file.ToEntity());
+                    var file = BmsModel.Decode(toPath);
+                    fol.Files.Add(file?.ToEntity() ?? throw new Exception());
                     con.SaveChanges();
                 }
             }
