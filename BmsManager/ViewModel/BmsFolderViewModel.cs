@@ -110,6 +110,77 @@ namespace BmsManager.ViewModel
             }
         }
 
+        private async Task merge()
+        {
+            var roots = Duplicates.Select(d => d.entity.Root).ToArray();
+            var ext = Settings.Default.Extentions;
+
+            foreach (var fol in Duplicates)
+            {
+                foreach (var file in fol.Files)
+                {
+                    // 重複BMSファイルは先に削除しておく
+                    if (Files.Any(f => f.MD5 == file.MD5))
+                    {
+                        if (SystemProvider.FileSystem.File.Exists(file.FullPath))
+                            SystemProvider.FileSystem.File.Delete(file.FullPath);
+                    }
+                }
+
+                if (SystemProvider.FileSystem.Directory.Exists(fol.FullPath))
+                {
+                    foreach (var file in SystemProvider.FileSystem.Directory.EnumerateFiles(fol.FullPath, "*.*", SearchOption.AllDirectories))
+                    {
+                        try
+                        {
+                            var toPath = PathUtil.Combine(FullPath, Path.GetFileName(file));
+                            var fileExt = Path.GetExtension(file); // 拡張子が存在しない場合もある
+                            if (fileExt.Length > 1 && ext.Contains(fileExt[1..]))
+                            {
+                                var i = 1;
+                                var dst = toPath;
+                                while (SystemProvider.FileSystem.File.Exists(toPath))
+                                {
+                                    i++;
+                                    toPath = $"{dst} ({i})";
+                                }
+                            }
+
+                            // 統合先のファイルを正とみなす
+                            if (!SystemProvider.FileSystem.File.Exists(toPath))
+                                SystemProvider.FileSystem.File.Move(file, toPath, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.ToString());
+                            return;
+                        }
+                    }
+                }
+
+                try
+                {
+                    SystemProvider.FileSystem.Directory.Delete(fol.FullPath, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                    return;
+                }
+            }
+
+            var loader = new FolderLoader();
+            foreach (var root in roots)
+            {
+                await loader.LoadAsync(root);
+                //root.Register();
+            }
+            await loader.LoadAsync(entity.Root);
+            //Root.Register();
+
+            //Application.Current.Dispatcher.Invoke(() => parent.Folders.Remove(this));
+        }
+
         public async void Install(string path, string md5)
         {
             try
