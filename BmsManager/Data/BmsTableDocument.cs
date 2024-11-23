@@ -66,7 +66,7 @@ namespace BmsManager.Data
                 Difficulties = Datas.GroupBy(d => d.Level).Select(d => new BmsTableDifficulty
                 {
                     Difficulty = d.Key,
-                    DifficultyOrder = (Header.LevelOrder?.Length ?? 0) == 0
+                    DifficultyOrder = Header.LevelOrder != null && Header.LevelOrder.Length > 0
                         ? Array.IndexOf(Header.LevelOrder, d.Key) + 1
                         : int.TryParse(d.Key, out var index) ? index : null,
                     TableDatas = d.Select(d => new Entity.BmsTableData
@@ -83,7 +83,7 @@ namespace BmsManager.Data
                         Comment = d.Comment,
                         OrgMD5 = d.OrgMD5
                     }).ToList()
-                }).ToList()
+                }).OrderBy(d => d.DifficultyOrder).ToList()
             };
         }
 

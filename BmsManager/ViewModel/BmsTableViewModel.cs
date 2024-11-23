@@ -25,7 +25,7 @@ namespace BmsManager.ViewModel
             set => SetProperty(ref children, value);
         }
 
-        public IEnumerable<BmsTableData> TableDatas => Children?.SelectMany(d => d.TableDatas).ToArray() ?? [.. difficulty.TableDatas];
+        public IEnumerable<BmsTableData> TableDatas => Children?.SelectMany(d => d.TableDatas).ToArray() ?? [.. difficulty?.TableDatas ?? []];
 
         public int ID => table?.ID ?? difficulty.ID;
 
@@ -55,7 +55,7 @@ namespace BmsManager.ViewModel
             this.parent = parent;
             this.table = table;
             Name = table.Name;
-            Children = table.Difficulties.Select(d => new BmsTableViewModel(d));
+            Children = table.Difficulties.OrderBy(d => d.DifficultyOrder).Select(d => new BmsTableViewModel(d));
             Reload = new AsyncRelayCommand(reloadAsync);
         }
 

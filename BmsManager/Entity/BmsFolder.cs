@@ -15,9 +15,9 @@ namespace BmsManager.Entity
 
         public required string Path { get; set; }
 
-        public required string Artist { get; set; }
+        public string? Artist { get; set; }
 
-        public required string Title { get; set; }
+        public string? Title { get; set; }
 
         public bool HasText { get; set; }
 

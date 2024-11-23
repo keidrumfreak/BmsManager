@@ -13,31 +13,31 @@ namespace BmsManager.Entity
 
         public string MD5 { get; set; }
 
-        public string LR2BmsID { get; set; }
+        public string? LR2BmsID { get; set; }
 
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
-        public string Artist { get; set; }
+        public string? Artist { get; set; }
 
         /// <summary>
         /// 本体URL
         /// </summary>
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
         /// <summary>
         /// 差分URL
         /// </summary>
-        public string DiffUrl { get; set; }
+        public string? DiffUrl { get; set; }
 
-        public string DiffName { get; set; }
+        public string? DiffName { get; set; }
 
-        public string PackUrl { get; set; }
+        public string? PackUrl { get; set; }
 
-        public string PackName { get; set; }
+        public string? PackName { get; set; }
 
-        public string Comment { get; set; }
+        public string? Comment { get; set; }
 
-        public string OrgMD5 { get; set; }
+        public string? OrgMD5 { get; set; }
 
         [ForeignKey(nameof(BmsTableDifficultyID))]
         public virtual BmsTableDifficulty Difficulty { get; set; }

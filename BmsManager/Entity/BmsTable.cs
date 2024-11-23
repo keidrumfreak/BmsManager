@@ -19,7 +19,7 @@ namespace BmsManager.Entity
 
         public string Symbol { get; set; }
 
-        public string Tag { get; set; }
+        public string? Tag { get; set; }
 
         [InverseProperty(nameof(BmsTableDifficulty.Table))]
         public virtual ICollection<BmsTableDifficulty> Difficulties { get; set; }
