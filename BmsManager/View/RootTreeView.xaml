@@ -40,7 +40,7 @@
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Text}" Tag="{Binding RelativeSource={RelativeSource AncestorType=TreeView}, Path=DataContext}">
+                        <TextBlock Grid.Column="0" Text="{Binding Text}">
                             <TextBlock.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="フォルダ読み込み" Command="{Binding LoadFromFileSystem}" />
