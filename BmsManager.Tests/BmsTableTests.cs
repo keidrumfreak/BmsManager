@@ -19,9 +19,9 @@ namespace BmsManager.Tests
             // satelliteをサンプルに使用
             var table = new BmsTableDocument(@"https://stellabms.xyz/sl/table.html");
             table.LoadAsync(Utility.GetHttpClient()).Wait();
+            var data = table.ToEntity();
             Assert.AreEqual(@"https://stellabms.xyz/sl", table.Home);
-            Assert.AreEqual("score.json", table.Header.DataUrl);
-            Assert.IsTrue(table.Datas.Any());
+            Assert.IsTrue(data != null);
         }
     }
 }

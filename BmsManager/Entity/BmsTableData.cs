@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BmsManager.Entity
@@ -11,7 +12,7 @@ namespace BmsManager.Entity
 
         public int BmsTableDifficultyID { get; set; }
 
-        public string MD5 { get; set; }
+        public required string MD5 { get; set; }
 
         public string? LR2BmsID { get; set; }
 
@@ -39,7 +40,12 @@ namespace BmsManager.Entity
 
         public string? OrgMD5 { get; set; }
 
+        BmsTableDifficulty? difficulty;
         [ForeignKey(nameof(BmsTableDifficultyID))]
-        public virtual BmsTableDifficulty Difficulty { get; set; }
+        public virtual BmsTableDifficulty Difficulty
+        {
+            get => difficulty ?? throw new InvalidOperationException();
+            set => difficulty = value;
+        }
     }
 }
