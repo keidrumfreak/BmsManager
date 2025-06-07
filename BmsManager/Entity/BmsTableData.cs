@@ -12,7 +12,7 @@ namespace BmsManager.Entity
 
         public int BmsTableDifficultyID { get; set; }
 
-        public required string MD5 { get; set; }
+        public string? MD5 { get; set; }
 
         public string? LR2BmsID { get; set; }
 

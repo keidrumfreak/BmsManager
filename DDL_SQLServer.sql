@@ -269,7 +269,7 @@ GO
 CREATE TABLE [dbo].[BmsTableData](
 	[ID] [int] IDENTITY(1,1) NOT NULL,
 	[BmsTableDifficultyID] [int] NOT NULL,
-	[MD5] [nvarchar](max) NOT NULL,
+	[MD5] [nvarchar](max) NULL,
 	[LR2BmsID] [nvarchar](max) NULL,
 	[Title] [nvarchar](max) NULL,
 	[Artist] [nvarchar](max) NULL,
