@@ -27,7 +27,7 @@ namespace BmsManager.ViewModel
             set => SetProperty(ref children, value);
         }
 
-        public IEnumerable<BmsTableData> TableDatas => Children?.SelectMany(d => d.TableDatas).ToArray() ?? [.. difficulty?.TableDatas ?? []];
+        public IEnumerable<BmsTableData> TableDatas => difficulty?.TableDatas.ToArray() ?? Children.SelectMany(d => d.TableDatas).ToArray(); //[.. difficulty?.TableDatas ?? []];
 
         public int ID => table?.ID ?? difficulty?.ID ?? -1;
 
