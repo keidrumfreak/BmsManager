@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using BmsManager.Entity;
 using CommonLib.Wpf;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.Win32;
 
 namespace BmsManager.ViewModel
 {
@@ -63,13 +61,11 @@ namespace BmsManager.ViewModel
         private async Task downloadAllAsync()
         {
             string targetDir;
-            using (var diag = new CommonOpenFileDialog())
-            {
-                diag.IsFolderPicker = true;
-                if (diag.ShowDialog() != CommonFileDialogResult.Ok)
-                    return;
-                targetDir = diag.FileName;
-            }
+            var diag = new OpenFolderDialog() { Multiselect = false };
+            if (!(diag.ShowDialog() ?? false))
+                return;
+
+            targetDir = diag.FolderName;
 
             foreach (var data in TableDatas)
                 await data.DownloadAsync(targetDir);
