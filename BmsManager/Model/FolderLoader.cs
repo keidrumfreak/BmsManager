@@ -38,7 +38,7 @@ namespace BmsManager.Model
                     con.RootDirectories.RemoveRange(delRoot);
                     await con.SaveChangesAsync().ConfigureAwait(false);
                 }
-                var delFol = await con.BmsFolders.Where(c => c.RootID == entity.ParentRootID && !folders.Contains(c.Path)).ToArrayAsync().ConfigureAwait(false);
+                var delFol = await con.BmsFolders.Where(c => c.RootID == entity.ID && !folders.Contains(c.Path)).ToArrayAsync().ConfigureAwait(false);
                 if (delFol.Length != 0)
                 {
                     con.ChangeTracker.AutoDetectChangesEnabled = false;
