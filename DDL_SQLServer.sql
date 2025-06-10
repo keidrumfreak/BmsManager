@@ -105,7 +105,7 @@ GO
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[RootDirectory]    Script Date: 2021/08/12 19:11:55 ******/
+/****** Object:  Table [dbo].[RootDirectory]    Script Date: 2025/06/10 10:54:51 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -124,11 +124,18 @@ CREATE TABLE [dbo].[RootDirectory](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
+ALTER TABLE [dbo].[RootDirectory]  WITH CHECK ADD  CONSTRAINT [FK_RootDirectory_RootDirectory] FOREIGN KEY([ParentRootID])
+REFERENCES [dbo].[RootDirectory] ([ID])
+GO
+
+ALTER TABLE [dbo].[RootDirectory] CHECK CONSTRAINT [FK_RootDirectory_RootDirectory]
+GO
+
 
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[BmsFolder]    Script Date: 2021/08/12 19:12:05 ******/
+/****** Object:  Table [dbo].[BmsFolder]    Script Date: 2025/06/10 10:54:17 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -151,11 +158,18 @@ CREATE TABLE [dbo].[BmsFolder](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
+ALTER TABLE [dbo].[BmsFolder]  WITH CHECK ADD  CONSTRAINT [FK_BmsFolder_RootDirectory] FOREIGN KEY([RootID])
+REFERENCES [dbo].[RootDirectory] ([ID])
+GO
+
+ALTER TABLE [dbo].[BmsFolder] CHECK CONSTRAINT [FK_BmsFolder_RootDirectory]
+GO
+
 
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[BmsFile]    Script Date: 2024/10/25 22:44:37 ******/
+/****** Object:  Table [dbo].[BmsFile]    Script Date: 2025/06/10 10:54:05 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -208,6 +222,13 @@ CREATE TABLE [dbo].[BmsFile](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
+ALTER TABLE [dbo].[BmsFile]  WITH CHECK ADD  CONSTRAINT [FK_BmsFile_BmsFolder] FOREIGN KEY([FolderID])
+REFERENCES [dbo].[BmsFolder] ([ID])
+GO
+
+ALTER TABLE [dbo].[BmsFile] CHECK CONSTRAINT [FK_BmsFile_BmsFolder]
+GO
+
 
 USE [BmsManager]
 GO
@@ -236,7 +257,7 @@ GO
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[BmsTableDifficulty]    Script Date: 2021/08/12 19:12:43 ******/
+/****** Object:  Table [dbo].[BmsTableDifficulty]    Script Date: 2025/06/10 10:56:05 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -255,11 +276,18 @@ CREATE TABLE [dbo].[BmsTableDifficulty](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
+ALTER TABLE [dbo].[BmsTableDifficulty]  WITH CHECK ADD  CONSTRAINT [FK_BmsTableDifficulty_BmsTableDifficulty] FOREIGN KEY([BmsTableID])
+REFERENCES [dbo].[BmsTable] ([ID])
+GO
+
+ALTER TABLE [dbo].[BmsTableDifficulty] CHECK CONSTRAINT [FK_BmsTableDifficulty_BmsTableDifficulty]
+GO
+
 
 USE [BmsManager]
 GO
 
-/****** Object:  Table [dbo].[BmsTableData]    Script Date: 2021/08/12 19:12:50 ******/
+/****** Object:  Table [dbo].[BmsTableData]    Script Date: 2025/06/10 10:55:55 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -285,6 +313,13 @@ CREATE TABLE [dbo].[BmsTableData](
 	[ID] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[BmsTableData]  WITH CHECK ADD  CONSTRAINT [FK_BmsTableData_BmsTableDifficulty] FOREIGN KEY([BmsTableDifficultyID])
+REFERENCES [dbo].[BmsTableDifficulty] ([ID])
+GO
+
+ALTER TABLE [dbo].[BmsTableData] CHECK CONSTRAINT [FK_BmsTableData_BmsTableDifficulty]
 GO
 
 
